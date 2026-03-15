@@ -78,8 +78,12 @@ function parseDocs() {
 		const rawContent = docModules[path];
 		const meta = metaModules[path]?.metadata ?? {};
 
-		const cleanPath = path.replace('/src/routes/docs/', '').replace('/+page.svx', '');
-		const slug = `/docs/${cleanPath}`;
+		const relativePath = path
+			.replace(/^\/src\/routes\/docs/, '')
+			.replace(/\/\+page\.svx$/, '')
+			.replace(/^\+page\.svx$/, '');
+		const cleanPath = relativePath.replace(/^\/+/, '');
+		const slug = cleanPath ? `/docs/${cleanPath}` : '/docs';
 
 		const title = meta.name || meta.title || cleanPath;
 		const description = meta.description || '';
