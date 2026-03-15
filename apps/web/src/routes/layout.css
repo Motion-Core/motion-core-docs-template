@@ -1,5 +1,13 @@
 @import 'tailwindcss';
 
+@font-face {
+	font-family: 'Inter Variable';
+	src: url('../lib/assets/fonts/inter-variable.ttf') format('truetype');
+	font-style: normal;
+	font-weight: 100 900;
+	font-display: swap;
+}
+
 html {
 	scroll-behavior: smooth;
 }
@@ -50,7 +58,9 @@ html {
 }
 
 @theme {
-	--font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	--font-sans:
+		'Inter Variable', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+		sans-serif;
 	--font-mono:
 		ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
 		monospace;

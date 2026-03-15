@@ -14,7 +14,7 @@ const OG_HEIGHT = 630;
 const MAX_TITLE_LENGTH = 88;
 const MAX_DESCRIPTION_LENGTH = 180;
 const canonicalOrigin = new URL(siteConfig.url).origin;
-const SYSTEM_FONT_STACK = 'sans-serif';
+const SYSTEM_FONT_STACK = 'Inter, sans-serif';
 
 const clampText = (value: string, maxLength: number) => {
 	const text = value.trim();
