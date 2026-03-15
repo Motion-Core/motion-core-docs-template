@@ -1,18 +1,7 @@
 import type { DocItem } from '../types/doc';
-import { docsNavigation } from '$lib/config/navigation';
+import { docsManifest as generatedDocsManifest } from '$lib/generated/docs-manifest';
 
-function flattenManifest(items: DocItem[], category?: string): DocItem[] {
-	return items.reduce<DocItem[]>((acc, item) => {
-		if (item.items) {
-			acc.push(...flattenManifest(item.items, item.name));
-		} else {
-			acc.push({ ...item, category: item.category ?? category });
-		}
-		return acc;
-	}, []);
-}
-
-export const docsManifest: DocItem[] = flattenManifest(docsNavigation);
+export const docsManifest: DocItem[] = generatedDocsManifest;
 
 export const getDocBySlug = (slug: string) => {
 	return docsManifest.find((doc) => doc.slug === slug);
