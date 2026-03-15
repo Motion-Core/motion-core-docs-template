@@ -20,54 +20,56 @@ Ta podstrona pokazuje komponenty, ktore zwykle laczysz z trescia instruktazowa: 
 <Steps>
 	<Step title="Dodaj zaleznosci">
 		W zespole utrzymujemy jedna komende instalacji na dokumentacje. Jezeli opisujesz dodatkowe pluginy, dopisz je przez `args` w komponencie instalatora.
-
-		```bash
-		bun add @motion-core/motion-gpu @motion-core/motion-gpu-svelte
-		```
 	</Step>
 
 	<Step title="Skonfiguruj dane wejsciowe">
 		Na etapie mockupu warto pokazac prosty kontrakt danych i zachowac nazwy takie, jakie faktycznie wystepuja w API.
-
-		```json
-		{
-			"renderMode": "on-demand",
-			"dpr": 2,
-			"profiling": false
-		}
-		```
 	</Step>
 
 	<Step title="Dodaj minimalny fragment kodu">
 		Ponizej masz male, ale realistyczne przykladowe API, ktore mozna skopiowac do dema.
-
-		```typescript
-		import { defineMaterial } from '@motion-core/motion-gpu';
-
-		export const pulse = defineMaterial({
-			fragment: `
-				fn frag(uv: vec2f) -> vec4f {
-					let wave = 0.5 + 0.5 * sin(motiongpuFrame.time + uv.x * 8.0);
-					return vec4f(vec3f(wave), 1.0);
-				}
-			`
-		});
-		```
 	</Step>
 
 	<Step>
 		Ostatni krok bez tytulu pokazuje drugi wariant komponentu `Step`. Ten tryb jest wygodny, kiedy chcesz utrzymac bardzo krotkie checklisty.
-
-		```wgsl
-		fn frag(uv: vec2f) -> vec4f {
-			let center = vec2f(0.5, 0.5);
-			let d = distance(uv, center);
-			let glow = smoothstep(0.35, 0.1, d);
-			return vec4f(glow, glow * 0.6, 1.0, 1.0);
-		}
-		```
 	</Step>
 </Steps>
+
+## Bloki kodu uzywane w krokach
+
+```bash
+bun add @motion-core/motion-gpu @motion-core/motion-gpu-svelte
+```
+
+```json
+{
+	"renderMode": "on-demand",
+	"dpr": 2,
+	"profiling": false
+}
+```
+
+```typescript
+import { defineMaterial } from '@motion-core/motion-gpu';
+
+export const pulse = defineMaterial({
+	fragment: `
+		fn frag(uv: vec2f) -> vec4f {
+			let wave = 0.5 + 0.5 * sin(motiongpuFrame.time + uv.x * 8.0);
+			return vec4f(vec3f(wave), 1.0);
+		}
+	`
+});
+```
+
+```wgsl
+fn frag(uv: vec2f) -> vec4f {
+	let center = vec2f(0.5, 0.5);
+	let d = distance(uv, center);
+	let glow = smoothstep(0.35, 0.1, d);
+	return vec4f(glow, glow * 0.6, 1.0, 1.0);
+}
+```
 
 ## Dalsze rozwiniecie
 
