@@ -11,7 +11,6 @@ type SitemapEntry = {
 const staticPages: SitemapEntry[] = [
 	{ path: '/', changefreq: 'weekly', priority: '1.0' },
 	{ path: '/docs', changefreq: 'weekly', priority: '0.9' },
-	{ path: '/playground', changefreq: 'weekly', priority: '0.9' },
 	{ path: '/llms.txt', changefreq: 'weekly', priority: '0.4' }
 ];
 
