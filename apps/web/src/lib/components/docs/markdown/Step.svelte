@@ -40,7 +40,7 @@
 			</span>
 		</div>
 	{/if}
-	<div class="text-base leading-relaxed tracking-normal text-foreground/70">
+	<div class="text-base leading-relaxed tracking-normal text-foreground-muted">
 		{@render children?.()}
 	</div>
 </div>
