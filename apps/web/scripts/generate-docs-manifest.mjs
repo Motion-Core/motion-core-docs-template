@@ -1,12 +1,12 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const appRoot = path.resolve(__dirname, '..');
-const configPath = path.join(appRoot, 'docs.config.json');
+const configPath = path.join(appRoot, 'src/lib/config/docs.ts');
 const docsRoutesPath = path.join(appRoot, 'src/routes/docs');
 const outputPath = path.join(appRoot, 'src/lib/generated/docs-manifest.ts');
 
@@ -246,16 +246,29 @@ function assertUniqueLeafSlugs(manifest) {
 	}
 }
 
+/**
+ * @returns {Promise<DocsConfig>}
+ */
+async function loadDocsConfig() {
+	const moduleUrl = pathToFileURL(configPath).href;
+	const configModule = await import(moduleUrl);
+
+	invariant(
+		typeof configModule === 'object' && configModule !== null,
+		`${path.relative(appRoot, configPath)} must export a module object`
+	);
+
+	const config = configModule.docsConfig;
+	invariant(
+		typeof config === 'object' && config !== null,
+		`${path.relative(appRoot, configPath)} must export a docsConfig object`
+	);
+
+	return /** @type {DocsConfig} */ (config);
+}
+
 async function main() {
-	const [configRaw, files] = await Promise.all([
-		readFile(configPath, 'utf8'),
-		walk(docsRoutesPath)
-	]);
-
-	const parsed = JSON.parse(configRaw);
-
-	invariant(typeof parsed === 'object' && parsed !== null, 'docs.config.json must be an object');
-	const config = /** @type {DocsConfig} */ (parsed);
+	const [config, files] = await Promise.all([loadDocsConfig(), walk(docsRoutesPath)]);
 
 	const categoryOrder = Array.isArray(config.categoryOrder)
 		? config.categoryOrder.filter((value) => typeof value === 'string')
