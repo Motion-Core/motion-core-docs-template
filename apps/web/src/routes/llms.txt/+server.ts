@@ -1,7 +1,5 @@
 import type { RequestHandler } from './$types';
-import { docsManifest } from '$lib/docs/manifest';
-import { getDocMetadata } from '$lib/docs/metadata';
-import { siteConfig } from '$lib/config/site';
+import { docsManifest, getDocMetadata, siteConfig } from '$lib';
 
 type DocEntry = {
 	slug: string;

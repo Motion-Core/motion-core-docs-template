@@ -1,20 +1,25 @@
 <script lang="ts">
-	import TableOfContents from '$lib/components/docs/TableOfContents.svelte';
-	import DocsSidebar from '$lib/components/docs/navigation/DocsSidebar.svelte';
-	import MobileSidebar from '$lib/components/docs/navigation/MobileSidebar.svelte';
-	import ScrollArea from '$lib/components/ui/ScrollArea.svelte';
-	import { DocNavigation } from '$lib';
+	import {
+		DocNavigation,
+		DocShareActions,
+		DocsSidebar,
+		MobileDocShareActions,
+		MobileSidebar,
+		ScrollArea,
+		TableOfContents,
+		docsManifest,
+		docsUiConfig,
+		getDocHref,
+		resolveRepositoryDocUrl,
+		resolveTocSelector,
+		siteConfig
+	} from '$lib';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
 	import { tick } from 'svelte';
 	import { beforeNavigate, afterNavigate } from '$app/navigation';
 	import { SvelteMap } from 'svelte/reactivity';
-	import DocShareActions from '$lib/components/docs/DocShareActions.svelte';
-	import MobileDocShareActions from '$lib/components/docs/MobileDocShareActions.svelte';
-	import { siteConfig } from '$lib/config/site';
-	import { docsUiConfig, resolveRepositoryDocUrl, resolveTocSelector } from '$lib/config/docs-ui';
-	import { docsManifest, getDocHref } from '$lib/docs/manifest';
 
 	const props = $props<{ data: LayoutData; children?: Snippet }>();
 	const previousLink = $derived(

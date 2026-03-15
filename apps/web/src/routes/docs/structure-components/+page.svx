@@ -7,9 +7,7 @@ order: 20
 ---
 
 <script lang="ts">
-	import InstallationTabs from '$lib/components/docs/InstallationTabs.svelte';
-	import Steps from '$lib/components/docs/markdown/Steps.svelte';
-	import Step from '$lib/components/docs/markdown/Step.svelte';
+	import { InstallationTabs, Step, Steps } from '$lib';
 </script>
 
 This page covers the remaining structural and utility components used in mdsvex content.

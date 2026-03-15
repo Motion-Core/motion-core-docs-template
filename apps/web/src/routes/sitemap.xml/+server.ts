@@ -1,6 +1,5 @@
 import type { RequestHandler } from './$types';
-import { docsManifest, getDocHref } from '$lib/docs/manifest';
-import { siteConfig } from '$lib/config/site';
+import { docsManifest, getDocHref, siteConfig } from '$lib';
 
 type SitemapEntry = {
 	path: string;

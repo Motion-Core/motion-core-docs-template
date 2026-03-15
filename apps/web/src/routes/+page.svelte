@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { brandingConfig } from '$lib/config/branding';
+	import { brandingConfig } from '$lib';
 </script>
 
 <a

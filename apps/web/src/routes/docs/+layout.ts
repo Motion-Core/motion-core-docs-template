@@ -1,6 +1,5 @@
 import type { LayoutLoad } from './$types';
-import { getAdjacentDocs, getDocBySlug } from '$lib/docs/manifest';
-import { getDocMetadata } from '$lib/docs/metadata';
+import { getAdjacentDocs, getDocBySlug, getDocMetadata } from '$lib';
 
 function pathToSlug(pathname: string): string {
 	const normalized = pathname.replace(/\/+$/, '');

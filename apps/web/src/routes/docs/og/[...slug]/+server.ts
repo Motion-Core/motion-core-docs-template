@@ -1,11 +1,13 @@
 import { error } from '@sveltejs/kit';
 import { Resvg, initWasm } from '@resvg/resvg-wasm';
 import type { RequestHandler } from './$types';
-import { siteConfig } from '$lib/config/site';
-import { getDocMetadata } from '$lib/docs/metadata';
-import { getDocBySlug } from '$lib/docs/manifest';
-import interVariableDataUri from '$lib/assets/fonts/inter-variable.ttf?inline';
-import motionGpuLogoRaw from '$lib/assets/motiongpu-logo.svg?raw';
+import {
+	getDocBySlug,
+	getDocMetadata,
+	interVariableDataUri,
+	motionGpuLogoRaw,
+	siteConfig
+} from '$lib';
 
 const OG_WIDTH = 1200;
 const OG_HEIGHT = 630;

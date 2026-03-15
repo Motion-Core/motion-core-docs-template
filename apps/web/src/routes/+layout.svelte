@@ -1,9 +1,7 @@
 <script lang="ts">
 	import './layout.css';
 	import { page } from '$app/state';
-	import CommandPalette from '$lib/components/docs/search/CommandPalette.svelte';
-	import { siteConfig } from '$lib/config/site';
-	import { docsUiConfig } from '$lib/config/docs-ui';
+	import { CommandPalette, docsUiConfig, siteConfig } from '$lib';
 
 	const { children } = $props();
 
