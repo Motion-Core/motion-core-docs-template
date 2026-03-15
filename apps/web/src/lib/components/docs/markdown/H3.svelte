@@ -13,10 +13,7 @@
 
 <h3
 	{...restProps}
-	class={cn(
-		'mt-10 scroll-m-24 text-xl font-medium text-foreground [&_code]:text-lg',
-		className
-	)}
+	class={cn('mt-10 scroll-m-24 text-xl font-medium text-foreground [&_code]:text-lg', className)}
 >
 	{@render children?.()}
 </h3>
