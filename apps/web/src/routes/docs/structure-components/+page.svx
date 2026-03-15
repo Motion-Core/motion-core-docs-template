@@ -1,0 +1,43 @@
+---
+title: MDSVEX Structure Components
+name: Structure Components
+description: Reference samples for table and step-based components, including InstallationTabs.
+category: Reference
+order: 20
+---
+
+<script lang="ts">
+	import InstallationTabs from '$lib/components/docs/InstallationTabs.svelte';
+	import Steps from '$lib/components/docs/markdown/Steps.svelte';
+	import Step from '$lib/components/docs/markdown/Step.svelte';
+</script>
+
+This page covers the remaining structural and utility components used in mdsvex content.
+
+## InstallationTabs component
+
+<InstallationTabs pkg="@motion-core/motion-gpu" />
+
+## Table sample
+
+| Component | Source syntax | Notes |
+| --- | --- | --- |
+| `table` | Pipe table markdown | Wraps `thead`, `tbody`, `tr`, `th`, `td` |
+| `Steps` | `<Steps>...</Steps>` | Step container with counter context |
+| `Step` | `<Step title="...">...</Step>` | One numbered row; `title` is optional |
+
+## Steps and Step sample
+
+<Steps>
+	<Step title="Step with title">
+		Reference text only. No tutorial sequence, just structure and spacing.
+	</Step>
+
+	<Step title="Second step">
+		Another sample row showing numbering and title alignment.
+	</Step>
+
+	<Step>
+		Sample row without a `title` prop.
+	</Step>
+</Steps>

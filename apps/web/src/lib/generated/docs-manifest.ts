@@ -3,16 +3,16 @@ import type { DocItem } from '$lib/types/doc';
 
 export const docsNavigation: DocItem[] = [
 	{
-		slug: 'mockups',
-		name: 'Mockups',
+		slug: 'reference',
+		name: 'Reference',
 		items: [
 			{
 				slug: '',
-				name: 'Komponenty mdsvex'
+				name: 'Text Components'
 			},
 			{
-				slug: 'mdsvex-recipes',
-				name: 'Przepisy komponentow mdsvex'
+				slug: 'structure-components',
+				name: 'Structure Components'
 			}
 		]
 	}
@@ -21,12 +21,12 @@ export const docsNavigation: DocItem[] = [
 export const docsManifest: DocItem[] = [
 	{
 		slug: '',
-		name: 'Komponenty mdsvex',
-		category: 'Mockups'
+		name: 'Text Components',
+		category: 'Reference'
 	},
 	{
-		slug: 'mdsvex-recipes',
-		name: 'Przepisy komponentow mdsvex',
-		category: 'Mockups'
+		slug: 'structure-components',
+		name: 'Structure Components',
+		category: 'Reference'
 	}
 ];

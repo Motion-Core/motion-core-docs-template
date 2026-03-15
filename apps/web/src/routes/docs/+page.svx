@@ -1,61 +1,51 @@
 ---
-title: Komponenty mdsvex - przeglad
-description: Strona mockup pokazujaca wszystkie style markdown i komponenty mdsvex dostepne w szablonie.
-category: Mockups
+title: MDSVEX Text Components
+name: Text Components
+description: Reference samples for heading, paragraph, link, inline code, blockquote, divider, lists, and fenced code.
+category: Reference
 order: 10
 ---
 
-Ta strona jest praktycznym mockupem: bez lorem ipsum, za to z realnym przegladem stylow i elementow, ktore juz masz w warstwie mdsvex. Pokazuje jak wyglada zwykly tekst, `inline code`, **strong**, [link wewnetrzny](/docs/mdsvex-recipes) oraz [link zewnetrzny](https://svelte.dev).
+This page is a compact reference for markdown-to-component mappings used in this documentation app.
 
-> Ten blok sluzy jako przyklad `blockquote`: dobry do notatek migracyjnych, caveatow i decyzji architektonicznych.
+# H1 sample
 
-## Typografia i naglowki
+Single-line sample for the `h1` mapping.
 
-To jest normalny akapit, celowo niekrotki, zeby bylo widac rytm linii i odstepy pomiedzy sekcjami. W dokumentacji produktowej najczesciej bedzie to opis API, zaleznosci i zachowania runtime.
+## H2 sample
 
-### H3: Sekcja pomocnicza
+A standard paragraph maps to the paragraph component.
 
-Kiedy potrzebujesz bardzo konkretnego podrozdzialu, ten poziom najczesciej sprawdza sie najlepiej.
+### H3 sample
 
-#### H4: Drobne doprecyzowanie
+Short secondary heading sample.
 
-Tutaj zwykle laduja krotkie uwagi i ograniczenia, np. "tylko dla `on-demand`".
+#### H4 sample
+
+Short tertiary heading sample.
+
+> Blockquote sample: neutral note content for policies, caveats, or status notes.
 
 ---
 
-## Listy i semantyka
+## Unordered list sample
 
-- Lista nienumerowana dobrze nadaje sie do cech i mozliwosci.
-- Kazdy element moze laczyc **strong**, `inline code` i [odnosnik](/docs/mdsvex-recipes).
-- Taki uklad jest czytelny rowniez na mobile.
+- First list item with **strong**.
+- Second list item with `inline code`.
+- Third list item with a [link](https://svelte.dev).
 
-1. Lista numerowana sprawdza sie przy instrukcjach krok po kroku.
-2. W praktyce warto laczyc ja z komponentem `Steps`.
-3. Ostatni punkt moze odsylac do [drugiej strony mockup](/docs/mdsvex-recipes).
+## Ordered list sample
 
-## Tabela komponentow
+1. First ordered item.
+2. Second ordered item.
+3. Third ordered item.
 
-| Element | Jak go wywolac | Typowy kontekst |
-| --- | --- | --- |
-| Link | `[etykieta](url)` | Linki do API, repo i changeloga |
-| Inline code | `` `renderMode` `` | Nazwy opcji i kluczy konfiguracji |
-| Kod w tabeli | `` `pnpm\|bun\|npm` `` | Pokazanie kilku wariantow obok siebie |
-| Strong | `**wazne**` | Akcentowanie ostrzezen i decyzji |
-
-## Bloki kodu
+## Fenced code sample
 
 ```bash
-bun run --cwd apps/web dev
+bun run --cwd apps/web check
 ```
 
 ```typescript
-export const docsExample = {
-	component: 'MarkdownLayout',
-	target: '/docs/mdsvex-recipes',
-	ready: true
-};
+type ComponentName = 'h1' | 'h2' | 'h3' | 'h4';
 ```
-
-# Przyklad H1 wewnatrz tresci
-
-Ten naglowek jest celowy: demonstruje styl komponentu `H1.svelte` bez ruszania layoutu strony.

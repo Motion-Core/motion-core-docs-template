@@ -1,9 +1,9 @@
 {
-	"categoryOrder": ["Mockups", "Documentation"],
+	"categoryOrder": ["Reference", "Documentation"],
 	"defaults": {
-		"category": "Mockups",
-		"rootCategory": "Mockups",
-		"rootName": "Komponenty mdsvex",
+		"category": "Reference",
+		"rootCategory": "Reference",
+		"rootName": "Overview",
 		"rootOrder": -1000,
 		"defaultOrder": 1000
 	}

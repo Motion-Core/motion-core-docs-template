@@ -13,7 +13,7 @@
 	id="main-content"
 	bind:this={mainContent}
 	tabindex="-1"
-	class="mx-auto flex min-h-dvh w-full max-w-6xl flex-col items-center justify-center border-x border-border bg-background"
+	class="flex min-h-dvh w-full flex-col items-center justify-center bg-background"
 >
 	<h1>Hello World</h1>
 </main>
