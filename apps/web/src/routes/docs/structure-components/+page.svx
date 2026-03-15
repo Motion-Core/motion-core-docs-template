@@ -14,7 +14,7 @@ This page covers the remaining structural and utility components used in mdsvex 
 
 ## InstallationTabs component
 
-<InstallationTabs pkg="@motion-core/motion-gpu" />
+<InstallationTabs pkg="@motion-core/example" />
 
 ## Table sample
 

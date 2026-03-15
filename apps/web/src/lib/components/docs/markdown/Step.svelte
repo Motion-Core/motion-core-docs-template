@@ -15,14 +15,13 @@
 
 <div class={cn('relative pb-10 pl-8', className)}>
 	{#if title}
-		<div class="mb-4 flex h-8 items-center">
+		<div class="mb-4 flex h-10 items-center">
 			<div
-				class="inset-shadow absolute -left-4 flex size-8 rounded-full border border-border bg-background-inset p-0.5"
+				class="inset-shadow absolute -left-5 flex size-10 rounded-full border border-border bg-background-inset p-1"
 			>
 				<span
 					class="flex h-full w-full items-center justify-center rounded-full border border-border bg-background text-xs font-medium text-foreground shadow-md [counter-increment:step] before:content-[counter(step)]"
 				>
-					<span class="card-highlight absolute z-0 size-8 rounded-full shadow-sm"></span>
 				</span>
 			</div>
 			<h3 class="relative z-10 text-lg leading-none font-medium tracking-tight">
@@ -31,16 +30,17 @@
 		</div>
 	{:else}
 		<div
-			class="inset-shadow absolute -left-4 flex size-8 rounded-full border border-border bg-background-inset p-0.5"
+			class="inset-shadow absolute -left-5 flex size-10 rounded-full border border-border bg-background-inset p-1"
 		>
 			<span
 				class="flex h-full w-full items-center justify-center rounded-full border border-border bg-background text-xs font-medium text-foreground shadow-md [counter-increment:step] before:content-[counter(step)]"
 			>
-				<span class="card-highlight absolute z-0 size-8 rounded-full shadow-sm"></span>
 			</span>
 		</div>
 	{/if}
-	<div class="text-base leading-relaxed tracking-normal text-foreground-muted">
+	<div
+		class={cn('text-base leading-relaxed tracking-normal text-foreground-muted', !title && 'pt-2')}
+	>
 		{@render children?.()}
 	</div>
 </div>
