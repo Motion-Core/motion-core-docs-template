@@ -1,29 +1,29 @@
 export const siteConfig = {
-	name: 'Motion GPU',
-	shortName: 'Motion GPU Docs',
+	name: 'Motion Core Documentation Template',
+	shortName: 'Motion Core Documentation Template',
 	url: 'https://motion-gpu.dev',
 	description:
-		'A WebGPU-first library for Svelte 5. Build high-performance, GPU-accelerated visualizations with a declarative API, strict runtime contracts, and type-safe WGSL shaders.',
+		'A reusable documentation template for modern TypeScript projects. Launch branded docs fast with configurable navigation, SEO metadata, and content structure.',
 	author: 'Marek Jóźwiak',
 	keywords: [
-		'webgpu',
-		'svelte',
-		'svelte 5',
-		'shaders',
-		'wgsl',
-		'graphics',
-		'gpu',
-		'visualization',
-		'creative coding',
-		'motion-gpu'
+		'documentation',
+		'docs template',
+		'static docs',
+		'typescript',
+		'sveltekit',
+		'seo',
+		'developer docs',
+		'knowledge base',
+		'template',
+		'motion core documentation template'
 	],
 	ogImage: '/og-image.jpg',
 	links: {
-		github: 'https://github.com/motion-core/motion-gpu',
-		twitter: 'https://x.com/madebyhex'
+		github: 'https://example.com/',
+		twitter: 'https://example.com/'
 	},
 	package: {
-		name: '@motion-core/motion-gpu'
+		name: '@motion-core/example'
 	}
 };
 

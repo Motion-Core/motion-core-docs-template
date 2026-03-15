@@ -72,7 +72,7 @@
 		<meta property="og:type" content="website" />
 		<meta property="og:url" content={canonicalUrl} />
 		<meta property="og:image" content={sharedOgImage} />
-		<meta property="og:image:alt" content="Motion GPU logomark" />
+		<meta property="og:image:alt" content={`${siteName} logomark`} />
 		<meta property="og:image:type" content="image/png" />
 		<meta name="twitter:title" content={homeTitle} />
 		<meta name="twitter:description" content={homeDescription} />

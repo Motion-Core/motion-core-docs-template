@@ -7,7 +7,7 @@ type DocEntry = {
 	category: string;
 };
 
-const summary = `${siteConfig.name} is a Svelte-first WebGPU runtime for fullscreen WGSL rendering, deterministic frame scheduling, and composable post-processing pipelines.`;
+const summary = `${siteConfig.name} is ${siteConfig.description}`;
 
 const detailParagraphs = [
 	'LLM-friendly Markdown for every page is available at `/docs/raw/<slug>`; this is the source doc content without navigation chrome.',

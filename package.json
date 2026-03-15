@@ -1,5 +1,5 @@
 {
-  "name": "motion-gpu-monorepo",
+  "name": "@motion-core/docs-template-monorepo",
   "private": true,
   "version": "0.0.1",
   "type": "module",
