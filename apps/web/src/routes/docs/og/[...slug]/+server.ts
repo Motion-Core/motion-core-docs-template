@@ -1,13 +1,7 @@
 import { error } from '@sveltejs/kit';
 import { Resvg, initWasm } from '@resvg/resvg-wasm';
 import type { RequestHandler } from './$types';
-import {
-	getDocBySlug,
-	getDocMetadata,
-	interVariableDataUri,
-	motionGpuLogoRaw,
-	siteConfig
-} from '$lib';
+import { brandLogoRaw, getDocBySlug, getDocMetadata, interVariableDataUri, siteConfig } from '$lib';
 
 const OG_WIDTH = 1200;
 const OG_HEIGHT = 630;
@@ -111,13 +105,13 @@ type ResvgWasmState = {
 	initialized?: boolean;
 };
 
-const resvgState = globalThis as typeof globalThis & { __motionGpuResvgWasmState?: ResvgWasmState };
-if (!resvgState.__motionGpuResvgWasmState) {
-	resvgState.__motionGpuResvgWasmState = {};
+const resvgState = globalThis as typeof globalThis & { __docsOgResvgWasmState?: ResvgWasmState };
+if (!resvgState.__docsOgResvgWasmState) {
+	resvgState.__docsOgResvgWasmState = {};
 }
 
 const ensureResvgWasm = (origin: string) => {
-	const state = resvgState.__motionGpuResvgWasmState as ResvgWasmState;
+	const state = resvgState.__docsOgResvgWasmState as ResvgWasmState;
 	if (state.initialized) {
 		return Promise.resolve();
 	}
@@ -148,7 +142,7 @@ const ensureResvgWasm = (origin: string) => {
 };
 
 const logoDataUri = `data:image/svg+xml,${encodeURIComponent(
-	motionGpuLogoRaw.replaceAll('currentColor', '#ff6900')
+	brandLogoRaw.replaceAll('currentColor', '#ff6900')
 )}`;
 
 export const GET: RequestHandler = async ({ params, url }) => {
@@ -163,7 +157,7 @@ export const GET: RequestHandler = async ({ params, url }) => {
 	const category = getDocBySlug(metadata.slug)?.category ?? 'Documentation';
 	const title = clampText(metadata.title, MAX_TITLE_LENGTH);
 	const description = clampText(
-		metadata.description ?? 'Documentation for Motion GPU.',
+		metadata.description ?? 'Documentation page.',
 		MAX_DESCRIPTION_LENGTH
 	);
 	const pageUrl = new URL(`/docs/${metadata.slug}`, canonicalOrigin).href;

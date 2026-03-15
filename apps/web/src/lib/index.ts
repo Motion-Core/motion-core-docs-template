@@ -26,4 +26,4 @@ export { docsManifest, getAdjacentDocs, getDocBySlug, getDocHref } from './docs/
 export { getDocMetadata, type DocMetadata } from './docs/metadata';
 
 export { default as interVariableDataUri } from './assets/fonts/inter-variable.ttf?inline';
-export { default as motionGpuLogoRaw } from './assets/motiongpu-logo.svg?raw';
+export { default as brandLogoRaw } from './assets/motiongpu-logo.svg?raw';
