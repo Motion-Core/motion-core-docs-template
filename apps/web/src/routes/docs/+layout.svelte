@@ -46,7 +46,7 @@
 	const canonicalUrl = $derived(metadata ? new URL(metadata.href, siteOrigin).href : null);
 	const docOgImage = $derived(
 		metadata
-			? new URL(`/docs/og/${metadata.slug}`, siteOrigin).href
+			? new URL(metadata.slug ? `/docs/og/${metadata.slug}` : '/docs/og', siteOrigin).href
 			: new URL(siteConfig.ogImage, siteOrigin).href
 	);
 	const docTitle = $derived(
