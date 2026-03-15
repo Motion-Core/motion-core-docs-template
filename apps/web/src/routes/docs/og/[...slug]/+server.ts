@@ -1,13 +1,10 @@
 import { error } from '@sveltejs/kit';
-import satori from 'satori';
-import { html } from 'satori-html';
 import { Resvg, initWasm } from '@resvg/resvg-wasm';
 import type { RequestHandler } from './$types';
 import { siteConfig } from '$lib/config/site';
 import { getDocMetadata } from '$lib/docs/metadata';
 import { getDocBySlug } from '$lib/docs/manifest';
-import aeonikProRegularDataUri from '$lib/assets/fonts/aeonikpro-satori-400.ttf?inline';
-import aeonikProSemiBoldDataUri from '$lib/assets/fonts/aeonikpro-satori-600.ttf?inline';
+import interVariableDataUri from '$lib/assets/fonts/inter-variable.ttf?inline';
 import motionGpuLogoRaw from '$lib/assets/motiongpu-logo.svg?raw';
 
 const OG_WIDTH = 1200;
@@ -15,6 +12,7 @@ const OG_HEIGHT = 630;
 const MAX_TITLE_LENGTH = 88;
 const MAX_DESCRIPTION_LENGTH = 180;
 const canonicalOrigin = new URL(siteConfig.url).origin;
+const SYSTEM_FONT_STACK = 'sans-serif';
 
 const clampText = (value: string, maxLength: number) => {
 	const text = value.trim();
@@ -22,12 +20,11 @@ const clampText = (value: string, maxLength: number) => {
 	return `${text.slice(0, maxLength - 1).trimEnd()}…`;
 };
 
-const dataUriToArrayBuffer = (dataUri: string) => {
+const dataUriToUint8Array = (dataUri: string) => {
 	const base64 = dataUri.slice(dataUri.indexOf(',') + 1);
 
 	if (typeof Buffer !== 'undefined') {
-		const bytes = Buffer.from(base64, 'base64');
-		return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+		return Uint8Array.from(Buffer.from(base64, 'base64'));
 	}
 
 	const binary = atob(base64);
@@ -35,13 +32,77 @@ const dataUriToArrayBuffer = (dataUri: string) => {
 	for (let index = 0; index < binary.length; index += 1) {
 		bytes[index] = binary.charCodeAt(index);
 	}
-	return bytes.buffer;
+	return bytes;
 };
 
-const fontDataPromise = Promise.all([
-	Promise.resolve(dataUriToArrayBuffer(aeonikProRegularDataUri)),
-	Promise.resolve(dataUriToArrayBuffer(aeonikProSemiBoldDataUri))
-]);
+const escapeXml = (value: string) =>
+	value
+		.replaceAll('&', '&amp;')
+		.replaceAll('<', '&lt;')
+		.replaceAll('>', '&gt;')
+		.replaceAll('"', '&quot;')
+		.replaceAll("'", '&#39;');
+
+const wrapText = (value: string, maxCharsPerLine: number, maxLines: number) => {
+	const words = value.trim().split(/\s+/).filter(Boolean);
+	if (words.length === 0) return [''];
+
+	const lines: string[] = [];
+	let current = '';
+	let truncated = false;
+
+	for (const word of words) {
+		const candidate = current ? `${current} ${word}` : word;
+
+		if (candidate.length <= maxCharsPerLine) {
+			current = candidate;
+			continue;
+		}
+
+		if (current) {
+			lines.push(current);
+		} else {
+			lines.push(clampText(word, maxCharsPerLine));
+		}
+
+		if (lines.length >= maxLines) {
+			truncated = true;
+			current = '';
+			break;
+		}
+
+		current = word;
+	}
+
+	if (!truncated && current) {
+		lines.push(current);
+	}
+
+	if (lines.length > maxLines) {
+		lines.length = maxLines;
+		truncated = true;
+	}
+
+	if (truncated && lines.length > 0) {
+		const last = lines.length - 1;
+		lines[last] = clampText(lines[last], Math.max(1, maxCharsPerLine - 1));
+		if (!lines[last].endsWith('…')) {
+			lines[last] = `${lines[last].replace(/[.\s]+$/g, '')}…`;
+		}
+	}
+
+	return lines;
+};
+
+const renderTspans = (lines: string[], x: number, lineHeight: number) =>
+	lines
+		.map((line, index) => {
+			const dy = index === 0 ? 0 : lineHeight;
+			return `<tspan x="${x}" dy="${dy}">${escapeXml(line)}</tspan>`;
+		})
+		.join('');
+
+const ogFontBuffers = Promise.resolve([dataUriToUint8Array(interVariableDataUri)]);
 
 type ResvgWasmState = {
 	promise?: Promise<void>;
@@ -104,48 +165,33 @@ export const GET: RequestHandler = async ({ params, url }) => {
 		MAX_DESCRIPTION_LENGTH
 	);
 	const pageUrl = new URL(`/docs/${metadata.slug}`, canonicalOrigin).href;
-	const [aeonikProRegular, aeonikProSemiBold] = await fontDataPromise;
+	const titleLines = wrapText(title, 18, 2);
+	const descriptionLines = wrapText(description, 56, 2);
+	const titleY = 340;
+	const titleLineHeight = 100;
+	const descriptionY = titleY + (titleLines.length - 1) * titleLineHeight + 92;
+	const fontBuffers = await ogFontBuffers;
 	await ensureResvgWasm(url.origin);
 
-	const markup = html`
-		<div
-			style="display:flex;flex-direction:column;justify-content:space-between;width:100%;height:100%;padding:40px;background:#ffffff;font-family:Aeonik Pro,sans-serif;"
-		>
-			<div style="display:flex;align-items:flex-start;justify-content:space-between;">
-				<img src="${logoDataUri}" alt="" style="display:flex;width:78px;height:78px;" />
-				<div style="display:flex;font-size:24px;color:#8a8f98;font-weight:400;">${pageUrl}</div>
-			</div>
+	const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${OG_WIDTH}" height="${OG_HEIGHT}" viewBox="0 0 ${OG_WIDTH} ${OG_HEIGHT}">
+	<rect width="100%" height="100%" fill="#ffffff" />
+	<g font-family="${SYSTEM_FONT_STACK}">
+		<image href="${logoDataUri}" x="40" y="40" width="78" height="78" />
+		<text x="1160" y="82" fill="#8a8f98" font-size="24" font-weight="400" text-anchor="end">${escapeXml(pageUrl)}</text>
+		<text x="40" y="250" fill="#8a8f98" font-size="21" font-weight="500" letter-spacing="1.2">${escapeXml(category.toUpperCase())}</text>
+		<text x="40" y="${titleY}" fill="#111318" font-size="98" font-weight="700">${renderTspans(titleLines, 40, titleLineHeight)}</text>
+		<text x="40" y="${descriptionY}" fill="#5f6672" font-size="36" font-weight="400">${renderTspans(descriptionLines, 40, 48)}</text>
+	</g>
+</svg>`;
 
-			<div style="display:flex;flex-direction:column;gap:24px;">
-				<div
-					style="display:flex;font-size:21px;letter-spacing:0.06em;text-transform:uppercase;color:#8a8f98;font-weight:400;"
-				>
-					${category}
-				</div>
-				<div
-					style="display:flex;max-width:1060px;font-size:98px;line-height:0.99;color:#111318;font-weight:600;"
-				>
-					${title}
-				</div>
-				<div
-					style="display:flex;max-width:1020px;font-size:36px;line-height:1.28;color:#5f6672;font-weight:400;"
-				>
-					${description}
-				</div>
-			</div>
-		</div>
-	`;
-
-	const svg = await satori(markup, {
-		width: OG_WIDTH,
-		height: OG_HEIGHT,
-		fonts: [
-			{ name: 'Aeonik Pro', data: aeonikProRegular, weight: 400, style: 'normal' },
-			{ name: 'Aeonik Pro', data: aeonikProSemiBold, weight: 600, style: 'normal' }
-		]
-	});
 	const rendered = new Resvg(svg, {
-		fitTo: { mode: 'width', value: OG_WIDTH }
+		fitTo: { mode: 'width', value: OG_WIDTH },
+		font: {
+			fontBuffers,
+			defaultFontFamily: 'Inter',
+			sansSerifFamily: 'Inter'
+		}
 	}).render();
 	const png = rendered.asPng();
 	const pngBody = new Uint8Array(png.byteLength);
