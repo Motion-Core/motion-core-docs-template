@@ -91,7 +91,7 @@
 					onclick={handleCopy}
 					aria-live="polite"
 					aria-disabled={copyState === 'success'}
-					class="group/option flex items-center gap-2 overflow-hidden rounded-sm px-3 py-1.5 text-left font-medium text-foreground-muted transition-colors duration-150 ease-out hover:bg-background-muted hover:text-foreground"
+					class="group/option flex items-center gap-2 overflow-hidden rounded-sm px-3 py-1.5 text-left font-medium tracking-normal text-foreground-muted transition-colors duration-150 ease-out hover:bg-background-muted hover:text-foreground"
 				>
 					<span class="grid" style="grid-template-areas: 'content';">
 						{#key copyState}
@@ -131,7 +131,7 @@
 
 			{#if canShowRepository}
 				<a
-					class="group/option flex items-center gap-2 rounded-sm px-3 py-1.5 text-left font-medium text-foreground-muted transition-colors duration-150 ease-out hover:bg-background-muted hover:text-foreground"
+					class="group/option flex items-center gap-2 rounded-sm px-3 py-1.5 text-left font-medium tracking-normal text-foreground-muted transition-colors duration-150 ease-out hover:bg-background-muted hover:text-foreground"
 					href={githubUrl}
 					target="_blank"
 					rel="noreferrer"
@@ -144,7 +144,7 @@
 
 			{#if chatGptUrl}
 				<a
-					class="group/option flex items-center gap-2 rounded-sm px-3 py-1.5 text-left font-medium text-foreground-muted transition-colors duration-150 ease-out hover:bg-background-muted hover:text-foreground"
+					class="group/option flex items-center gap-2 rounded-sm px-3 py-1.5 text-left font-medium tracking-normal text-foreground-muted transition-colors duration-150 ease-out hover:bg-background-muted hover:text-foreground"
 					href={chatGptUrl}
 					target="_blank"
 					rel="noreferrer"
@@ -168,7 +168,7 @@
 
 			{#if claudeUrl}
 				<a
-					class="group/option flex items-center gap-2 rounded-sm px-3 py-1.5 text-left font-medium text-foreground-muted transition-colors duration-150 ease-out hover:bg-background-muted hover:text-foreground"
+					class="group/option flex items-center gap-2 rounded-sm px-3 py-1.5 text-left font-medium tracking-normal text-foreground-muted transition-colors duration-150 ease-out hover:bg-background-muted hover:text-foreground"
 					href={claudeUrl}
 					target="_blank"
 					rel="noreferrer"

@@ -73,12 +73,12 @@ html {
 	--font-weight-extrabold: 550;
 	--font-weight-black: 600;
 
-	--tracking-tighter: -0.075;
-	--tracking-tight: -0.05;
-	--tracking-normal: -0.25;
-	--tracking-wide: 0;
-	--tracking-wider: 0.025;
-	--tracking-widest: 0.075;
+	--tracking-tighter: -0.06rem;
+	--tracking-tight: -0.035rem;
+	--tracking-normal: -0.01rem;
+	--tracking-wide: 0.005rem;
+	--tracking-wider: 0.03rem;
+	--tracking-widest: 0.08rem;
 
 	--radius-xs: calc(var(--radius-base) * 1);
 	--radius-sm: calc(var(--radius-base) * 2);

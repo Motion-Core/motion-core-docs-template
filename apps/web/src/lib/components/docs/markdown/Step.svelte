@@ -25,7 +25,7 @@
 					<span class="card-highlight absolute z-0 size-8 rounded-full shadow-sm"></span>
 				</span>
 			</div>
-			<h3 class="relative z-10 text-lg leading-none font-medium">
+			<h3 class="relative z-10 text-lg leading-none font-medium tracking-tight">
 				{title}
 			</h3>
 		</div>
@@ -40,7 +40,7 @@
 			</span>
 		</div>
 	{/if}
-	<div class="text-base leading-relaxed text-foreground/70">
+	<div class="text-base leading-relaxed tracking-normal text-foreground/70">
 		{@render children?.()}
 	</div>
 </div>

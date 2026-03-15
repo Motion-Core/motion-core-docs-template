@@ -222,15 +222,15 @@
 					{#if metadata}
 						<div class="space-y-4">
 							{#if currentDoc?.category}
-								<p class="mb-2 text-sm font-medium text-foreground/45 capitalize">
+								<p class="mb-2 text-sm font-medium tracking-normal text-foreground/45 capitalize">
 									{currentDoc.category}
 								</p>
 							{/if}
-							<h1 class="scroll-m-20 text-3xl font-medium text-foreground">
+							<h1 class="scroll-m-20 text-3xl font-medium tracking-tight text-foreground">
 								{metadata.name || metadata.title}
 							</h1>
 							{#if metadata.description}
-								<p class="max-w-4xl text-base font-normal text-foreground-muted">
+								<p class="max-w-4xl text-base font-normal tracking-normal text-foreground-muted">
 									{metadata.description}
 								</p>
 							{/if}

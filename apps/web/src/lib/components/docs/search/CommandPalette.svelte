@@ -148,12 +148,12 @@
 				<input
 					bind:this={inputRef}
 					bind:value={query}
-					class="command-palette-input flex h-12 w-full bg-transparent text-base text-foreground placeholder:text-foreground/45 focus:outline-none focus-visible:border-none! focus-visible:ring-0! focus-visible:ring-offset-0! focus-visible:outline-none!"
+					class="command-palette-input flex h-12 w-full bg-transparent text-base tracking-normal text-foreground placeholder:text-foreground/45 focus:outline-none focus-visible:border-none! focus-visible:ring-0! focus-visible:ring-offset-0! focus-visible:outline-none!"
 					placeholder={docsUiConfig.search.dialogPlaceholder}
 					aria-label={docsUiConfig.search.dialogPlaceholder}
 				/>
 				<kbd
-					class="pointer-events-none inset-shadow relative hidden h-5 items-center gap-1 rounded-xs border border-border bg-background-inset px-1.5 font-mono text-[10px] font-medium text-foreground/45 select-none sm:flex"
+					class="pointer-events-none inset-shadow relative hidden h-5 items-center gap-1 rounded-xs border border-border bg-background-inset px-1.5 font-mono text-[10px] font-medium tracking-normal text-foreground/45 select-none sm:flex"
 				>
 					ESC
 				</kbd>
@@ -173,7 +173,7 @@
 								{@const isChild = result.matchType === 'heading' || result.matchType === 'content'}
 								<button
 									class={cn(
-										'group relative flex w-full flex-col items-start gap-1 rounded-sm px-3 py-2 text-sm font-medium',
+										'group relative flex w-full flex-col items-start gap-1 rounded-sm px-3 py-2 text-sm font-medium tracking-normal',
 										isChild && 'pl-8',
 										i === selectedIndex
 											? 'bg-background-muted text-foreground'
@@ -188,7 +188,7 @@
 
 									<div class="flex w-full flex-col items-start gap-0.5">
 										{#if result.matchType !== 'content'}
-											<div class="flex items-center gap-2 font-medium">
+											<div class="flex items-center gap-2 font-medium tracking-normal">
 												{#if result.matchType === 'heading'}
 													<span class="opacity-70">#</span>
 												{/if}
@@ -206,7 +206,7 @@
 										{#if result.snippet}
 											<div
 												class={cn(
-													'line-clamp-1 text-left text-xs font-medium',
+													'line-clamp-1 text-left text-xs font-medium tracking-normal',
 													i === selectedIndex ? 'text-foreground' : 'text-foreground/60'
 												)}
 											>
@@ -224,7 +224,7 @@
 							{/each}
 						</ScrollArea>
 					{:else if query}
-						<div class="py-6 text-center text-sm text-foreground/45">
+						<div class="py-6 text-center text-sm tracking-normal text-foreground/45">
 							{docsUiConfig.search.noResultsLabel}
 						</div>
 					{/if}
@@ -238,7 +238,7 @@
 				>
 					<Return class="size-3" />
 				</kbd>
-				<span class="text-xs font-medium text-foreground/45">
+				<span class="text-xs font-medium tracking-normal text-foreground/45">
 					{docsUiConfig.search.submitHintLabel}
 				</span>
 			</div>

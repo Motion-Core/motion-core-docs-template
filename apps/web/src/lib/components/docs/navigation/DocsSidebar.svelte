@@ -47,7 +47,7 @@
 			>
 				{@html brandingConfig.logoRaw}
 			</span>
-			<span class="text-xl font-medium text-foreground">{brandingConfig.name}</span>
+			<span class="text-xl font-medium tracking-tight text-foreground">{brandingConfig.name}</span>
 		</a>
 
 		{#if docsUiConfig.search.enabled}
@@ -72,7 +72,7 @@
 					<button
 						onclick={() => toggleGroup(doc.slug)}
 						class={cn(
-							'flex w-full items-center justify-between rounded-sm px-3 py-1.5 text-sm font-medium transition-all duration-150 ease-out hover:bg-background-muted hover:text-foreground',
+							'flex w-full items-center justify-between rounded-sm px-3 py-1.5 text-sm font-medium tracking-normal transition-all duration-150 ease-out hover:bg-background-muted hover:text-foreground',
 							isGroupActive ? 'text-foreground' : 'text-foreground-muted'
 						)}
 					>
@@ -92,7 +92,7 @@
 								<a
 									{href}
 									class={cn(
-										'block rounded-sm px-3 py-1.5 text-sm font-medium transition-all duration-150 ease-out',
+										'block rounded-sm px-3 py-1.5 text-sm font-medium tracking-normal transition-all duration-150 ease-out',
 										isActive
 											? 'bg-accent/10 text-accent'
 											: 'text-foreground-muted hover:bg-background-muted hover:text-foreground'
@@ -109,7 +109,7 @@
 					<a
 						{href}
 						class={cn(
-							'block rounded-sm px-3 py-1.5 text-sm transition-all duration-150 ease-out',
+							'block rounded-sm px-3 py-1.5 text-sm tracking-normal transition-all duration-150 ease-out',
 							isActive
 								? 'bg-accent/10 text-accent'
 								: 'text-foreground-muted hover:bg-background-muted hover:text-foreground'

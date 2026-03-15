@@ -537,7 +537,7 @@
 						<a
 							href={`#${heading.id}`}
 							class={cn(
-								'block max-w-48 truncate py-1 font-medium transition-[color] duration-150 ease-out',
+								'block max-w-48 truncate py-1 font-medium tracking-normal transition-[color] duration-150 ease-out',
 								isLinkHighlighted(heading.id)
 									? 'text-accent'
 									: 'text-foreground-muted hover:text-foreground'
@@ -552,5 +552,5 @@
 		</div>
 	</nav>
 {:else}
-	<div class="hidden text-sm text-foreground/45 lg:block">{emptyLabel}</div>
+	<div class="hidden text-sm tracking-normal text-foreground/45 lg:block">{emptyLabel}</div>
 {/if}
