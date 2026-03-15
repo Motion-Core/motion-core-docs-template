@@ -47,11 +47,9 @@
 	"type": "module",
 	"dependencies": {
 		"@resvg/resvg-wasm": "^2.6.2",
-		"acorn": "^8.16.0",
 		"carbon-icons-svelte": "^13.9.0",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
-		"resolve.exports": "^2.0.3",
 		"satori": "^0.25.0",
 		"satori-html": "^0.3.2",
 		"tailwind-merge": "^3.5.0"
