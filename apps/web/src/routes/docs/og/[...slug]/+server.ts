@@ -89,10 +89,8 @@ const logoDataUri = `data:image/svg+xml,${encodeURIComponent(
 )}`;
 
 export const GET: RequestHandler = async ({ params, url }) => {
-	const slug = params.slug;
-	if (!slug) {
-		throw error(404, 'Document not found');
-	}
+	const rawSlug = (params.slug ?? '').replace(/^\/+|\/+$/g, '');
+	const slug = rawSlug === '' || rawSlug === 'index' || rawSlug === 'docs' ? '' : rawSlug;
 
 	const metadata = getDocMetadata(`/docs/${slug}`);
 	if (!metadata) {
