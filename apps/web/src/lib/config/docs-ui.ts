@@ -1,6 +1,17 @@
+/**
+ * Supported package manager tabs shown in installation examples.
+ */
 export const availablePackageManagers = ['npm', 'pnpm', 'bun', 'yarn'] as const;
+
+/**
+ * Union of package manager keys derived from `availablePackageManagers`.
+ */
 export type PackageManagerOption = (typeof availablePackageManagers)[number];
 
+/**
+ * Global, strongly-typed settings for interactive documentation UI elements.
+ * Adjust defaults here to tune behavior across the entire docs experience.
+ */
 export type DocsUiConfig = {
 	search: {
 		enabled: boolean;
@@ -78,6 +89,9 @@ export type DocsUiConfig = {
 	};
 };
 
+/**
+ * Centralized interactive docs configuration used by route components and helpers.
+ */
 export const docsUiConfig: DocsUiConfig = {
 	search: {
 		enabled: true,
@@ -153,10 +167,23 @@ export const docsUiConfig: DocsUiConfig = {
 	}
 };
 
+/**
+ * Replaces `{token}` placeholders in a template string with provided values.
+ *
+ * @param template String that may contain `{key}` placeholders.
+ * @param variables Object with replacement values indexed by key.
+ * @returns Template with placeholders replaced; missing keys resolve to an empty string.
+ */
 function interpolateTemplate(template: string, variables: Record<string, string>) {
 	return template.replace(/\{([a-zA-Z0-9_]+)\}/g, (_, key: string) => variables[key] ?? '');
 }
 
+/**
+ * Resolves the heading selector for table-of-contents generation based on a doc slug.
+ *
+ * @param slug Relative documentation slug (for example `changelog/1.0.0`).
+ * @returns CSS selector used to extract headings from page content.
+ */
 export function resolveTocSelector(slug?: string | null) {
 	const normalizedSlug = slug ?? '';
 	const override = docsUiConfig.toc.selectorOverrides.find((item) =>
@@ -165,6 +192,12 @@ export function resolveTocSelector(slug?: string | null) {
 	return override?.selector ?? docsUiConfig.toc.defaultSelector;
 }
 
+/**
+ * Builds AI assistant links (ChatGPT/Claude) for the current documentation URL.
+ *
+ * @param rawUrl Absolute URL of the current docs page.
+ * @returns Encoded assistant URLs when enabled; otherwise `null` values.
+ */
 export function resolveDocAssistantUrls(rawUrl?: string | null) {
 	if (!rawUrl) {
 		return {
@@ -194,6 +227,13 @@ export function resolveDocAssistantUrls(rawUrl?: string | null) {
 	};
 }
 
+/**
+ * Creates a deep link to a documentation file in the source repository.
+ *
+ * @param repositoryBaseUrl Repository root URL (for example `https://github.com/org/repo`).
+ * @param repositoryRelativePath File path prefixed with `/` from repository root.
+ * @returns URL pointing to the configured branch and target file.
+ */
 export function resolveRepositoryDocUrl(repositoryBaseUrl: string, repositoryRelativePath: string) {
 	const branch = docsUiConfig.docActions.repositoryBranch.trim();
 	const safeBranch = branch.length > 0 ? branch : 'main';
