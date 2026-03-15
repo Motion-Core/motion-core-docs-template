@@ -1,24 +1,10 @@
 {
-	"categoryOrder": [
-		"Getting Started",
-		"Core Concepts",
-		"Rendering",
-		"Shaders & Textures",
-		"API Reference",
-		"Advanced",
-		"Documentation"
-	],
+	"categoryOrder": ["Mockups", "Documentation"],
 	"defaults": {
-		"category": "Documentation",
-		"rootCategory": "Getting Started",
-		"rootName": "Overview",
+		"category": "Mockups",
+		"rootCategory": "Mockups",
+		"rootName": "Komponenty mdsvex",
 		"rootOrder": -1000,
 		"defaultOrder": 1000
-	},
-	"overrides": {
-		"writing-shaders": {
-			"category": "Shaders & Textures",
-			"order": 10
-		}
 	}
 }

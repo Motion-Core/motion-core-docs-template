@@ -334,8 +334,16 @@ async function main() {
 
 	assertUniqueLeafSlugs(resolvedDocs);
 
+	const explicitOrderIndex = new Map(categoryOrder.map((category, idx) => [category, idx]));
 	resolvedDocs.sort((a, b) => {
-		if (a.category !== b.category) return 0;
+		if (a.category !== b.category) {
+			const ai = explicitOrderIndex.get(a.category);
+			const bi = explicitOrderIndex.get(b.category);
+			if (ai !== undefined && bi !== undefined) return ai - bi;
+			if (ai !== undefined) return -1;
+			if (bi !== undefined) return 1;
+			return a.category.localeCompare(b.category);
+		}
 		if (a.order !== b.order) return a.order - b.order;
 		return a.slug.localeCompare(b.slug);
 	});

@@ -1,84 +1,61 @@
 ---
-title: MotionGPU Documentation
-description: Framework-agnostic WebGPU core with a Svelte 5 adapter for fullscreen WGSL rendering.
+title: Komponenty mdsvex - przeglad
+description: Strona mockup pokazujaca wszystkie style markdown i komponenty mdsvex dostepne w szablonie.
+category: Mockups
+order: 10
 ---
 
-`@motion-core/motion-gpu` ships a **framework-agnostic WebGPU core** plus a **Svelte 5 adapter** for fullscreen WGSL rendering. You get a declarative material system, a reactive frame scheduler, and a composable post-processing pipeline — wired into a single `<FragCanvas>` component in the Svelte adapter.
+Ta strona jest praktycznym mockupem: bez lorem ipsum, za to z realnym przegladem stylow i elementow, ktore juz masz w warstwie mdsvex. Pokazuje jak wyglada zwykly tekst, `inline code`, **strong**, [link wewnetrzny](/docs/mdsvex-recipes) oraz [link zewnetrzny](https://svelte.dev).
 
-This documentation was generated directly from the `packages/motion-gpu/src` source tree, so every contract, default value, and edge-case behavior described here reflects the actual implementation.
+> Ten blok sluzy jako przyklad `blockquote`: dobry do notatek migracyjnych, caveatow i decyzji architektonicznych.
 
-## What this package ships
+## Typografia i naglowki
 
-| Area | Source of truth | What it does |
+To jest normalny akapit, celowo niekrotki, zeby bylo widac rytm linii i odstepy pomiedzy sekcjami. W dokumentacji produktowej najczesciej bedzie to opis API, zaleznosci i zachowania runtime.
+
+### H3: Sekcja pomocnicza
+
+Kiedy potrzebujesz bardzo konkretnego podrozdzialu, ten poziom najczesciej sprawdza sie najlepiej.
+
+#### H4: Drobne doprecyzowanie
+
+Tutaj zwykle laduja krotkie uwagi i ograniczenia, np. "tylko dla `on-demand`".
+
+---
+
+## Listy i semantyka
+
+- Lista nienumerowana dobrze nadaje sie do cech i mozliwosci.
+- Kazdy element moze laczyc **strong**, `inline code` i [odnosnik](/docs/mdsvex-recipes).
+- Taki uklad jest czytelny rowniez na mobile.
+
+1. Lista numerowana sprawdza sie przy instrukcjach krok po kroku.
+2. W praktyce warto laczyc ja z komponentem `Steps`.
+3. Ostatni punkt moze odsylac do [drugiej strony mockup](/docs/mdsvex-recipes).
+
+## Tabela komponentow
+
+| Element | Jak go wywolac | Typowy kontekst |
 | --- | --- | --- |
-| **Svelte runtime component** | `svelte/FragCanvas.svelte` | Owns the `<canvas>`, provides Svelte context/hooks, and bridges props/runtime state into the core loop. |
-| **Runtime loop (core)** | `core/runtime-loop.ts` | Runs requestAnimationFrame, renderer rebuild policy, frame scheduling, render gating, and normalized error routing. |
-| **Material pipeline** | `material.ts` + `material-preprocess.ts` | Validates fragment shaders, expands `#include` / `defines`, and produces deterministic pipeline signatures. |
-| **Renderer** | `renderer.ts` | Handles WebGPU device init, shader compilation, uniform buffer writes, texture uploads, and render-graph execution. |
-| **Frame scheduler** | `core/frame-registry.ts` + `svelte/frame-context.ts` | Orchestrates ordered frame tasks, stage graphs, invalidation tokens, render-mode gating, and optional profiling (core), with Svelte hook/context adapter wrappers. |
-| **Pass system** | `render-graph.ts` + `passes/*` | Implements an extensible pass graph with ping-pong slots (`source`/`target`), named render targets, optional canvas output, and three built-in pass types. |
-| **Texture loading** | `core/texture-loader.ts` + `svelte/use-texture.ts` | Fetches, decodes, and caches texture URLs with abort/reload race safety and reactive Svelte store state. |
-| **Diagnostics** | `error-report.ts` + `error-diagnostics.ts` | Maps low-level WebGPU and WGSL errors to structured reports with hints and source snippets. |
+| Link | `[etykieta](url)` | Linki do API, repo i changeloga |
+| Inline code | `` `renderMode` `` | Nazwy opcji i kluczy konfiguracji |
+| Kod w tabeli | `` `pnpm\|bun\|npm` `` | Pokazanie kilku wariantow obok siebie |
+| Strong | `**wazne**` | Akcentowanie ostrzezen i decyzji |
 
-## Public entrypoints
+## Bloki kodu
 
-| Entrypoint | Key exports |
-| --- | --- |
-| `@motion-core/motion-gpu` | Framework-agnostic core runtime primitives (`defineMaterial`, `createFrameRegistry`, `createMotionGPURuntimeLoop`, `createCurrentWritable`, passes, texture loader, error normalization) |
-| `@motion-core/motion-gpu/advanced` | Core runtime plus scheduler helper utilities (`applySchedulerPreset`, `captureSchedulerDebugSnapshot`) |
-| `@motion-core/motion-gpu/svelte` | Svelte adapter runtime (`FragCanvas`, `useMotionGPU`, `useFrame`, `useTexture`, passes, material helpers) |
-| `@motion-core/motion-gpu/svelte/advanced` | Svelte adapter runtime plus user context APIs and scheduler helpers |
+```bash
+bun run --cwd apps/web dev
+```
 
-The export contract is verified in `src/tests/public-api.test.ts`.
+```typescript
+export const docsExample = {
+	component: 'MarkdownLayout',
+	target: '/docs/mdsvex-recipes',
+	ready: true
+};
+```
 
-## Runtime mental model
+# Przyklad H1 wewnatrz tresci
 
-Understanding the frame-by-frame flow is the single most useful thing you can learn about MotionGPU:
-
-1. You create an **immutable material** with `defineMaterial({ fragment, uniforms, textures, ... })`.
-2. `FragCanvas` **resolves** that material and derives a **pipeline signature** (a deterministic string from the compiled shader, uniform layout, and texture bindings).
-3. If the signature changes, the WebGPU **renderer is rebuilt** from scratch. If it stays the same, only uniform buffers and texture bindings are updated — no recompilation.
-4. Every animation frame:
-   - **Scheduler tasks** run in topological order (your `useFrame` callbacks).
-   - Runtime **uniforms and textures** are merged with material defaults.
-   - The **base fullscreen pass** renders your fragment shader.
-   - Optional **post-process passes** execute through the render graph.
-   - The **final result** is presented to the canvas.
-
-## Hard contracts
-
-These are enforced at runtime and will throw immediately if violated:
-
-| Contract | Enforced by |
-| --- | --- |
-| Fragment function must be `fn frag(uv: vec2f) -> vec4f` | `defineMaterial` validation |
-| `ShaderPass` fragment must define `fn shade(inputColor: vec4f, uv: vec2f) -> vec4f` | `ShaderPass` constructor |
-| Uniform / texture / define / include keys must be WGSL-safe identifiers (`[A-Za-z_][A-Za-z0-9_]*`) | Validators in `uniforms.ts`, `textures.ts`, `material-preprocess.ts` |
-| `renderMode` API contract is `'always'`, `'on-demand'`, or `'manual'` | Scheduler types/runtime |
-| `maxDelta > 0` and `profilingWindow > 0` | Scheduler assertions |
-| Render target `scale`, `width`, `height` must be finite and `> 0` | Render-target resolver |
-| Pass slots must reference valid surfaces (`canvas` output-only, named slots must exist in `renderTargets`) | Render graph planner |
-
-## Defaults worth knowing
-
-| Setting | Default value |
-| --- | --- |
-| `FragCanvas.clearColor` | `[0, 0, 0, 1]` (opaque black) |
-| `FragCanvas.outputColorSpace` | `'srgb'` |
-| `FragCanvas.renderMode` | `'always'` |
-| `FragCanvas.autoRender` | `true` |
-| `FragCanvas.maxDelta` | `0.1` (seconds) |
-| `FragCanvas.dpr` | `window.devicePixelRatio` (or `1` during SSR) |
-| Texture filter | `'linear'` |
-| Texture address mode | `'clamp-to-edge'` |
-| Texture update mode | Source-dependent: `HTMLVideoElement` → `perFrame`, everything else → `once` |
-| Texture `flipY` | `true` |
-| Texture `generateMipmaps` | `false` |
-
-## Scope and boundaries
-
-- This package targets **fullscreen fragment workflows** — it is not a general-purpose scene graph or 3D engine.
-- Root entrypoints (`@motion-core/motion-gpu`, `/advanced`) are framework-agnostic core APIs.
-- Framework runtimes must be consumed via adapter entrypoints (`@motion-core/motion-gpu/svelte`, future `/react`, `/vue`).
-- The Svelte runtime works without its advanced entrypoint; `@motion-core/motion-gpu/svelte/advanced` adds namespaced user state and extended scheduler ergonomics.
-- All documentation references behaviors currently implemented in the repository, including edge cases verified by the test suite.
+Ten naglowek jest celowy: demonstruje styl komponentu `H1.svelte` bez ruszania layoutu strony.

@@ -3,22 +3,16 @@ import type { DocItem } from '$lib/types/doc';
 
 export const docsNavigation: DocItem[] = [
 	{
-		slug: 'getting-started',
-		name: 'Getting Started',
+		slug: 'mockups',
+		name: 'Mockups',
 		items: [
 			{
 				slug: '',
-				name: 'Overview'
-			}
-		]
-	},
-	{
-		slug: 'shaders-textures',
-		name: 'Shaders & Textures',
-		items: [
+				name: 'Komponenty mdsvex'
+			},
 			{
-				slug: 'writing-shaders',
-				name: 'Writing Shaders'
+				slug: 'mdsvex-recipes',
+				name: 'Przepisy komponentow mdsvex'
 			}
 		]
 	}
@@ -27,12 +21,12 @@ export const docsNavigation: DocItem[] = [
 export const docsManifest: DocItem[] = [
 	{
 		slug: '',
-		name: 'Overview',
-		category: 'Getting Started'
+		name: 'Komponenty mdsvex',
+		category: 'Mockups'
 	},
 	{
-		slug: 'writing-shaders',
-		name: 'Writing Shaders',
-		category: 'Shaders & Textures'
+		slug: 'mdsvex-recipes',
+		name: 'Przepisy komponentow mdsvex',
+		category: 'Mockups'
 	}
 ];

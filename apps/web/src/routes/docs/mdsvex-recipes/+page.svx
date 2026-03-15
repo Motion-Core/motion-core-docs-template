@@ -1,0 +1,76 @@
+---
+title: Przepisy komponentow mdsvex
+description: Druga strona mockup pokazujaca komponenty Steps i InstallationTabs w realnym scenariuszu.
+category: Mockups
+order: 20
+---
+
+<script lang="ts">
+	import InstallationTabs from '$lib/components/docs/InstallationTabs.svelte';
+</script>
+
+Ta podstrona pokazuje komponenty, ktore zwykle laczysz z trescia instruktazowa: instalacje, kroki wdrozenia i bloki kodu. Zamiast sztucznego opisu jest gotowy szkielet strony typu "quick start".
+
+## Instalacja
+
+<InstallationTabs pkg="@motion-core/motion-gpu" />
+
+## Scenariusz: od zera do pierwszego widoku
+
+<Steps>
+	<Step title="Dodaj zaleznosci">
+		W zespole utrzymujemy jedna komende instalacji na dokumentacje. Jezeli opisujesz dodatkowe pluginy, dopisz je przez `args` w komponencie instalatora.
+
+		```bash
+		bun add @motion-core/motion-gpu @motion-core/motion-gpu-svelte
+		```
+	</Step>
+
+	<Step title="Skonfiguruj dane wejsciowe">
+		Na etapie mockupu warto pokazac prosty kontrakt danych i zachowac nazwy takie, jakie faktycznie wystepuja w API.
+
+		```json
+		{
+			"renderMode": "on-demand",
+			"dpr": 2,
+			"profiling": false
+		}
+		```
+	</Step>
+
+	<Step title="Dodaj minimalny fragment kodu">
+		Ponizej masz male, ale realistyczne przykladowe API, ktore mozna skopiowac do dema.
+
+		```typescript
+		import { defineMaterial } from '@motion-core/motion-gpu';
+
+		export const pulse = defineMaterial({
+			fragment: `
+				fn frag(uv: vec2f) -> vec4f {
+					let wave = 0.5 + 0.5 * sin(motiongpuFrame.time + uv.x * 8.0);
+					return vec4f(vec3f(wave), 1.0);
+				}
+			`
+		});
+		```
+	</Step>
+
+	<Step>
+		Ostatni krok bez tytulu pokazuje drugi wariant komponentu `Step`. Ten tryb jest wygodny, kiedy chcesz utrzymac bardzo krotkie checklisty.
+
+		```wgsl
+		fn frag(uv: vec2f) -> vec4f {
+			let center = vec2f(0.5, 0.5);
+			let d = distance(uv, center);
+			let glow = smoothstep(0.35, 0.1, d);
+			return vec4f(glow, glow * 0.6, 1.0, 1.0);
+		}
+		```
+	</Step>
+</Steps>
+
+## Dalsze rozwiniecie
+
+- Jezeli potrzebujesz opisac wiecej niz jeden flow, powiel sekcje `Steps`.
+- Jezeli strona jest bardzo techniczna, lacz kroki z tabela parametrow i linkami do API.
+- Powrot do [strony przegladowej](/docs).
