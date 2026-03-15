@@ -3,6 +3,7 @@
 	import { slide } from 'svelte/transition';
 	import { docsNavigation } from '$lib/config/navigation';
 	import { brandingConfig } from '$lib/config/branding';
+	import { docsUiConfig } from '$lib/config/docs-ui';
 	import { siteConfig } from '$lib/config/site';
 	import { cn } from '$lib/utils/cn';
 	import SearchTrigger from '../search/SearchTrigger.svelte';
@@ -49,7 +50,9 @@
 			<span class="text-xl font-medium text-foreground">{brandingConfig.name}</span>
 		</a>
 
-		<SearchTrigger />
+		{#if docsUiConfig.search.enabled}
+			<SearchTrigger />
+		{/if}
 	</div>
 
 	<ScrollArea
@@ -59,7 +62,7 @@
 	>
 		<nav class="flex flex-col space-y-1">
 			<h4 class="mb-2 ml-2 text-xs font-medium tracking-wider text-foreground/45 uppercase">
-				Docs
+				{docsUiConfig.sidebar.navigationLabel}
 			</h4>
 			{#each docsNavigation as doc (doc.slug)}
 				{#if doc.items?.length}
@@ -120,15 +123,19 @@
 	</ScrollArea>
 
 	<div class="flex items-center gap-1 p-4">
-		<ThemeToggle />
-		<a
-			class="group transition-scale inset-shadow relative inline-flex size-7 cursor-pointer items-center justify-center rounded-sm border border-border bg-background-inset text-foreground duration-150 ease-out active:scale-[0.95]"
-			href={githubUrl}
-			target="_blank"
-			rel="noreferrer"
-			aria-label="Open Motion GPU on GitHub"
-		>
-			<LogoGithub class="size-4 flex-none" />
-		</a>
+		{#if docsUiConfig.sidebar.showThemeToggle}
+			<ThemeToggle />
+		{/if}
+		{#if docsUiConfig.sidebar.showRepositoryLink}
+			<a
+				class="group transition-scale inset-shadow relative inline-flex size-7 cursor-pointer items-center justify-center rounded-sm border border-border bg-background-inset text-foreground duration-150 ease-out active:scale-[0.95]"
+				href={githubUrl}
+				target="_blank"
+				rel="noreferrer"
+				aria-label={docsUiConfig.sidebar.repositoryAriaLabel}
+			>
+				<LogoGithub class="size-4 flex-none" />
+			</a>
+		{/if}
 	</div>
 </aside>

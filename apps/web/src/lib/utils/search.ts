@@ -1,3 +1,5 @@
+import { docsUiConfig } from '$lib/config/docs-ui';
+
 type DocSection = {
 	title: string;
 	slug: string;
@@ -256,7 +258,7 @@ export function searchDocs(query: string): DocSection[] {
 			if (scoreDiff !== 0) return scoreDiff;
 			return a.parent.title.localeCompare(b.parent.title);
 		})
-		.slice(0, 20);
+		.slice(0, docsUiConfig.search.maxGroups);
 
 	const flatResults: DocSection[] = [];
 
@@ -265,7 +267,7 @@ export function searchDocs(query: string): DocSection[] {
 
 		group.children.sort((a, b) => b.score - a.score);
 
-		const topChildren = group.children.slice(0, 5);
+		const topChildren = group.children.slice(0, docsUiConfig.search.maxChildrenPerGroup);
 
 		flatResults.push(...topChildren);
 	}

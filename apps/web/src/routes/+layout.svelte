@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import CommandPalette from '$lib/components/docs/search/CommandPalette.svelte';
 	import { siteConfig } from '$lib/config/site';
+	import { docsUiConfig } from '$lib/config/docs-ui';
 
 	const { children } = $props();
 
@@ -88,5 +89,7 @@
 	{/if}
 </svelte:head>
 
-<CommandPalette />
+{#if docsUiConfig.search.enabled}
+	<CommandPalette />
+{/if}
 {@render children()}

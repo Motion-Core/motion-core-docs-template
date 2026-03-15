@@ -13,6 +13,7 @@
 	import DocShareActions from '$lib/components/docs/DocShareActions.svelte';
 	import MobileDocShareActions from '$lib/components/docs/MobileDocShareActions.svelte';
 	import { siteConfig } from '$lib/config/site';
+	import { docsUiConfig, resolveRepositoryDocUrl, resolveTocSelector } from '$lib/config/docs-ui';
 	import { docsManifest, getDocHref } from '$lib/docs/manifest';
 
 	const props = $props<{ data: LayoutData; children?: Snippet }>();
@@ -103,12 +104,12 @@
 		metadata ? `/apps/web/src/routes${metadata.href}/+page.svx` : null
 	);
 	const githubUrl = $derived(
-		repoRelativePath ? `${siteConfig.links.github}/blob/master${repoRelativePath}` : null
+		repoRelativePath ? resolveRepositoryDocUrl(siteConfig.links.github, repoRelativePath) : null
 	);
+	const showDocActions = $derived(docsUiConfig.docActions.enabled && Boolean(metadata));
+	const showToc = $derived(docsUiConfig.toc.enabled);
 
-	const tocSelector = $derived(
-		docSlug?.startsWith('changelog/') ? '[data-doc-content] h2' : undefined
-	);
+	const tocSelector = $derived(resolveTocSelector(docSlug));
 
 	const scrollContainerId = 'docs-content-container';
 	const scrollPositions = new SvelteMap<string, number>();
@@ -234,7 +235,7 @@
 								</p>
 							{/if}
 
-							{#if metadata && rawPath && rawUrl && githubUrl}
+							{#if showDocActions}
 								<MobileDocShareActions {rawPath} {rawUrl} {githubUrl} />
 							{/if}
 						</div>
@@ -252,10 +253,17 @@
 
 		<aside class="hidden min-w-0 xl:block xl:py-8 xl:pr-4 xl:pl-4">
 			<div class="sticky top-8 flex h-full max-h-[calc(100dvh-4rem)] min-h-0 flex-col">
-				<div class="min-h-0 flex-1">
-					<TableOfContents selector={tocSelector} />
-				</div>
-				{#if metadata && rawPath && rawUrl && githubUrl}
+				{#if showToc}
+					<div class="min-h-0 flex-1">
+						<TableOfContents
+							selector={tocSelector}
+							title={docsUiConfig.toc.title}
+							emptyLabel={docsUiConfig.toc.emptyLabel}
+							minViewportWidth={docsUiConfig.toc.minViewportWidth}
+						/>
+					</div>
+				{/if}
+				{#if showDocActions}
 					<DocShareActions {rawPath} {rawUrl} {githubUrl} />
 				{/if}
 			</div>

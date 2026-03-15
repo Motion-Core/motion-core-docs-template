@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { searchState } from '$lib/stores/search.svelte';
+	import { docsUiConfig } from '$lib/config/docs-ui';
 	import { searchDocs } from '$lib/utils/search';
 	import { fade, scale } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
@@ -18,7 +19,14 @@
 	let contentHeight = $state(0);
 
 	function handleGlobalKeydown(e: KeyboardEvent) {
-		if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+		const hotkey = docsUiConfig.search.hotkey;
+		if (!hotkey.enabled || !docsUiConfig.search.enabled) {
+			return;
+		}
+
+		const matchesModifier = hotkey.metaOrCtrl ? e.metaKey || e.ctrlKey : true;
+		const matchesKey = e.key.toLowerCase() === hotkey.key.toLowerCase();
+		if (matchesModifier && matchesKey) {
 			e.preventDefault();
 			searchState.toggle();
 		}
@@ -32,6 +40,7 @@
 	});
 
 	$effect(() => {
+		if (!docsUiConfig.search.enabled) return;
 		if (searchState.isOpen && inputRef) {
 			inputRef.focus();
 		}
@@ -74,6 +83,7 @@
 	}
 
 	$effect(() => {
+		if (!docsUiConfig.search.enabled) return;
 		if (searchState.isOpen) {
 			window.addEventListener('keydown', handleKeydown);
 			return () => window.removeEventListener('keydown', handleKeydown);
@@ -104,7 +114,7 @@
 	}
 </script>
 
-{#if searchState.isOpen}
+{#if docsUiConfig.search.enabled && searchState.isOpen}
 	<div
 		class="fixed inset-0 z-60 bg-background-inset/80 backdrop-blur-sm"
 		transition:fade={{ duration: 150 }}
@@ -139,8 +149,8 @@
 					bind:this={inputRef}
 					bind:value={query}
 					class="command-palette-input flex h-12 w-full bg-transparent text-base text-foreground placeholder:text-foreground/45 focus:outline-none focus-visible:border-none! focus-visible:ring-0! focus-visible:ring-offset-0! focus-visible:outline-none!"
-					placeholder="Search documentation..."
-					aria-label="Search documentation"
+					placeholder={docsUiConfig.search.dialogPlaceholder}
+					aria-label={docsUiConfig.search.dialogPlaceholder}
 				/>
 				<kbd
 					class="pointer-events-none inset-shadow relative hidden h-5 items-center gap-1 rounded-xs border border-border bg-background-inset px-1.5 font-mono text-[10px] font-medium text-foreground/45 select-none sm:flex"
@@ -214,7 +224,9 @@
 							{/each}
 						</ScrollArea>
 					{:else if query}
-						<div class="py-6 text-center text-sm text-foreground/45">No results found.</div>
+						<div class="py-6 text-center text-sm text-foreground/45">
+							{docsUiConfig.search.noResultsLabel}
+						</div>
 					{/if}
 				</div>
 			</div>
@@ -226,7 +238,9 @@
 				>
 					<Return class="size-3" />
 				</kbd>
-				<span class="text-xs font-medium text-foreground/45"> Go to page </span>
+				<span class="text-xs font-medium text-foreground/45">
+					{docsUiConfig.search.submitHintLabel}
+				</span>
 			</div>
 		</div>
 	</div>
