@@ -125,6 +125,11 @@ export const docsUiConfig: DocsUiConfig = {
 		assistantPromptTemplate:
 			"I'm currently viewing the documentation at {url}. Please assist me in learning how to work with it. I may need clarification on concepts, sample code demonstrations, or troubleshooting guidance related to this documentation.",
 		assistants: {
+			chatgpt: {
+				enabled: true,
+				label: 'Open in ChatGPT',
+				hrefTemplate: 'https://chatgpt.com/?hints=search&prompt={prompt}'
+			},
 			claude: {
 				enabled: true,
 				label: 'Open in Claude',

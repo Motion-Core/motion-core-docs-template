@@ -1,7 +1,29 @@
 import type { DocItem } from '../types/doc';
-import { docsManifest as generatedDocsManifest } from '$lib/generated/docs-manifest';
+import { docsNavigation } from '$lib/config/navigation';
 
-export const docsManifest: DocItem[] = generatedDocsManifest;
+const flattenNavigationToManifest = (items: DocItem[], parentCategory?: string): DocItem[] => {
+	const manifest: DocItem[] = [];
+
+	for (const item of items) {
+		const effectiveCategory = item.category ?? parentCategory;
+
+		if (item.items?.length) {
+			const childCategory = effectiveCategory ?? item.name;
+			manifest.push(...flattenNavigationToManifest(item.items, childCategory));
+			continue;
+		}
+
+		manifest.push({
+			slug: item.slug,
+			name: item.name,
+			category: effectiveCategory
+		});
+	}
+
+	return manifest;
+};
+
+export const docsManifest: DocItem[] = flattenNavigationToManifest(docsNavigation);
 
 export const getDocBySlug = (slug: string) => {
 	return docsManifest.find((doc) => doc.slug === slug);
