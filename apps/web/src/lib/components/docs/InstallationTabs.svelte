@@ -71,7 +71,9 @@
 						onclick={() => (packageManagerStore.active = pm)}
 						class={cn(
 							'relative px-4 py-2.5 text-sm font-medium tracking-normal transition-colors outline-none select-none',
-							packageManagerStore.active === pm ? 'text-foreground' : 'text-foreground-muted'
+							packageManagerStore.active === pm
+								? 'text-foreground'
+								: 'cursor-pointer text-foreground-muted'
 						)}
 					>
 						{pm}
