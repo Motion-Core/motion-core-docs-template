@@ -220,7 +220,7 @@
 		>
 			<ScrollArea
 				id="docs-content-container"
-				class="mx-auto h-full w-full p-2 lg:max-h-[calc(100dvh-2rem)]"
+				class="mx-auto h-full w-full lg:max-h-[calc(100dvh-2rem)]"
 				viewportClass="rounded-lg overscroll-none flex flex-col gap-8 px-4 py-8 lg:px-8"
 			>
 				<section class="min-w-0 flex-1 space-y-8">
