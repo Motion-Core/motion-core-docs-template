@@ -97,7 +97,7 @@ export const GET: RequestHandler = async ({ params, url }) => {
 	const category = getDocBySlug(metadata.slug)?.category ?? 'Documentation';
 	const title = clampText(metadata.title, MAX_TITLE_LENGTH);
 	const description = clampText(
-		metadata.description ?? 'Documentation for Motion GPU.',
+		metadata.description ?? 'Documentation for Motion Core.',
 		MAX_DESCRIPTION_LENGTH
 	);
 	const pageUrl = new URL(`/docs/${metadata.slug}`, canonicalOrigin).href;
