@@ -8,6 +8,10 @@ order: 20
 
 <script lang="ts">
 	import { InstallationTabs, Step, Steps } from '$lib';
+	import { ComponentPreview } from '$lib';
+	import demoSource from "../../../lib/components/ui/ThemeToggle.svelte?raw";
+	import ThemeToggle from "../../../lib/components/ui/ThemeToggle.svelte";
+	import demoSource2 from "../../../lib/stores/theme.svelte.ts?raw";
 </script>
 
 This page covers the remaining structural and utility components used in mdsvex content.
@@ -39,3 +43,14 @@ This page covers the remaining structural and utility components used in mdsvex 
 		Sample row without a `title` prop.
 	</Step>
 </Steps>
+
+## Component Preview
+
+<ComponentPreview
+	sources={[
+		{ name: "ThemeToggle.svelte", code: demoSource, language: "svelte" },
+		{ name: "theme.svelte.ts", code: demoSource2, language: "typescript" },
+	]}
+>
+	<ThemeToggle />
+</ComponentPreview>
