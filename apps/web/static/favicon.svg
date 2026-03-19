@@ -1,12 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="93" height="93" viewBox="0 0 93 93" fill="none"><g clip-path="url(#clip0_4_2)">
-<path d="M0 44H30.3431C33.9652 44 37.4388 42.5612 40 40C42.5612 37.4388 44 33.9652 44 30.3431V0H36V30.3438L14.5439 8.8877L8.8877 14.5439L30.3438 36H0V44Z" fill="#FF6900"></path>
-<path d="M93 49H62.6569C59.0348 49 55.5612 50.4388 53 53C50.4388 55.5612 49 59.0348 49 62.6569V93H57V62.6562L78.4561 84.1123L84.1123 78.4561L62.6563 57H93V49Z" fill="#FF6900"></path>
-<path d="M49 0V30.3431C49 33.9652 50.4388 37.4388 53 40C55.5612 42.5612 59.0348 44 62.6569 44H93V36H62.6563L84.1123 14.5439L78.4561 8.8877L57 30.3438V0H49Z" fill="#FF6900"></path>
-<path d="M44 93V62.6569C44 59.0348 42.5612 55.5612 40 53C37.4388 50.4388 33.9652 49 30.3431 49H0V57H30.3438L8.8877 78.4561L14.5439 84.1123L36 62.6562V93H44Z" fill="#FF6900"></path>
-</g><defs>
-<clipPath id="clip0_4_2">
-<rect width="93" height="93" fill="white"></rect>
-</clipPath>
-</defs><style>@media (prefers-color-scheme: light) { :root { filter: none; } }
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="360" height="138"><svg width="360" height="138" viewBox="0 0 360 138" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M41.6104 41.5364L0 83.0733V110.536V138H27.784H55.5685L83.0852 110.537L110.602 83.0744V110.537V138H138.391H166.178L193.554 110.671C208.611 95.6394 221.114 83.3412 221.338 83.3412C221.563 83.3412 221.747 95.6394 221.747 110.671V138H249.263H276.78L318.39 96.4636L360 54.9267V27.4636V0H332.216H304.432L276.915 27.4625L249.398 54.9256V27.4625V0H221.609H193.821L166.446 27.3294C151.389 42.3606 138.886 54.6588 138.662 54.6588C138.437 54.6588 138.253 42.3606 138.253 27.3294V0H110.737H83.2202L41.6104 41.5364Z" fill="#FF6900" fill-opacity="0.8"></path>
+</svg><style>@media (prefers-color-scheme: light) { :root { filter: none; } }
 @media (prefers-color-scheme: dark) { :root { filter: none; } }
 </style></svg>
