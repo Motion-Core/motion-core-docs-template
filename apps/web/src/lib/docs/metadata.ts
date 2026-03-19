@@ -1,3 +1,5 @@
+import { parseDocSource } from './frontmatter';
+
 type DocMetadata = {
 	href: `/docs/${string}`;
 	slug: string;
@@ -5,29 +7,27 @@ type DocMetadata = {
 	description?: string;
 };
 
-type DocModule = {
-	metadata?: {
-		title?: string;
-		name?: string;
-		description?: string;
-	};
-};
-
-const docModules = import.meta.glob<DocModule>('/src/routes/docs/**/+page.svx', {
-	eager: true
+const docModules = import.meta.glob<string>('/src/routes/docs/**/+page.svx', {
+	query: '?raw',
+	eager: true,
+	import: 'default'
 });
 
 export function getDocMetadata(path: string): DocMetadata | null {
 	const normalizedPath = normalizePath(path);
 	const filePath = `/src/routes${normalizedPath}/+page.svx`;
-	const module = docModules[filePath];
+	const rawSource = docModules[filePath];
+	if (!rawSource) {
+		return null;
+	}
 
-	if (!module || !module.metadata) {
+	const { metadata } = parseDocSource(rawSource);
+	const { title, name, description } = metadata;
+	if (!title && !name && !description) {
 		return null;
 	}
 
 	const slug = normalizedPath.replace(/^\/docs(?:\/|$)/, '');
-	const { title, name, description } = module.metadata;
 
 	return {
 		href: normalizedPath as `/docs/${string}`,

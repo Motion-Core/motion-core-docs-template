@@ -1,4 +1,5 @@
 import { docsUiConfig } from '$lib/config/docs-ui';
+import { parseDocSource } from '$lib/docs/frontmatter';
 
 type DocSection = {
 	title: string;
@@ -12,23 +13,10 @@ type DocSection = {
 	snippet?: string;
 };
 
-type DocModule = {
-	default: string;
-	metadata?: {
-		name?: string;
-		title?: string;
-		description?: string;
-	};
-};
-
 const docModules = import.meta.glob<string>('/src/routes/docs/**/*.svx', {
 	query: '?raw',
 	eager: true,
 	import: 'default'
-});
-
-const metaModules = import.meta.glob<DocModule>('/src/routes/docs/**/*.svx', {
-	eager: true
 });
 
 const slugify = (value: string) =>
@@ -78,7 +66,7 @@ function parseDocs() {
 
 	for (const path in docModules) {
 		const rawContent = docModules[path];
-		const meta = metaModules[path]?.metadata ?? {};
+		const { metadata: meta, body: contentBody } = parseDocSource(rawContent);
 
 		const relativePath = path
 			.replace(/^\/src\/routes\/docs/, '')
@@ -107,8 +95,6 @@ function parseDocs() {
 				score: 0
 			});
 		}
-
-		const contentBody = rawContent.replace(/^---\n[\s\S]+?\n---\n/, '');
 
 		const lines = contentBody.split('\n');
 		let currentHeading: string | undefined = undefined;
