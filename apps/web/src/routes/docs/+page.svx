@@ -10,19 +10,11 @@ This page is a compact reference for markdown-to-component mappings used in this
 
 # H1 sample
 
-Single-line sample for the `h1` mapping.
-
 ## H2 sample
-
-A standard paragraph maps to the paragraph component.
 
 ### H3 sample
 
-Short secondary heading sample.
-
 #### H4 sample
-
-Short tertiary heading sample.
 
 > Blockquote sample: neutral note content for policies, caveats, or status notes.
 
