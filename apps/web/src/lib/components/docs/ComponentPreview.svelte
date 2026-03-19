@@ -98,7 +98,7 @@
 >
 	<div class="flex h-full flex-col rounded-md">
 		<div
-			class="relative flex min-h-96 flex-1 flex-col items-center justify-center rounded-md border border-border bg-background shadow-md"
+			class="card relative flex min-h-96 flex-1 flex-col items-center justify-center rounded-md bg-background"
 		>
 			<div
 				class="group/preview relative flex h-full w-full flex-1 flex-col overflow-hidden rounded-md bg-background"
@@ -117,7 +117,7 @@
 			</div>
 		</div>
 		<div
-			class="mt-1 flex flex-1 flex-col overflow-hidden rounded-md rounded-b-md border border-border bg-background shadow-md"
+			class="card mt-2 flex flex-1 flex-col overflow-hidden rounded-md rounded-b-md bg-background"
 		>
 			{#if tabs.length}
 				<div class="flex items-center border-b border-border bg-background text-sm">

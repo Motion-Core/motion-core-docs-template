@@ -20,7 +20,7 @@
 				class="inset-shadow absolute -left-5 flex size-10 rounded-full border border-border bg-background-inset p-1"
 			>
 				<span
-					class="flex h-full w-full items-center justify-center rounded-full border border-border bg-background text-xs font-medium text-foreground shadow-md [counter-increment:step] before:content-[counter(step)]"
+					class="card flex h-full w-full items-center justify-center rounded-full bg-background text-xs font-medium text-foreground [counter-increment:step] before:content-[counter(step)]"
 				>
 				</span>
 			</div>
@@ -33,7 +33,7 @@
 			class="inset-shadow absolute -left-5 flex size-10 rounded-full border border-border bg-background-inset p-1"
 		>
 			<span
-				class="flex h-full w-full items-center justify-center rounded-full border border-border bg-background text-xs font-medium text-foreground shadow-md [counter-increment:step] before:content-[counter(step)]"
+				class="card flex h-full w-full items-center justify-center rounded-full bg-background text-xs font-medium text-foreground [counter-increment:step] before:content-[counter(step)]"
 			>
 			</span>
 		</div>

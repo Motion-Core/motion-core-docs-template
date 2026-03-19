@@ -35,7 +35,7 @@
 			<div class="inset-shadow rounded-md border border-border bg-background-inset p-1">
 				<a
 					href="/docs"
-					class="inline-flex items-center justify-center rounded-sm border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground no-underline shadow-md transition-[background-color] duration-150 ease-out hover:bg-background-muted"
+					class="card inline-flex items-center justify-center rounded-sm bg-background px-4 py-2.5 text-sm font-medium text-foreground no-underline transition-[background-color] duration-150 ease-out hover:bg-background-muted"
 				>
 					Open Docs
 				</a>
