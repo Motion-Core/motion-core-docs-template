@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 @import '@fontsource/inter/latin.css';
 
+@variant dark (&:where(.dark, .dark *));
+
 html {
 	scroll-behavior: smooth;
 }
@@ -10,16 +12,17 @@ html {
 
 	--radius-base: 0.275rem;
 
-	--color-background-inset: oklch(0.9764 0.0013 var(--base-hue));
-	--color-background: oklch(1 0 0);
-	--color-background-muted: oklch(0.956 0.002 var(--base-hue));
-	--color-white-fixed: oklch(1 0 0);
-	--color-black-fixed: oklch(0.183 0.006 var(--base-hue));
-	--color-foreground: oklch(0.1881 0.006 var(--base-hue));
-	--color-foreground-muted: oklch(0.5493 0.0081 var(--base-hue));
-	--color-accent: oklch(0.6996 0.201959 44.4414);
-	--color-accent-secondary: oklch(0.5096 0.151959 44.4414);
+	--background-inset: oklch(0.9764 0.0013 var(--base-hue));
+	--background: oklch(1 0 0);
+	--background-muted: oklch(0.956 0.002 var(--base-hue));
+	--white-fixed: oklch(1 0 0);
+	--black-fixed: oklch(0.183 0.006 var(--base-hue));
+	--foreground: oklch(0.1881 0.006 var(--base-hue));
+	--foreground-muted: oklch(0.5493 0.0081 var(--base-hue));
+	--accent: oklch(0.6996 0.201959 44.4414);
+	--accent-secondary: oklch(0.5096 0.151959 44.4414);
 	--border: oklch(0.4224 0.0013 var(--base-hue) / 0.1);
+	--highlight: oklch(0.4224 0.0013 var(--base-hue));
 
 	--shadow-xs: 0px 1px 1px -0.5px rgba(0, 0, 0, 0.06);
 	--shadow-sm: 0px 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0px 3px 3px -1.5px rgba(0, 0, 0, 0.06);
@@ -40,14 +43,15 @@ html {
 }
 
 .dark {
-	--color-background-inset: oklch(0.1822 0.0044 var(--base-hue));
-	--color-background: oklch(0.2178 0.0056 var(--base-hue));
-	--color-background-muted: oklch(0.261 0.007 var(--base-hue));
-	--color-foreground: oklch(1 0 0);
-	--color-foreground-muted: oklch(0.6699 0.0081 var(--base-hue));
-	--color-accent: oklch(0.6996 0.181959 44.4414);
-	--color-accent-secondary: oklch(0.5096 0.131959 44.4414);
-	--color-border: oklch(0.928 0.013 var(--base-hue) / 0.05);
+	--background-inset: oklch(0.1822 0.0044 var(--base-hue));
+	--background: oklch(0.2178 0.0056 var(--base-hue));
+	--background-muted: oklch(0.261 0.007 var(--base-hue));
+	--foreground: oklch(1 0 0);
+	--foreground-muted: oklch(0.6699 0.0081 var(--base-hue));
+	--accent: oklch(0.6996 0.181959 44.4414);
+	--accent-secondary: oklch(0.5096 0.131959 44.4414);
+	--border: oklch(0.928 0.013 var(--base-hue) / 0.05);
+	--highlight: oklch(0.928 0.013 var(--base-hue));
 }
 
 @theme {
@@ -124,18 +128,6 @@ html {
 	}
 }
 
-@utility inset-shadow {
-	position: relative;
-	isolation: isolate;
-	box-shadow:
-		var(--tw-ring-offset-shadow, 0 0 #0000),
-		var(--tw-ring-shadow, 0 0 #0000),
-		var(--tw-ring-shadow, 0 0 #0000),
-		inset 0px 1px 1px -0.5px rgba(0, 0, 0, 0.06),
-		inset 0px 3px 3px -1.5px rgba(0, 0, 0, 0.06),
-		inset 0px 6px 6px -3px rgba(0, 0, 0, 0.06);
-}
-
 @utility bg-dashed {
 	background-image: linear-gradient(
 		45deg,
@@ -150,12 +142,23 @@ html {
 	background-size: 0.25rem 0.25rem;
 }
 
+@utility inset-shadow {
+	position: relative;
+	isolation: isolate;
+	box-shadow:
+		inset 0px 1px 1px -0.5px rgba(0, 0, 0, 0.06),
+		inset 0px 3px 3px -1.5px rgba(0, 0, 0, 0.06),
+		inset 0px 6px 6px -3px rgba(0, 0, 0, 0.06),
+		inset 0 -1px rgba(255, 255, 255, 0.06),
+		inset 0 0 0 1px oklch(from var(--highlight) l c h / 10%);
+}
+
 @layer utilities {
 	.card {
 		box-shadow:
 			0 -1px rgba(255, 255, 255, 0.06),
 			0 4px 8px rgba(0, 0, 0, 0.05),
-			0 0 0 1px rgba(255, 255, 255, 0.1),
+			0 0 0 1px oklch(from var(--highlight) l c h / 10%),
 			0 1px 6px -4px #000;
 	}
 }

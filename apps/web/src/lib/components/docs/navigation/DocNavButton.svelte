@@ -20,7 +20,7 @@
 
 <div
 	class={cn(
-		'group inset-shadow rounded-lg border border-border bg-background-inset p-1',
+		'group inset-shadow rounded-lg bg-background-inset p-1.5',
 		align === 'right' && 'sm:text-right',
 		forceSecondColumn && 'sm:col-start-2'
 	)}

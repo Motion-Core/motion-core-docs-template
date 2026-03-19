@@ -93,7 +93,7 @@
 </script>
 
 <section
-	class={cn('inset-shadow relative w-full rounded-lg border border-border bg-background-inset p-1')}
+	class={cn('inset-shadow relative w-full rounded-lg bg-background-inset p-1.5')}
 	{...restProps}
 >
 	<div class="flex h-full flex-col rounded-md">

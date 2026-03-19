@@ -32,7 +32,7 @@
 			</h1>
 			<p class="text-lg font-medium text-foreground-muted">Documentation Template</p>
 
-			<div class="inset-shadow rounded-md border border-border bg-background-inset p-1">
+			<div class="inset-shadow rounded-md bg-background-inset p-1.5">
 				<a
 					href="/docs"
 					class="card inline-flex items-center justify-center rounded-sm bg-background px-4 py-2.5 text-sm font-medium text-foreground no-underline transition-[background-color] duration-150 ease-out hover:bg-background-muted"

@@ -191,7 +191,7 @@
 {#if hasActions}
 	<div class="relative z-20 mt-8 flex w-full gap-2 lg:hidden">
 		{#if canShowCopy}
-			<div class="inset-shadow w-full rounded-md border border-border bg-background-inset p-1">
+			<div class="inset-shadow w-full rounded-md bg-background-inset p-1.5">
 				<button
 					type="button"
 					onclick={handleCopy}
@@ -237,7 +237,7 @@
 		{/if}
 
 		{#if hasMenuActions}
-			<div class="inset-shadow relative rounded-md border border-border bg-background-inset p-1">
+			<div class="inset-shadow relative rounded-md bg-background-inset p-1.5">
 				<button
 					bind:this={triggerRef}
 					type="button"
