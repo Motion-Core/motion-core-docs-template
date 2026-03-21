@@ -15,6 +15,7 @@
 		viewportClass?: string;
 		viewportStyle?: string;
 		mode?: ScrollMode;
+		thumbTabbable?: boolean;
 	};
 
 	const MIN_THUMB_SIZE = 20;
@@ -28,7 +29,8 @@
 		style,
 		viewportClass,
 		viewportStyle,
-		mode = 'vertical'
+		mode = 'vertical',
+		thumbTabbable = true
 	}: Props = $props();
 	const viewportId = $derived(id ?? undefined);
 
@@ -297,15 +299,15 @@
 			onmouseleave={() => (isHoveringVerticalTrack = false)}
 			role="presentation"
 		>
-			<div
-				role="scrollbar"
-				aria-controls={viewportId}
-				aria-orientation="vertical"
-				aria-valuemin={0}
-				aria-valuemax={Math.max(0, viewport ? viewport.scrollHeight - viewport.clientHeight : 0)}
-				aria-valuenow={viewport?.scrollTop ?? 0}
-				tabindex="0"
-				class={cn(
+				<div
+					role="scrollbar"
+					aria-controls={viewportId}
+					aria-orientation="vertical"
+					aria-valuemin={0}
+					aria-valuemax={Math.max(0, viewport ? viewport.scrollHeight - viewport.clientHeight : 0)}
+					aria-valuenow={viewport?.scrollTop ?? 0}
+					tabindex={thumbTabbable ? 0 : -1}
+					class={cn(
 					'relative rounded-full bg-foreground/10 transition-colors duration-150 hover:bg-foreground/30 active:bg-foreground/50',
 					isDragging && dragAxis === 'vertical' && 'bg-foreground/50'
 				)}
@@ -330,15 +332,15 @@
 			onmouseleave={() => (isHoveringHorizontalTrack = false)}
 			role="presentation"
 		>
-			<div
-				role="scrollbar"
-				aria-controls={viewportId}
-				aria-orientation="horizontal"
-				aria-valuemin={0}
-				aria-valuemax={Math.max(0, viewport ? viewport.scrollWidth - viewport.clientWidth : 0)}
-				aria-valuenow={viewport?.scrollLeft ?? 0}
-				tabindex="0"
-				class={cn(
+				<div
+					role="scrollbar"
+					aria-controls={viewportId}
+					aria-orientation="horizontal"
+					aria-valuemin={0}
+					aria-valuemax={Math.max(0, viewport ? viewport.scrollWidth - viewport.clientWidth : 0)}
+					aria-valuenow={viewport?.scrollLeft ?? 0}
+					tabindex={thumbTabbable ? 0 : -1}
+					class={cn(
 					'relative h-full rounded-full bg-foreground/10 transition-colors duration-150 hover:bg-foreground/30 active:bg-foreground/50',
 					isDragging && dragAxis === 'horizontal' && 'bg-foreground/50'
 				)}
