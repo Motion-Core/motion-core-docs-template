@@ -179,19 +179,19 @@
 						aria-label="Source files"
 					>
 						{#each tabs as tab, index (tab.name)}
-							<button
-								type="button"
-								id={`${tabsInstanceId}-tab-${index}`}
-								role="tab"
-								aria-selected={index === activeTab}
-								aria-controls={panelId}
-								tabindex={index === activeTab ? 0 : -1}
-								class={cn(
-									'border-b-2 px-4 py-2.5 text-sm font-medium tracking-normal whitespace-nowrap transition-colors duration-150 ease-out',
-									index === activeTab
-										? 'border-accent text-foreground'
-										: 'border-transparent text-foreground-muted hover:text-foreground'
-								)}
+								<button
+									type="button"
+									id={`${tabsInstanceId}-tab-${index}`}
+									role="tab"
+									aria-selected={index === activeTab}
+									aria-controls={panelId}
+									tabindex={index === activeTab ? 0 : -1}
+									class={cn(
+										'border-b-2 px-4 py-2.5 text-sm font-medium tracking-normal whitespace-nowrap transition-colors duration-150 ease-out outline-none select-none',
+										index === activeTab
+											? 'border-accent text-foreground'
+											: 'border-transparent text-foreground-muted hover:text-foreground'
+									)}
 								onclick={() => setActiveTab(index)}
 								onkeydown={(event) => handleTabKeydown(event, index)}
 							>
@@ -206,14 +206,18 @@
 					</div>
 				</div>
 			{/if}
-			<div
-				id={panelId}
-				role="tabpanel"
-				tabindex="0"
-				aria-labelledby={activeTabId}
-				class="flex-1"
-			>
-				<ScrollArea id="component-preview" class="relative max-h-96">
+				<div
+					id={panelId}
+					role="tabpanel"
+					aria-labelledby={activeTabId}
+					class="flex-1"
+				>
+					<ScrollArea
+						id="component-preview"
+						class="relative max-h-96"
+						thumbTabbable={false}
+						viewportTabbable={false}
+					>
 					<div
 						class="p-4 text-sm *:mt-0 *:rounded-none *:border-0 *:bg-transparent *:p-0 *:inset-shadow-none"
 					>
