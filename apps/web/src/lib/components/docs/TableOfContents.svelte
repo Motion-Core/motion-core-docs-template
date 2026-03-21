@@ -494,7 +494,7 @@
 </script>
 
 {#if headings.length > 0}
-	<nav class="hidden lg:block">
+	<nav class="hidden lg:block" aria-label={title}>
 		<div
 			class="mb-2 flex items-center gap-2 text-xs font-medium tracking-wide text-foreground-muted/70 uppercase"
 		>

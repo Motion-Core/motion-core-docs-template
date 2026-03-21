@@ -211,9 +211,9 @@
 	<div
 		class="flex h-full w-full min-w-0 lg:grid lg:grid-cols-[22rem_minmax(0,1fr)] lg:pr-4 xl:grid-cols-[22rem_minmax(0,56rem)_18rem] xl:justify-center"
 	>
-		<aside class="hidden lg:block">
+		<div class="hidden lg:block">
 			<DocsSidebar />
-		</aside>
+		</div>
 
 		<div
 			class="inset-shadow relative mx-auto h-full w-full max-w-4xl min-w-0 overflow-hidden border border-border bg-background-inset pt-12 lg:my-4 lg:max-h-[calc(100dvh-2rem)] lg:overflow-visible lg:rounded-xl lg:pt-0"
@@ -260,7 +260,10 @@
 			</ScrollArea>
 		</div>
 
-		<aside class="hidden xl:block xl:w-full xl:py-8 xl:pr-4 xl:pl-4">
+		<aside
+			class="hidden xl:block xl:w-full xl:py-8 xl:pr-4 xl:pl-4"
+			aria-label="Table of contents and document actions"
+		>
 			<div class="sticky top-8 flex h-full max-h-[calc(100dvh-4rem)] min-h-0 flex-col">
 				{#if showToc}
 					<div class="min-h-0 flex-1">
