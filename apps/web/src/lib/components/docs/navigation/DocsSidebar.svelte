@@ -47,6 +47,7 @@
 				class="inline-flex shrink-0 items-center text-accent [&>svg]:size-6 [&>svg]:fill-current"
 				aria-hidden="true"
 			>
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 				{@html brandingConfig.logoRaw}
 			</span>
 			<span class="text-xl font-medium tracking-tight text-foreground">{brandingConfig.name}</span>
