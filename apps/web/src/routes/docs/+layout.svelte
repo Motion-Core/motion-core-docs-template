@@ -205,7 +205,18 @@
 	{/if}
 </svelte:head>
 
-<main class="relative h-dvh bg-background text-foreground">
+<a
+	href="#docs-main-content"
+	class="sr-only fixed top-3 left-3 z-100 bg-foreground px-4 py-2 text-sm text-background-inset focus:not-sr-only"
+>
+	Skip to main content
+</a>
+
+<main
+	id="docs-main-content"
+	tabindex="-1"
+	class="relative h-dvh bg-background text-foreground"
+>
 	<MobileSidebar />
 
 	<div
