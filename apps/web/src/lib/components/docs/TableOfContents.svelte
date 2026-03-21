@@ -46,7 +46,10 @@
 	let svgWidth = $state(40);
 	let indicatorRange = $state<IndicatorRange | null>(null);
 	let pendingIndicatorFrame: number | null = null;
-	let tocViewportActive = $state(false);
+	let viewportWidth = $state(0);
+	const tocViewportActive = $derived(viewportWidth >= minViewportWidth);
+	let collectTimer: ReturnType<typeof setTimeout> | null = null;
+	let collectCleanup: (() => void) | undefined;
 
 	const ACTIVE_OFFSET = 140;
 	const VISIBLE_BUFFER = 24;
@@ -80,6 +83,16 @@
 			window.cancelAnimationFrame(pendingIndicatorFrame);
 			pendingIndicatorFrame = null;
 		}
+	}
+
+	function clearCollectionWork() {
+		if (collectTimer) {
+			clearTimeout(collectTimer);
+			collectTimer = null;
+		}
+
+		collectCleanup?.();
+		collectCleanup = undefined;
 	}
 
 	function registerLink(node: HTMLElement, id?: string) {
@@ -439,62 +452,72 @@
 		return currentIndex >= min && currentIndex <= max;
 	}
 
-	$effect(() => {
-		if (typeof window === 'undefined') return;
-		const mediaQuery = window.matchMedia(`(min-width: ${minViewportWidth}px)`);
-		const sync = () => {
-			tocViewportActive = mediaQuery.matches;
+	function manageToc(_node: HTMLElement, deps: { path: string; active: boolean; selector: string }) {
+		let currentDeps = deps;
+
+		const run = () => {
+			clearCollectionWork();
+
+			if (!currentDeps.active) {
+				resetTocState();
+				return;
+			}
+
+			collectTimer = setTimeout(() => {
+				collectTimer = null;
+				collectCleanup = collectHeadings();
+			}, 50);
 		};
 
-		sync();
-		mediaQuery.addEventListener('change', sync);
+		run();
 
-		return () => {
-			mediaQuery.removeEventListener('change', sync);
+		return {
+			update(nextDeps: { path: string; active: boolean; selector: string }) {
+				currentDeps = nextDeps;
+				run();
+			},
+			destroy() {
+				clearCollectionWork();
+				resetTocState();
+			}
 		};
-	});
+	}
 
-	$effect(() => {
-		const path = currentPath;
-		const isActive = tocViewportActive;
-		void path;
-		void isActive;
+	function observeLinksWrapper(node: HTMLOListElement, active: boolean) {
+		let observer: ResizeObserver | null = null;
 
-		if (!isActive) {
-			resetTocState();
-			return;
-		}
+		const sync = (enabled: boolean) => {
+			observer?.disconnect();
+			observer = null;
 
-		let cleanup: (() => void) | undefined;
+			if (typeof window === 'undefined' || !enabled) return;
 
-		const timer = setTimeout(() => {
-			cleanup = collectHeadings();
-		}, 50);
+			observer = new ResizeObserver(() => {
+				updateLayout();
+				updateIndicator();
+			});
 
-		return () => {
-			clearTimeout(timer);
-			cleanup?.();
+			observer.observe(node);
 		};
-	});
 
-	$effect(() => {
-		if (typeof window === 'undefined' || !linksWrapper || !tocViewportActive) return;
+		sync(active);
 
-		const observer = new ResizeObserver(() => {
-			updateLayout();
-			updateIndicator();
-		});
-
-		observer.observe(linksWrapper);
-
-		return () => {
-			observer.disconnect();
+		return {
+			update(nextActive: boolean) {
+				sync(nextActive);
+			},
+			destroy() {
+				observer?.disconnect();
+			}
 		};
-	});
+	}
 </script>
 
-{#if headings.length > 0}
-	<nav class="hidden lg:block" aria-label={title}>
+<svelte:window bind:innerWidth={viewportWidth} />
+
+<div class="contents" use:manageToc={{ path: currentPath, active: tocViewportActive, selector }}>
+	{#if headings.length > 0}
+		<nav class="hidden lg:block" aria-label={title}>
 		<div
 			class="mb-2 flex items-center gap-2 text-xs font-medium tracking-wide text-foreground-muted/70 uppercase"
 		>
@@ -528,7 +551,11 @@
 				{/if}
 			</div>
 
-			<ol class="relative flex flex-col pl-3 text-sm" bind:this={linksWrapper}>
+			<ol
+				class="relative flex flex-col pl-3 text-sm"
+				bind:this={linksWrapper}
+				use:observeLinksWrapper={tocViewportActive}
+			>
 				{#each headings as heading (heading.id)}
 					<li
 						class="transition-colors duration-150 ease-out"
@@ -550,7 +577,8 @@
 				{/each}
 			</ol>
 		</div>
-	</nav>
-{:else}
-	<div class="hidden text-sm tracking-normal text-foreground-muted/70 lg:block">{emptyLabel}</div>
-{/if}
+		</nav>
+	{:else}
+		<div class="hidden text-sm tracking-normal text-foreground-muted/70 lg:block">{emptyLabel}</div>
+	{/if}
+</div>
