@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import { backOut } from 'svelte/easing';
+	import { onDestroy } from 'svelte';
 	import { docsUiConfig, resolveDocAssistantUrls } from '$lib/config/docs-ui';
 	import Checkmark from 'carbon-icons-svelte/lib/Checkmark.svelte';
 	import LogoGithub from 'carbon-icons-svelte/lib/LogoGithub.svelte';
@@ -73,12 +74,10 @@
 		}
 	}
 
-	$effect(() => {
-		return () => {
-			if (resetTimer) {
-				clearTimeout(resetTimer);
-			}
-		};
+	onDestroy(() => {
+		if (resetTimer) {
+			clearTimeout(resetTimer);
+		}
 	});
 </script>
 
