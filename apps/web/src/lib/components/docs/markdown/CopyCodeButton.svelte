@@ -13,9 +13,9 @@
 	const className = $derived((props as Props).class ?? '');
 	const code = $derived((props as Props).code ?? '');
 
-	let copied = $state(false);
+	let copiedCode = $state<string | null>(null);
+	const copied = $derived(copiedCode !== null && copiedCode === code);
 	let timeoutId: number | null = null;
-	let lastCode: string | null = null;
 
 	async function handleCopy(value: string) {
 		if (!value || typeof navigator === 'undefined' || !navigator.clipboard) {
@@ -24,12 +24,12 @@
 
 		try {
 			await navigator.clipboard.writeText(value);
-			copied = true;
+			copiedCode = value;
 			if (timeoutId) {
 				window.clearTimeout(timeoutId);
 			}
 			timeoutId = window.setTimeout(() => {
-				copied = false;
+				copiedCode = null;
 				timeoutId = null;
 			}, 2000);
 		} catch (error) {
@@ -38,19 +38,6 @@
 	}
 
 	onDestroy(() => {
-		if (timeoutId) {
-			window.clearTimeout(timeoutId);
-			timeoutId = null;
-		}
-	});
-
-	$effect(() => {
-		if (lastCode === code) {
-			return;
-		}
-
-		lastCode = code;
-		copied = false;
 		if (timeoutId) {
 			window.clearTimeout(timeoutId);
 			timeoutId = null;
