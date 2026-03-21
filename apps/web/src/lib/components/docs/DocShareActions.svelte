@@ -15,7 +15,6 @@
 
 	let { rawPath, rawUrl, githubUrl }: Props = $props();
 
-	let buttonRef = $state<HTMLButtonElement | null>(null);
 	const opensInNewTabLabel = '(opens in a new tab)';
 
 	type CopyState = 'idle' | 'copying' | 'success' | 'error';
@@ -86,7 +85,6 @@
 		<div class="flex flex-col gap-1 text-sm">
 			{#if canShowCopy}
 				<button
-					bind:this={buttonRef}
 					type="button"
 					onclick={handleCopy}
 					aria-live="polite"
