@@ -214,7 +214,7 @@
 				<input
 					id={inputId}
 					value={query}
-					class="flex h-12 w-full bg-transparent text-base tracking-normal text-foreground placeholder:text-foreground-muted/70 focus:outline-none focus-visible:border-none! focus-visible:ring-0! focus-visible:ring-offset-0! focus-visible:outline-none!"
+					class="flex h-12 w-full bg-transparent text-base tracking-normal text-foreground transition-none placeholder:text-foreground-muted/70 focus:outline-none focus-visible:border-none! focus-visible:ring-0! focus-visible:ring-offset-0! focus-visible:outline-none!"
 					placeholder={docsUiConfig.search.dialogPlaceholder}
 					aria-label={docsUiConfig.search.dialogPlaceholder}
 					oninput={(event) => {
