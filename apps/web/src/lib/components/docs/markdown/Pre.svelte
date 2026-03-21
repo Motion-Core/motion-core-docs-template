@@ -30,25 +30,25 @@
 </script>
 
 <div class="inset-shadow mt-8 rounded-lg bg-background-inset p-1.5">
-	<div
-		{...restProps}
-		class={cn(
-			unstyled
-				? 'group/pre relative font-mono text-base font-normal'
-				: 'group/pre card relative rounded-md bg-background p-4 font-mono text-base font-normal text-foreground',
-			className
-		)}
-	>
-		<ScrollArea mode="horizontal" class="w-full">
-			{@render children?.()}
-		</ScrollArea>
-		{#if code}
-			<div class="pointer-events-none absolute top-2 right-2">
-				<CopyCodeButton {code} class="pointer-events-auto" />
-			</div>
-		{/if}
+		<div
+			{...restProps}
+			class={cn(
+				unstyled
+					? 'group/pre relative font-mono text-base font-normal'
+					: 'group/pre card relative rounded-md bg-background p-4 font-mono text-base font-normal text-foreground',
+				className
+			)}
+		>
+			{#if code}
+				<div class="pointer-events-none absolute top-2 right-2">
+					<CopyCodeButton {code} class="pointer-events-auto" />
+				</div>
+			{/if}
+			<ScrollArea mode="horizontal" class="w-full">
+				{@render children?.()}
+			</ScrollArea>
+		</div>
 	</div>
-</div>
 
 <style>
 	:global(.shiki) {
