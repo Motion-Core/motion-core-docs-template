@@ -73,10 +73,12 @@
 
 	function getFocusableElements() {
 		if (!dialogRef) return [];
-		const selector =
-			'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+		const selector = 'a[href], button, input, textarea, select, [tabindex]';
 		return Array.from(dialogRef.querySelectorAll<HTMLElement>(selector)).filter(
-			(element) => !element.hasAttribute('disabled') && element.getAttribute('aria-hidden') !== 'true'
+			(element) =>
+				!element.hasAttribute('disabled') &&
+				element.getAttribute('aria-hidden') !== 'true' &&
+				element.tabIndex >= 0
 		);
 	}
 
@@ -230,9 +232,10 @@
 						>
 							{#each results as result, i (result.slug + (result.anchor || '') + i)}
 								{@const isChild = result.matchType === 'heading' || result.matchType === 'content'}
-								<button
-									class={cn(
-										'group relative flex w-full flex-col items-start gap-1 rounded-sm px-3 py-2 text-sm font-medium tracking-normal',
+									<button
+										tabindex="-1"
+										class={cn(
+											'group relative flex w-full flex-col items-start gap-1 rounded-sm px-3 py-2 text-sm font-medium tracking-normal',
 										isChild && 'pl-8',
 										i === selectedIndex
 											? 'bg-background-muted text-foreground'
