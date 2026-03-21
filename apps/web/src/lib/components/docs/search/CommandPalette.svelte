@@ -201,7 +201,7 @@
 				contentHeight = 0;
 			}}
 			>
-				<h2 id="command-palette-title" class="sr-only">{docsUiConfig.search.dialogPlaceholder}</h2>
+				<span id="command-palette-title" class="sr-only">{docsUiConfig.search.dialogPlaceholder}</span>
 				<div class="flex items-center border-b border-border/60 px-3">
 				<Search size={24} class="mr-2 text-foreground-muted/70" />
 					<input
