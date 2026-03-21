@@ -19,10 +19,9 @@
 	let copyState = $state<'idle' | 'copying' | 'success' | 'error'>('idle');
 	let resetTimer = $state<ReturnType<typeof setTimeout> | null>(null);
 	let isDropdownOpen = $state(false);
-	let dropdownRef = $state<HTMLDivElement | null>(null);
-	let triggerRef = $state<HTMLButtonElement | null>(null);
 	let dropdownStyle = $state('');
 	const dropdownId = 'mobile-doc-actions-menu';
+	const dropdownTriggerId = `${dropdownId}-trigger`;
 	const opensInNewTabLabel = '(opens in a new tab)';
 	const canUseWindow = typeof window !== 'undefined';
 	const canUseDocument = typeof document !== 'undefined';
@@ -153,13 +152,26 @@
 	function closeDropdown(options?: { restoreFocus?: boolean }) {
 		isDropdownOpen = false;
 		if (options?.restoreFocus) {
-			triggerRef?.focus();
+			getTriggerElement()?.focus();
 		}
 	}
 
+	function getDropdownElement() {
+		if (!canUseDocument) return null;
+		const node = document.getElementById(dropdownId);
+		return node instanceof HTMLDivElement ? node : null;
+	}
+
+	function getTriggerElement() {
+		if (!canUseDocument) return null;
+		const node = document.getElementById(dropdownTriggerId);
+		return node instanceof HTMLButtonElement ? node : null;
+	}
+
 	function getMenuItems() {
-		if (!dropdownRef) return [];
-		return Array.from(dropdownRef.querySelectorAll<HTMLElement>('[role="menuitem"]'));
+		const dropdown = getDropdownElement();
+		if (!dropdown) return [];
+		return Array.from(dropdown.querySelectorAll<HTMLElement>('[role="menuitem"]'));
 	}
 
 	function handleDropdownKeydown(event: KeyboardEvent) {
@@ -200,20 +212,24 @@
 	}
 
 	function handleClickOutside(event: MouseEvent) {
+		const dropdown = getDropdownElement();
+		const trigger = getTriggerElement();
+
 		if (
 			isDropdownOpen &&
-			dropdownRef &&
-			!dropdownRef.contains(event.target as Node) &&
-			triggerRef &&
-			!triggerRef.contains(event.target as Node)
+			dropdown &&
+			!dropdown.contains(event.target as Node) &&
+			trigger &&
+			!trigger.contains(event.target as Node)
 		) {
 			closeDropdown();
 		}
 	}
 
 	function updatePosition() {
-		if (!triggerRef || !canUseWindow) return;
-		const rect = triggerRef.getBoundingClientRect();
+		const trigger = getTriggerElement();
+		if (!trigger || !canUseWindow) return;
+		const rect = trigger.getBoundingClientRect();
 		dropdownStyle = `top: ${rect.bottom + 8}px; right: ${window.innerWidth - rect.right}px; position: fixed;`;
 	}
 
@@ -309,7 +325,7 @@
 		{#if hasMenuActions}
 			<div class="inset-shadow relative rounded-md bg-background-inset p-1.5">
 					<button
-						bind:this={triggerRef}
+						id={dropdownTriggerId}
 						type="button"
 						onclick={toggleDropdown}
 						class="{buttonClass} w-auto! px-2.5!"
@@ -321,11 +337,10 @@
 						<OverflowMenuHorizontal class="size-4" />
 					</button>
 
-					{#if isDropdownOpen}
-						<div
-							use:portal={'main'}
-							bind:this={dropdownRef}
-							id={dropdownId}
+						{#if isDropdownOpen}
+							<div
+								use:portal={'main'}
+								id={dropdownId}
 							style={dropdownStyle}
 							class="card z-50 flex w-48 origin-top-right flex-col gap-0.5 rounded-md bg-background p-1"
 							role="menu"
