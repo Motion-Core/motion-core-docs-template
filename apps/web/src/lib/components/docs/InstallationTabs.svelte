@@ -150,7 +150,6 @@
 			<div
 				id={panelId}
 				role="tabpanel"
-				tabindex="0"
 				aria-labelledby={activeTabId}
 				class="min-h-12.5 p-4 [&>div]:mt-0 [&>div]:rounded-none [&>div]:border-0 [&>div]:bg-transparent [&>div]:p-0 [&>div]:shadow-none [&>div]:[box-shadow:none]!"
 			>
