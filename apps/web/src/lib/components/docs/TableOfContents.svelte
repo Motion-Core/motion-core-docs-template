@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { fromAction } from 'svelte/attachments';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { cn } from '$lib/utils/cn';
 	import { page } from '$app/state';
@@ -57,7 +58,7 @@
 	const linkRefs = new SvelteMap<string, HTMLAnchorElement>();
 	const linkPositions = new SvelteMap<string, { top: number; height: number }>();
 	const headingOrder = new SvelteMap<string, number>();
-	let linksWrapper = $state<HTMLOListElement | null>(null);
+	const linksWrapperId = 'toc-links-wrapper';
 
 	const currentPath = $derived(page.url.pathname);
 
@@ -179,7 +180,14 @@
 		return commands.join('');
 	}
 
+	function getLinksWrapperElement() {
+		if (typeof document === 'undefined') return null;
+		const node = document.getElementById(linksWrapperId);
+		return node instanceof HTMLOListElement ? node : null;
+	}
+
 	function updateLayout() {
+		const linksWrapper = getLinksWrapperElement();
 		if (!linksWrapper || headings.length === 0) {
 			lineHeight = 0;
 			return;
@@ -515,7 +523,10 @@
 
 <svelte:window bind:innerWidth={viewportWidth} />
 
-<div class="contents" use:manageToc={{ path: currentPath, active: tocViewportActive, selector }}>
+<div
+	class="contents"
+	{@attach fromAction(manageToc, () => ({ path: currentPath, active: tocViewportActive, selector }))}
+>
 	{#if headings.length > 0}
 		<nav class="hidden lg:block" aria-label={title}>
 		<div
@@ -551,11 +562,11 @@
 				{/if}
 			</div>
 
-			<ol
-				class="relative flex flex-col pl-3 text-sm"
-				bind:this={linksWrapper}
-				use:observeLinksWrapper={tocViewportActive}
-			>
+				<ol
+					id={linksWrapperId}
+					class="relative flex flex-col pl-3 text-sm"
+					{@attach fromAction(observeLinksWrapper, () => tocViewportActive)}
+				>
 				{#each headings as heading (heading.id)}
 					<li
 						class="transition-colors duration-150 ease-out"
@@ -563,14 +574,14 @@
 					>
 						<a
 							href={`#${heading.id}`}
-							class={cn(
-								'block max-w-48 truncate py-1 font-medium tracking-normal transition-[color] duration-150 ease-out',
-								isLinkHighlighted(heading.id)
-									? 'text-accent'
-									: 'text-foreground-muted hover:text-foreground'
-							)}
-							use:registerLink={heading.id}
-						>
+								class={cn(
+									'block max-w-48 truncate py-1 font-medium tracking-normal transition-[color] duration-150 ease-out',
+									isLinkHighlighted(heading.id)
+										? 'text-accent'
+										: 'text-foreground-muted hover:text-foreground'
+								)}
+								{@attach fromAction(registerLink, () => heading.id)}
+							>
 							{heading.text}
 						</a>
 					</li>
