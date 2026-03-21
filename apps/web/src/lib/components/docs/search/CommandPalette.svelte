@@ -18,9 +18,10 @@
 	let normalizedSelectedIndex = $derived(
 		results.length === 0 ? 0 : Math.min(selectedIndex, results.length - 1)
 	);
-	let inputRef = $state<HTMLInputElement>();
-	let dialogRef = $state<HTMLDivElement>();
 	let contentHeight = $state(0);
+	const canUseDocument = typeof document !== 'undefined';
+	const dialogId = 'command-palette-dialog';
+	const inputId = 'command-palette-input';
 
 	function handleGlobalKeydown(e: KeyboardEvent) {
 		const hotkey = docsUiConfig.search.hotkey;
@@ -47,25 +48,39 @@
 		searchState.close();
 	}
 
+	function getDialogElement() {
+		if (!canUseDocument) return null;
+		const node = document.getElementById(dialogId);
+		return node instanceof HTMLDivElement ? node : null;
+	}
+
+	function getInputElement() {
+		if (!canUseDocument) return null;
+		const node = document.getElementById(inputId);
+		return node instanceof HTMLInputElement ? node : null;
+	}
+
 	function manageDialogFocus(_node: HTMLDivElement) {
-		const activeElement = document.activeElement;
+		const activeElement =
+			canUseDocument && document.activeElement instanceof HTMLElement
+				? document.activeElement
+				: null;
 		const restoreFocusEl = activeElement instanceof HTMLElement ? activeElement : null;
 
 		tick().then(() => {
-			inputRef?.focus();
+			getInputElement()?.focus();
 		});
 
-		return {
-			destroy() {
-				restoreFocusEl?.focus();
-			}
+		return () => {
+			restoreFocusEl?.focus();
 		};
 	}
 
 	function getFocusableElements() {
-		if (!dialogRef) return [];
+		const dialog = getDialogElement();
+		if (!dialog) return [];
 		const selector = 'a[href], button, input, textarea, select, [tabindex]';
-		return Array.from(dialogRef.querySelectorAll<HTMLElement>(selector)).filter(
+		return Array.from(dialog.querySelectorAll<HTMLElement>(selector)).filter(
 			(element) =>
 				!element.hasAttribute('disabled') &&
 				element.getAttribute('aria-hidden') !== 'true' &&
@@ -74,7 +89,8 @@
 	}
 
 	function handleTabKey(event: KeyboardEvent) {
-		if (!dialogRef) return;
+		const dialog = getDialogElement();
+		if (!dialog) return;
 		const focusable = getFocusableElements();
 		if (focusable.length === 0) {
 			event.preventDefault();
@@ -87,14 +103,14 @@
 			document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
 		if (event.shiftKey) {
-			if (!activeElement || activeElement === first || !dialogRef.contains(activeElement)) {
+			if (!activeElement || activeElement === first || !dialog.contains(activeElement)) {
 				event.preventDefault();
 				last.focus();
 			}
 			return;
 		}
 
-		if (!activeElement || activeElement === last || !dialogRef.contains(activeElement)) {
+		if (!activeElement || activeElement === last || !dialog.contains(activeElement)) {
 			event.preventDefault();
 			first.focus();
 		}
@@ -167,8 +183,8 @@
 	></div>
 
 	<div
-		bind:this={dialogRef}
-		use:manageDialogFocus
+		id={dialogId}
+		{@attach manageDialogFocus}
 		class="fixed inset-0 z-60 flex items-start justify-center p-4 sm:pt-[10vh]"
 		role="dialog"
 		aria-modal="true"
@@ -196,7 +212,7 @@
 			<div class="flex items-center border-b border-border/60 px-3">
 				<Search size={24} class="mr-2 text-foreground-muted/70" />
 				<input
-					bind:this={inputRef}
+					id={inputId}
 					value={query}
 					class="flex h-12 w-full bg-transparent text-base tracking-normal text-foreground placeholder:text-foreground-muted/70 focus:outline-none focus-visible:border-none! focus-visible:ring-0! focus-visible:ring-offset-0! focus-visible:outline-none!"
 					placeholder={docsUiConfig.search.dialogPlaceholder}
