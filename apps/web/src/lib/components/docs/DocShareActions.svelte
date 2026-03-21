@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import { backOut } from 'svelte/easing';
+	import { onDestroy } from 'svelte';
 	import { docsUiConfig, resolveDocAssistantUrls } from '$lib/config/docs-ui';
 	import Checkmark from 'carbon-icons-svelte/lib/Checkmark.svelte';
 	import LogoGithub from 'carbon-icons-svelte/lib/LogoGithub.svelte';
@@ -14,7 +15,6 @@
 
 	let { rawPath, rawUrl, githubUrl }: Props = $props();
 
-	let buttonRef = $state<HTMLButtonElement | null>(null);
 	const opensInNewTabLabel = '(opens in a new tab)';
 
 	type CopyState = 'idle' | 'copying' | 'success' | 'error';
@@ -73,12 +73,10 @@
 		}
 	}
 
-	$effect(() => {
-		return () => {
-			if (resetTimer) {
-				clearTimeout(resetTimer);
-			}
-		};
+	onDestroy(() => {
+		if (resetTimer) {
+			clearTimeout(resetTimer);
+		}
 	});
 </script>
 
@@ -87,7 +85,6 @@
 		<div class="flex flex-col gap-1 text-sm">
 			{#if canShowCopy}
 				<button
-					bind:this={buttonRef}
 					type="button"
 					onclick={handleCopy}
 					aria-live="polite"

@@ -6,7 +6,7 @@
 	import Checkmark from 'carbon-icons-svelte/lib/Checkmark.svelte';
 	import LogoGithub from 'carbon-icons-svelte/lib/LogoGithub.svelte';
 	import OverflowMenuHorizontal from 'carbon-icons-svelte/lib/OverflowMenuHorizontal.svelte';
-	import { tick } from 'svelte';
+	import { onDestroy, onMount, tick } from 'svelte';
 
 	type Props = {
 		rawPath?: string | null;
@@ -19,12 +19,12 @@
 	let copyState = $state<'idle' | 'copying' | 'success' | 'error'>('idle');
 	let resetTimer = $state<ReturnType<typeof setTimeout> | null>(null);
 	let isDropdownOpen = $state(false);
-	let dropdownRef = $state<HTMLDivElement | null>(null);
-	let triggerRef = $state<HTMLButtonElement | null>(null);
 	let dropdownStyle = $state('');
-	let prefetchedContent = $state<string | null>(null);
 	const dropdownId = 'mobile-doc-actions-menu';
+	const dropdownTriggerId = `${dropdownId}-trigger`;
 	const opensInNewTabLabel = '(opens in a new tab)';
+	const canUseWindow = typeof window !== 'undefined';
+	const canUseDocument = typeof document !== 'undefined';
 
 	const assistantUrls = $derived(resolveDocAssistantUrls(rawUrl));
 	const chatGptUrl = $derived(assistantUrls.chatGptUrl);
@@ -35,6 +35,12 @@
 	);
 	const hasMenuActions = $derived(canShowRepository || Boolean(chatGptUrl) || Boolean(claudeUrl));
 	const hasActions = $derived(canShowCopy || hasMenuActions);
+	const prefetchedContentPromise = $derived.by(() => {
+		if (!canShowCopy || !rawPath || !canUseWindow) {
+			return Promise.resolve<string | null>(null);
+		}
+		return fetchPrefetchedContent(rawPath);
+	});
 
 	const copyLabel = $derived(
 		copyState === 'copying'
@@ -46,22 +52,17 @@
 					: docsUiConfig.docActions.copyLabels.mobileIdle
 	);
 
-	async function prefetchContent() {
-		if (!canShowCopy || !rawPath) return;
+	async function fetchPrefetchedContent(path: string) {
 		try {
-			const response = await fetch(rawPath);
+			const response = await fetch(path);
 			if (response.ok) {
-				prefetchedContent = await response.text();
+				return await response.text();
 			}
 		} catch (e) {
 			console.warn('Failed to prefetch document content:', e);
 		}
+		return null;
 	}
-
-	$effect(() => {
-		if (!canShowCopy) return;
-		prefetchContent();
-	});
 
 	async function handleCopy() {
 		if (!canShowCopy || copyState === 'copying' || copyState === 'success') return;
@@ -69,7 +70,7 @@
 		copyState = 'copying';
 
 		try {
-			let content = prefetchedContent;
+			let content = await prefetchedContentPromise;
 			if (!content) {
 				if (!rawPath) throw new Error('No path to fetch');
 				const response = await fetch(rawPath);
@@ -80,7 +81,7 @@
 			let success = false;
 
 			// 1. Try modern Clipboard API
-			if (navigator?.clipboard?.writeText) {
+			if (canUseWindow && navigator?.clipboard?.writeText) {
 				try {
 					await navigator.clipboard.writeText(content);
 					success = true;
@@ -90,7 +91,7 @@
 			}
 
 			// 2. Fallback for Mobile Safari
-			if (!success) {
+			if (!success && canUseDocument) {
 				try {
 					const textArea = document.createElement('textarea');
 					textArea.value = content;
@@ -141,18 +142,36 @@
 			return;
 		}
 		isDropdownOpen = true;
+		updatePosition();
+		tick().then(() => {
+			const [first] = getMenuItems();
+			first?.focus();
+		});
 	}
 
 	function closeDropdown(options?: { restoreFocus?: boolean }) {
 		isDropdownOpen = false;
 		if (options?.restoreFocus) {
-			triggerRef?.focus();
+			getTriggerElement()?.focus();
 		}
 	}
 
+	function getDropdownElement() {
+		if (!canUseDocument) return null;
+		const node = document.getElementById(dropdownId);
+		return node instanceof HTMLDivElement ? node : null;
+	}
+
+	function getTriggerElement() {
+		if (!canUseDocument) return null;
+		const node = document.getElementById(dropdownTriggerId);
+		return node instanceof HTMLButtonElement ? node : null;
+	}
+
 	function getMenuItems() {
-		if (!dropdownRef) return [];
-		return Array.from(dropdownRef.querySelectorAll<HTMLElement>('[role="menuitem"]'));
+		const dropdown = getDropdownElement();
+		if (!dropdown) return [];
+		return Array.from(dropdown.querySelectorAll<HTMLElement>('[role="menuitem"]'));
 	}
 
 	function handleDropdownKeydown(event: KeyboardEvent) {
@@ -167,7 +186,10 @@
 		const items = getMenuItems();
 		if (items.length === 0) return;
 
-		const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+		const activeElement =
+			canUseDocument && document.activeElement instanceof HTMLElement
+				? document.activeElement
+				: null;
 		const activeIndex = activeElement ? items.indexOf(activeElement) : -1;
 
 		if (event.key === 'ArrowDown') {
@@ -190,58 +212,62 @@
 	}
 
 	function handleClickOutside(event: MouseEvent) {
+		const dropdown = getDropdownElement();
+		const trigger = getTriggerElement();
+
 		if (
 			isDropdownOpen &&
-			dropdownRef &&
-			!dropdownRef.contains(event.target as Node) &&
-			triggerRef &&
-			!triggerRef.contains(event.target as Node)
+			dropdown &&
+			!dropdown.contains(event.target as Node) &&
+			trigger &&
+			!trigger.contains(event.target as Node)
 		) {
 			closeDropdown();
 		}
 	}
 
 	function updatePosition() {
-		if (!triggerRef) return;
-		const rect = triggerRef.getBoundingClientRect();
+		const trigger = getTriggerElement();
+		if (!trigger || !canUseWindow) return;
+		const rect = trigger.getBoundingClientRect();
 		dropdownStyle = `top: ${rect.bottom + 8}px; right: ${window.innerWidth - rect.right}px; position: fixed;`;
 	}
 
-	$effect(() => {
-		if (isDropdownOpen) {
+	onMount(() => {
+		if (!canUseWindow) return;
+
+		const handleScrollOrResize = () => {
+			if (!isDropdownOpen) return;
 			updatePosition();
-			window.addEventListener('click', handleClickOutside);
-			window.addEventListener('scroll', updatePosition, true);
-			window.addEventListener('resize', updatePosition);
-			window.addEventListener('keydown', handleDropdownKeydown);
-		} else {
-			window.removeEventListener('click', handleClickOutside);
-			window.removeEventListener('scroll', updatePosition, true);
-			window.removeEventListener('resize', updatePosition);
-			window.removeEventListener('keydown', handleDropdownKeydown);
+		};
+
+		const handleWindowClick = (event: MouseEvent) => {
+			if (!isDropdownOpen) return;
+			handleClickOutside(event);
+		};
+
+		const handleWindowKeydown = (event: KeyboardEvent) => {
+			if (!isDropdownOpen) return;
+			handleDropdownKeydown(event);
+		};
+
+		window.addEventListener('click', handleWindowClick);
+		window.addEventListener('scroll', handleScrollOrResize, true);
+		window.addEventListener('resize', handleScrollOrResize);
+		window.addEventListener('keydown', handleWindowKeydown);
+
+		return () => {
+			window.removeEventListener('click', handleWindowClick);
+			window.removeEventListener('scroll', handleScrollOrResize, true);
+			window.removeEventListener('resize', handleScrollOrResize);
+			window.removeEventListener('keydown', handleWindowKeydown);
+		};
+	});
+
+	onDestroy(() => {
+		if (resetTimer) {
+			clearTimeout(resetTimer);
 		}
-		return () => {
-			window.removeEventListener('click', handleClickOutside);
-			window.removeEventListener('scroll', updatePosition, true);
-			window.removeEventListener('resize', updatePosition);
-			window.removeEventListener('keydown', handleDropdownKeydown);
-		};
-	});
-
-	$effect(() => {
-		if (!isDropdownOpen) return;
-		tick().then(() => {
-			const [first] = getMenuItems();
-			first?.focus();
-		});
-	});
-
-	$effect(() => {
-		return () => {
-			if (resetTimer) {
-				clearTimeout(resetTimer);
-			}
-		};
 	});
 
 	const buttonClass =
@@ -299,7 +325,7 @@
 		{#if hasMenuActions}
 			<div class="inset-shadow relative rounded-md bg-background-inset p-1.5">
 					<button
-						bind:this={triggerRef}
+						id={dropdownTriggerId}
 						type="button"
 						onclick={toggleDropdown}
 						class="{buttonClass} w-auto! px-2.5!"
@@ -311,11 +337,10 @@
 						<OverflowMenuHorizontal class="size-4" />
 					</button>
 
-					{#if isDropdownOpen}
-						<div
-							use:portal={'main'}
-							bind:this={dropdownRef}
-							id={dropdownId}
+						{#if isDropdownOpen}
+							<div
+								use:portal={'main'}
+								id={dropdownId}
 							style={dropdownStyle}
 							class="card z-50 flex w-48 origin-top-right flex-col gap-0.5 rounded-md bg-background p-1"
 							role="menu"

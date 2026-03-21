@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { page } from '$app/state';
+	import { afterNavigate } from '$app/navigation';
+	import { onDestroy } from 'svelte';
 	import DocsSidebar from './DocsSidebar.svelte';
 	import { brandingConfig } from '$lib/config/branding';
 	import Menu from 'carbon-icons-svelte/lib/Menu.svelte';
@@ -7,25 +8,55 @@
 
 	let isOpen = $state(false);
 	let isVisible = $state(false);
-	let panelRef = $state<HTMLDivElement | null>(null);
-	let toggleButtonRef = $state<HTMLButtonElement | null>(null);
-	let closeButtonRef = $state<HTMLButtonElement | null>(null);
 	let restoreFocusEl: HTMLElement | null = null;
-	let wasOpen = false;
-	const pathname = $derived(page.url.pathname);
+	const canUseDocument = typeof document !== 'undefined';
+	const panelId = 'mobile-sidebar-panel';
+	const toggleButtonId = 'mobile-sidebar-toggle';
+	const closeButtonId = 'mobile-sidebar-close';
+
+	function setBodyOverflow(value: string) {
+		if (!canUseDocument) return;
+		document.body.style.overflow = value;
+	}
+
+	function getPanelElement() {
+		if (!canUseDocument) return null;
+		const node = document.getElementById(panelId);
+		return node instanceof HTMLDivElement ? node : null;
+	}
+
+	function getToggleButton() {
+		if (!canUseDocument) return null;
+		const node = document.getElementById(toggleButtonId);
+		return node instanceof HTMLButtonElement ? node : null;
+	}
+
+	function getCloseButton() {
+		if (!canUseDocument) return null;
+		const node = document.getElementById(closeButtonId);
+		return node instanceof HTMLButtonElement ? node : null;
+	}
 
 	function open() {
-		const activeElement = document.activeElement;
-		restoreFocusEl = activeElement instanceof HTMLElement ? activeElement : toggleButtonRef;
+		const activeElement =
+			canUseDocument && document.activeElement instanceof HTMLElement
+				? document.activeElement
+				: null;
+		restoreFocusEl = activeElement instanceof HTMLElement ? activeElement : getToggleButton();
+		setBodyOverflow('hidden');
 
 		if (isVisible) {
 			isOpen = true;
+			requestAnimationFrame(() => {
+				getCloseButton()?.focus();
+			});
 			return;
 		}
 
 		isVisible = true;
 		requestAnimationFrame(() => {
 			isOpen = true;
+			getCloseButton()?.focus();
 		});
 	}
 
@@ -38,21 +69,35 @@
 		open();
 	}
 
-	function close() {
+	function close(options: { restoreFocus?: boolean } = {}) {
+		const { restoreFocus = true } = options;
 		isOpen = false;
+		setBodyOverflow('');
+
+		if (restoreFocus) {
+			restoreFocusEl?.focus();
+		}
+
+		restoreFocusEl = null;
+	}
+
+	function closePanel() {
+		close();
 	}
 
 	function getFocusableElements() {
-		if (!panelRef) return [];
+		const panel = getPanelElement();
+		if (!panel) return [];
 		const selector =
 			'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
-		return Array.from(panelRef.querySelectorAll<HTMLElement>(selector)).filter(
+		return Array.from(panel.querySelectorAll<HTMLElement>(selector)).filter(
 			(element) => !element.hasAttribute('disabled') && element.getAttribute('aria-hidden') !== 'true'
 		);
 	}
 
 	function handleTabKey(event: KeyboardEvent) {
-		if (!panelRef) return;
+		const panel = getPanelElement();
+		if (!panel) return;
 
 		const focusable = getFocusableElements();
 		if (focusable.length === 0) {
@@ -62,17 +107,20 @@
 
 		const first = focusable[0];
 		const last = focusable[focusable.length - 1];
-		const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+		const activeElement =
+			canUseDocument && document.activeElement instanceof HTMLElement
+				? document.activeElement
+				: null;
 
 		if (event.shiftKey) {
-			if (!activeElement || activeElement === first || !panelRef.contains(activeElement)) {
+			if (!activeElement || activeElement === first || !panel.contains(activeElement)) {
 				event.preventDefault();
 				last.focus();
 			}
 			return;
 		}
 
-		if (!activeElement || activeElement === last || !panelRef.contains(activeElement)) {
+		if (!activeElement || activeElement === last || !panel.contains(activeElement)) {
 			event.preventDefault();
 			first.focus();
 		}
@@ -97,48 +145,16 @@
 		if (!isOpen) isVisible = false;
 	}
 
-	$effect(() => {
-		if (isOpen) {
-			requestAnimationFrame(() => {
-				closeButtonRef?.focus();
-			});
-		}
+	afterNavigate(() => {
+		close({ restoreFocus: false });
 	});
 
-	$effect(() => {
-		if (isOpen && !wasOpen) {
-			document.body.style.overflow = 'hidden';
-		}
-
-		if (!isOpen && wasOpen) {
-			document.body.style.overflow = '';
-			restoreFocusEl?.focus();
-			restoreFocusEl = null;
-		}
-
-		wasOpen = isOpen;
-	});
-
-	$effect(() => {
-		if (!isOpen) return;
-		document.addEventListener('keydown', handleDocumentKeydown);
-		return () => {
-			document.removeEventListener('keydown', handleDocumentKeydown);
-		};
-	});
-
-	$effect(() => {
-		return () => {
-			document.body.style.overflow = '';
-			document.removeEventListener('keydown', handleDocumentKeydown);
-		};
-	});
-
-	$effect(() => {
-		void pathname;
-		close();
+	onDestroy(() => {
+		setBodyOverflow('');
 	});
 </script>
+
+<svelte:document onkeydown={handleDocumentKeydown} />
 
 <div
 	class="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-border bg-background px-4 py-1.5 lg:hidden"
@@ -156,11 +172,11 @@
 		</span>
 		<span class="font-medium tracking-tight text-foreground">{brandingConfig.name}</span>
 	</a>
-	<button
-		bind:this={toggleButtonRef}
-		onclick={toggle}
-		class="-mr-2 inline-flex size-10 items-center justify-center gap-2 rounded-sm text-sm whitespace-nowrap text-foreground transition-colors duration-150 ease-out hover:bg-background-muted lg:hidden"
-		aria-label="Toggle menu"
+		<button
+			id={toggleButtonId}
+			onclick={toggle}
+			class="-mr-2 inline-flex size-10 items-center justify-center gap-2 rounded-sm text-sm whitespace-nowrap text-foreground transition-colors duration-150 ease-out hover:bg-background-muted lg:hidden"
+			aria-label="Toggle menu"
 	>
 		<Menu size={20} />
 	</button>
@@ -170,26 +186,26 @@
 	<div
 		class="overlay fixed inset-0 z-50 bg-background-inset/80 backdrop-blur-sm lg:hidden"
 		class:active={isOpen}
-		onclick={close}
+		onclick={closePanel}
 		role="presentation"
 		aria-hidden="true"
 	></div>
 
-	<div
-		bind:this={panelRef}
-		class="sidebar fixed inset-y-0 right-0 z-50 w-3/4 max-w-sm overflow-hidden border-l border-border bg-background-inset text-foreground-muted lg:hidden"
-		class:active={isOpen}
-		ontransitionend={handleSidebarTransitionEnd}
+		<div
+			id={panelId}
+			class="sidebar fixed inset-y-0 right-0 z-50 w-3/4 max-w-sm overflow-hidden border-l border-border bg-background-inset text-foreground-muted lg:hidden"
+			class:active={isOpen}
+			ontransitionend={handleSidebarTransitionEnd}
 		role="dialog"
 		aria-modal="true"
 		aria-label="Navigation menu"
 		tabindex="-1"
-	>
-		<div class="absolute top-0 right-0 flex justify-end p-4">
-			<button bind:this={closeButtonRef} onclick={close} aria-label="Close menu">
-				<Close size={32} class="size-6" />
-			</button>
-		</div>
+		>
+			<div class="absolute top-0 right-0 flex justify-end p-4">
+				<button id={closeButtonId} onclick={closePanel} aria-label="Close menu">
+					<Close size={32} class="size-6" />
+				</button>
+			</div>
 		<DocsSidebar />
 	</div>
 {/if}

@@ -68,36 +68,36 @@
 
 	let activeTab = $state(0);
 
-	$effect(() => {
-		void tabs;
-		if (activeTab > tabs.length - 1) {
-			activeTab = 0;
+	const selectedTab = $derived(
+		tabs.length === 0 ? 0 : Math.min(activeTab, Math.max(0, tabs.length - 1))
+	);
+	const activeSource = $derived((tabs.at(selectedTab) ?? null) as SourceTab | null);
+	const activeTabId = $derived(`${tabsInstanceId}-tab-${selectedTab}`);
+
+	async function highlightTabs(
+		sources: SourceTab[]
+	): Promise<Record<string, { light: string; dark: string }>> {
+		const highlighter = await getHighlighter();
+		const highlightedSources: Record<string, { light: string; dark: string }> = {};
+
+		for (const tab of sources) {
+			const lang = tab.language ?? 'typescript';
+			highlightedSources[tab.name] = {
+				light: highlighter.codeToHtml(tab.code, {
+					lang,
+					theme: 'github-light'
+				}),
+				dark: highlighter.codeToHtml(tab.code, {
+					lang,
+					theme: 'github-dark'
+				})
+			};
 		}
-	});
 
-	const activeSource = $derived((tabs.at(activeTab) ?? null) as SourceTab | null);
-	const activeTabId = $derived(`${tabsInstanceId}-tab-${activeTab}`);
+		return highlightedSources;
+	}
 
-	let highlightedSources = $state<Record<string, { light: string; dark: string }>>({});
-
-	$effect(() => {
-		getHighlighter().then((highlighter) => {
-			tabs.forEach((tab) => {
-				if (!highlightedSources[tab.name]) {
-					const lang = tab.language ?? 'typescript';
-					const light = highlighter.codeToHtml(tab.code, {
-						lang,
-						theme: 'github-light'
-					});
-					const dark = highlighter.codeToHtml(tab.code, {
-						lang,
-						theme: 'github-dark'
-					});
-					highlightedSources[tab.name] = { light, dark };
-				}
-			});
-		});
-	});
+	const highlightedSourcesPromise = $derived(highlightTabs(tabs));
 
 	function setActiveTab(index: number) {
 		activeTab = index;
@@ -183,12 +183,12 @@
 									type="button"
 									id={`${tabsInstanceId}-tab-${index}`}
 									role="tab"
-									aria-selected={index === activeTab}
+									aria-selected={index === selectedTab}
 									aria-controls={panelId}
-									tabindex={index === activeTab ? 0 : -1}
+									tabindex={index === selectedTab ? 0 : -1}
 									class={cn(
 										'border-b-2 px-4 py-2.5 text-sm font-medium tracking-normal whitespace-nowrap transition-colors duration-150 ease-out outline-none select-none',
-										index === activeTab
+										index === selectedTab
 											? 'border-accent text-foreground'
 											: 'border-transparent text-foreground-muted hover:text-foreground'
 									)}
@@ -222,16 +222,18 @@
 						class="p-4 text-sm *:mt-0 *:rounded-none *:border-0 *:bg-transparent *:p-0 *:inset-shadow-none"
 					>
 						{#if activeSource}
-							{#if highlightedSources[activeSource.name]}
+							{#await highlightedSourcesPromise}
+								<pre class="p-4">{activeSource.code}</pre>
+							{:then highlightedSources}
 								<ShikiCodeBlock
 									code=""
 									htmlLight={highlightedSources[activeSource.name].light}
 									htmlDark={highlightedSources[activeSource.name].dark}
 									unstyled={true}
 								/>
-							{:else}
+							{:catch}
 								<pre class="p-4">{activeSource.code}</pre>
-							{/if}
+							{/await}
 						{:else}
 							{@render codeSlot?.()}
 						{/if}

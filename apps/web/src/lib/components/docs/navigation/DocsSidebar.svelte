@@ -17,25 +17,27 @@
 	);
 	const githubUrl = siteConfig.links.github;
 
-	let expandedGroups = $state<Record<string, boolean>>({});
+	let expandedGroupOverrides = $state<Record<string, boolean>>({});
 
 	const docHref = (slug: string) => (slug ? `/docs/${slug}` : '/docs');
 
-	function toggleGroup(slug: string) {
-		expandedGroups[slug] = !expandedGroups[slug];
-	}
-
-	$effect(() => {
-		const allDocs = [...docsNavigation];
-		for (const doc of allDocs) {
+	const autoExpandedGroups = $derived.by<Record<string, boolean>>(() => {
+		const expanded: Record<string, boolean> = {};
+		for (const doc of docsNavigation) {
 			if (doc.items?.length) {
-				const isChildActive = doc.items.some((item) => docHref(item.slug) === currentPath);
-				if (isChildActive && expandedGroups[doc.slug] === undefined) {
-					expandedGroups[doc.slug] = true;
-				}
+				expanded[doc.slug] = doc.items.some((item) => docHref(item.slug) === currentPath);
 			}
 		}
+		return expanded;
 	});
+
+	function isGroupActive(slug: string) {
+		return expandedGroupOverrides[slug] ?? autoExpandedGroups[slug] ?? false;
+	}
+
+	function toggleGroup(slug: string) {
+		expandedGroupOverrides[slug] = !isGroupActive(slug);
+	}
 </script>
 
 <aside class="flex h-dvh flex-col bg-background" aria-label="Documentation sidebar">
@@ -45,6 +47,7 @@
 				class="inline-flex shrink-0 items-center text-accent [&>svg]:size-6 [&>svg]:fill-current"
 				aria-hidden="true"
 			>
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 				{@html brandingConfig.logoRaw}
 			</span>
 			<span class="text-xl font-medium tracking-tight text-foreground">{brandingConfig.name}</span>
@@ -66,22 +69,20 @@
 			</h4>
 			{#each docsNavigation as doc (doc.slug)}
 				{#if doc.items?.length}
-					{@const isGroupActive =
-						expandedGroups[doc.slug] ??
-						doc.items.some((item) => docHref(item.slug) === currentPath)}
+					{@const groupIsActive = isGroupActive(doc.slug)}
 					<button
 						onclick={() => toggleGroup(doc.slug)}
 						class={cn(
 							'flex w-full items-center justify-between rounded-sm px-3 py-1.5 text-sm font-medium tracking-normal transition-all duration-150 ease-out hover:bg-background-muted hover:text-foreground',
-							isGroupActive ? 'text-foreground' : 'text-foreground-muted'
+							groupIsActive ? 'text-foreground' : 'text-foreground-muted'
 						)}
 					>
 						<span>{doc.name}</span>
 						<ChevronRight
-							class={cn('size-4 transition-transform duration-150', isGroupActive && 'rotate-90')}
+							class={cn('size-4 transition-transform duration-150', groupIsActive && 'rotate-90')}
 						/>
 					</button>
-					{#if isGroupActive}
+					{#if groupIsActive}
 						<div
 							transition:slide={{ duration: 220 }}
 							class="relative flex flex-col gap-1 overflow-hidden pl-5 before:absolute before:top-1 before:bottom-1 before:left-3 before:w-px before:bg-border"

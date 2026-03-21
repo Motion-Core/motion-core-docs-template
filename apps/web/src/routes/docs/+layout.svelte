@@ -17,7 +17,7 @@
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
-	import { tick } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { beforeNavigate, afterNavigate } from '$app/navigation';
 	import { SvelteMap } from 'svelte/reactivity';
 
@@ -118,6 +118,38 @@
 
 	const scrollContainerId = 'docs-content-container';
 	const scrollPositions = new SvelteMap<string, number>();
+	let hashFallbackTimer: ReturnType<typeof setTimeout> | null = null;
+
+	function clearHashFallbackTimer() {
+		if (hashFallbackTimer) {
+			clearTimeout(hashFallbackTimer);
+			hashFallbackTimer = null;
+		}
+	}
+
+	function scrollToHash(hash: string) {
+		if (!hash) return;
+		const id = hash.substring(1);
+
+		const scrollToElement = () => {
+			const element = document.getElementById(id);
+			if (element) {
+				element.scrollIntoView({
+					behavior: 'smooth',
+					block: 'start'
+				});
+				return true;
+			}
+			return false;
+		};
+
+		clearHashFallbackTimer();
+		tick().then(() => {
+			if (!scrollToElement()) {
+				hashFallbackTimer = setTimeout(scrollToElement, 100);
+			}
+		});
+	}
 
 	beforeNavigate(() => {
 		const elem = document.getElementById(scrollContainerId);
@@ -138,37 +170,23 @@
 				elem.scrollTop = 0;
 			}
 		}
+
+		if (page.url.hash) {
+			scrollToHash(page.url.hash);
+		}
 	});
 
-	$effect(() => {
-		const hash = page.url.hash;
-		let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
-		if (hash) {
-			const id = hash.substring(1);
+	onMount(() => {
+		const handleHashChange = () => {
+			scrollToHash(window.location.hash);
+		};
 
-			const scrollToElement = () => {
-				const element = document.getElementById(id);
-				if (element) {
-					element.scrollIntoView({
-						behavior: 'smooth',
-						block: 'start'
-					});
-					return true;
-				}
-				return false;
-			};
-
-			tick().then(() => {
-				if (!scrollToElement()) {
-					fallbackTimer = setTimeout(scrollToElement, 100);
-				}
-			});
-		}
+		window.addEventListener('hashchange', handleHashChange);
+		handleHashChange();
 
 		return () => {
-			if (fallbackTimer) {
-				clearTimeout(fallbackTimer);
-			}
+			window.removeEventListener('hashchange', handleHashChange);
+			clearHashFallbackTimer();
 		};
 	});
 </script>
