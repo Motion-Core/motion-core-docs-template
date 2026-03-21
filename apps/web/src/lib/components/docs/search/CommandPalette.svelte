@@ -8,7 +8,7 @@
 	import { onNavigate } from '$app/navigation';
 	import { cn } from '$lib/utils/cn';
 	import ScrollArea from '$lib/components/ui/ScrollArea.svelte';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import Search from 'carbon-icons-svelte/lib/Search.svelte';
 	import Return from 'carbon-icons-svelte/lib/Return.svelte';
 
@@ -16,7 +16,10 @@
 	let results = $derived(searchDocs(query));
 	let selectedIndex = $state(0);
 	let inputRef = $state<HTMLInputElement>();
+	let dialogRef = $state<HTMLDivElement>();
 	let contentHeight = $state(0);
+	let restoreFocusEl: HTMLElement | null = null;
+	let wasOpen = false;
 
 	function handleGlobalKeydown(e: KeyboardEvent) {
 		const hotkey = docsUiConfig.search.hotkey;
@@ -41,9 +44,22 @@
 
 	$effect(() => {
 		if (!docsUiConfig.search.enabled) return;
-		if (searchState.isOpen && inputRef) {
-			inputRef.focus();
+		const isOpen = searchState.isOpen;
+
+		if (isOpen && !wasOpen) {
+			const activeElement = document.activeElement;
+			restoreFocusEl = activeElement instanceof HTMLElement ? activeElement : null;
+			tick().then(() => {
+				inputRef?.focus();
+			});
 		}
+
+		if (!isOpen && wasOpen) {
+			restoreFocusEl?.focus();
+			restoreFocusEl = null;
+		}
+
+		wasOpen = isOpen;
 	});
 
 	$effect(() => {
@@ -55,8 +71,51 @@
 		searchState.close();
 	}
 
+	function getFocusableElements() {
+		if (!dialogRef) return [];
+		const selector = 'a[href], button, input, textarea, select, [tabindex]';
+		return Array.from(dialogRef.querySelectorAll<HTMLElement>(selector)).filter(
+			(element) =>
+				!element.hasAttribute('disabled') &&
+				element.getAttribute('aria-hidden') !== 'true' &&
+				element.tabIndex >= 0
+		);
+	}
+
+	function handleTabKey(event: KeyboardEvent) {
+		if (!dialogRef) return;
+		const focusable = getFocusableElements();
+		if (focusable.length === 0) {
+			event.preventDefault();
+			return;
+		}
+
+		const first = focusable[0];
+		const last = focusable[focusable.length - 1];
+		const activeElement =
+			document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+		if (event.shiftKey) {
+			if (!activeElement || activeElement === first || !dialogRef.contains(activeElement)) {
+				event.preventDefault();
+				last.focus();
+			}
+			return;
+		}
+
+		if (!activeElement || activeElement === last || !dialogRef.contains(activeElement)) {
+			event.preventDefault();
+			first.focus();
+		}
+	}
+
 	function handleKeydown(e: KeyboardEvent) {
 		if (!searchState.isOpen) return;
+
+		if (e.key === 'Tab') {
+			handleTabKey(e);
+			return;
+		}
 
 		if (e.key === 'Escape') {
 			e.preventDefault();
@@ -123,9 +182,11 @@
 	></div>
 
 	<div
+		bind:this={dialogRef}
 		class="fixed inset-0 z-60 flex items-start justify-center p-4 sm:pt-[10vh]"
 		role="dialog"
 		aria-modal="true"
+		aria-labelledby="command-palette-title"
 		tabindex="-1"
 		onclick={(e) => e.target === e.currentTarget && close()}
 		onkeydown={(e) => e.key === 'Escape' && close()}
@@ -143,12 +204,14 @@
 				contentHeight = 0;
 			}}
 		>
+			<span id="command-palette-title" class="sr-only">{docsUiConfig.search.dialogPlaceholder}</span
+			>
 			<div class="flex items-center border-b border-border/60 px-3">
 				<Search size={24} class="mr-2 text-foreground-muted/70" />
 				<input
 					bind:this={inputRef}
 					bind:value={query}
-					class="command-palette-input flex h-12 w-full bg-transparent text-base tracking-normal text-foreground placeholder:text-foreground-muted/70 focus:outline-none focus-visible:border-none! focus-visible:ring-0! focus-visible:ring-offset-0! focus-visible:outline-none!"
+					class="flex h-12 w-full bg-transparent text-base tracking-normal text-foreground placeholder:text-foreground-muted/70 focus:outline-none focus-visible:border-none! focus-visible:ring-0! focus-visible:ring-offset-0! focus-visible:outline-none!"
 					placeholder={docsUiConfig.search.dialogPlaceholder}
 					aria-label={docsUiConfig.search.dialogPlaceholder}
 				/>
@@ -172,6 +235,7 @@
 							{#each results as result, i (result.slug + (result.anchor || '') + i)}
 								{@const isChild = result.matchType === 'heading' || result.matchType === 'content'}
 								<button
+									tabindex="-1"
 									class={cn(
 										'group relative flex w-full flex-col items-start gap-1 rounded-sm px-3 py-2 text-sm font-medium tracking-normal',
 										isChild && 'pl-8',
@@ -242,13 +306,3 @@
 		</div>
 	</div>
 {/if}
-
-<style>
-	.command-palette-input:focus,
-	.command-palette-input:focus-visible {
-		outline: none !important;
-		outline-color: transparent !important;
-		outline-offset: 0 !important;
-		box-shadow: none !important;
-	}
-</style>

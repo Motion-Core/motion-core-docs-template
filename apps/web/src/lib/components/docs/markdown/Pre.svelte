@@ -39,11 +39,11 @@
 			className
 		)}
 	>
-		<ScrollArea mode="horizontal" class="w-full">
+		<ScrollArea mode="horizontal" class="w-full" thumbTabbable={false}>
 			{@render children?.()}
 		</ScrollArea>
 		{#if code}
-			<div class="pointer-events-none absolute top-2 right-2">
+			<div class="pointer-events-none absolute top-2 right-2 z-10">
 				<CopyCodeButton {code} class="pointer-events-auto" />
 			</div>
 		{/if}

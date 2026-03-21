@@ -15,6 +15,8 @@
 		viewportClass?: string;
 		viewportStyle?: string;
 		mode?: ScrollMode;
+		thumbTabbable?: boolean;
+		viewportTabbable?: boolean;
 	};
 
 	const MIN_THUMB_SIZE = 20;
@@ -28,7 +30,9 @@
 		style,
 		viewportClass,
 		viewportStyle,
-		mode = 'vertical'
+		mode = 'vertical',
+		thumbTabbable = true,
+		viewportTabbable = true
 	}: Props = $props();
 	const viewportId = $derived(id ?? undefined);
 
@@ -238,7 +242,6 @@
 	}
 
 	const viewportAttachment: Attachment<HTMLDivElement> = (node) => {
-		mode;
 		viewport = node;
 		updateThumbs(node);
 
@@ -274,15 +277,28 @@
 </script>
 
 <div class={cn('relative flex flex-col overflow-hidden', className)} {style}>
-	<div
-		{@attach viewportAttachment}
-		id={viewportId}
-		class={cn('scrollbar-hide min-h-0 w-full flex-1', viewportOverflowClass, viewportClass)}
-		style={viewportStyle}
-		onscroll={handleScroll}
-	>
-		{@render children?.()}
-	</div>
+	{#if viewportTabbable}
+		<div
+			{@attach viewportAttachment}
+			id={viewportId}
+			class={cn('scrollbar-hide min-h-0 w-full flex-1', viewportOverflowClass, viewportClass)}
+			style={viewportStyle}
+			onscroll={handleScroll}
+		>
+			{@render children?.()}
+		</div>
+	{:else}
+		<div
+			{@attach viewportAttachment}
+			id={viewportId}
+			tabindex="-1"
+			class={cn('scrollbar-hide min-h-0 w-full flex-1', viewportOverflowClass, viewportClass)}
+			style={viewportStyle}
+			onscroll={handleScroll}
+		>
+			{@render children?.()}
+		</div>
+	{/if}
 
 	{#if showVerticalTrack}
 		<div
@@ -304,7 +320,7 @@
 				aria-valuemin={0}
 				aria-valuemax={Math.max(0, viewport ? viewport.scrollHeight - viewport.clientHeight : 0)}
 				aria-valuenow={viewport?.scrollTop ?? 0}
-				tabindex="0"
+				tabindex={thumbTabbable ? 0 : -1}
 				class={cn(
 					'relative rounded-full bg-foreground/10 transition-colors duration-150 hover:bg-foreground/30 active:bg-foreground/50',
 					isDragging && dragAxis === 'vertical' && 'bg-foreground/50'
@@ -337,7 +353,7 @@
 				aria-valuemin={0}
 				aria-valuemax={Math.max(0, viewport ? viewport.scrollWidth - viewport.clientWidth : 0)}
 				aria-valuenow={viewport?.scrollLeft ?? 0}
-				tabindex="0"
+				tabindex={thumbTabbable ? 0 : -1}
 				class={cn(
 					'relative h-full rounded-full bg-foreground/10 transition-colors duration-150 hover:bg-foreground/30 active:bg-foreground/50',
 					isDragging && dragAxis === 'horizontal' && 'bg-foreground/50'

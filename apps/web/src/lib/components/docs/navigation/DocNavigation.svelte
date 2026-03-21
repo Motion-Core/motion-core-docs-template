@@ -16,7 +16,7 @@
 </script>
 
 {#if docsUiConfig.pagination.enabled && (previous || next)}
-	<nav class="relative mt-16 border-t border-border pt-9">
+	<nav class="relative mt-16 border-t border-border pt-9" aria-label="Documentation pagination">
 		<div class="grid gap-4 sm:grid-cols-2">
 			{#if previous}
 				<DocNavButton label={docsUiConfig.pagination.previousLabel} {...previous} />

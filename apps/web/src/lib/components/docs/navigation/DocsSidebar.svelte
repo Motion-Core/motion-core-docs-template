@@ -38,7 +38,7 @@
 	});
 </script>
 
-<aside class="flex h-dvh flex-col bg-background">
+<aside class="flex h-dvh flex-col bg-background" aria-label="Documentation sidebar">
 	<div class="flex flex-col gap-8 p-4">
 		<a href="/" class="flex items-center gap-2">
 			<span
@@ -60,7 +60,7 @@
 		viewportClass="p-4"
 		viewportStyle="mask-image: linear-gradient(to bottom, transparent, black 16px, black calc(100% - 16px), transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 16px, black calc(100% - 16px), transparent);"
 	>
-		<nav class="flex flex-col space-y-1">
+		<nav class="flex flex-col space-y-1" aria-label="Documentation pages">
 			<h4 class="mb-2 ml-2 text-xs font-medium tracking-wide text-foreground-muted/70 uppercase">
 				{docsUiConfig.sidebar.navigationLabel}
 			</h4>
@@ -127,13 +127,13 @@
 			<ThemeToggle />
 		{/if}
 		{#if docsUiConfig.sidebar.showRepositoryLink}
-			<a
-				class="group transition-scale inset-shadow relative inline-flex size-7 cursor-pointer items-center justify-center rounded-sm bg-background-inset text-foreground duration-150 ease-out active:scale-[0.95]"
-				href={githubUrl}
-				target="_blank"
-				rel="noreferrer"
-				aria-label={docsUiConfig.sidebar.repositoryAriaLabel}
-			>
+				<a
+					class="group transition-scale inset-shadow relative inline-flex size-7 cursor-pointer items-center justify-center rounded-sm bg-background-inset text-foreground duration-150 ease-out active:scale-[0.95]"
+					href={githubUrl}
+					target="_blank"
+					rel="noreferrer"
+					aria-label={`${docsUiConfig.sidebar.repositoryAriaLabel} (opens in a new tab)`}
+				>
 				<LogoGithub class="size-4 flex-none" />
 			</a>
 		{/if}
