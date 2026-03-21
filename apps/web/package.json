@@ -42,8 +42,9 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test": "vitest run",
 		"test:watch": "vitest",
-		"lint": "prettier --check . && eslint .",
-		"format": "prettier --write ."
+		"lint": "eslint .",
+		"format": "prettier --write .",
+		"format:check": "prettier --check ."
 	},
 	"type": "module",
 	"dependencies": {

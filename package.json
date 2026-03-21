@@ -15,7 +15,8 @@
     "check": "bun run --cwd apps/web check",
     "test": "bun run --cwd apps/web test --passWithNoTests",
     "lint": "bun run --cwd apps/web lint",
-    "format": "bun run --cwd apps/web format"
+    "format": "bun run --cwd apps/web format",
+    "format:check": "bun run --cwd apps/web format:check"
   },
   "dependencies": {
     "prettier-plugin-tailwindcss": "^0.7.2"
