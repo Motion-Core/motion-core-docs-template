@@ -6,6 +6,7 @@
 	import Checkmark from 'carbon-icons-svelte/lib/Checkmark.svelte';
 	import LogoGithub from 'carbon-icons-svelte/lib/LogoGithub.svelte';
 	import OverflowMenuHorizontal from 'carbon-icons-svelte/lib/OverflowMenuHorizontal.svelte';
+	import { tick } from 'svelte';
 
 	type Props = {
 		rawPath?: string | null;
@@ -22,6 +23,7 @@
 	let triggerRef = $state<HTMLButtonElement | null>(null);
 	let dropdownStyle = $state('');
 	let prefetchedContent = $state<string | null>(null);
+	const dropdownId = 'mobile-doc-actions-menu';
 
 	const assistantUrls = $derived(resolveDocAssistantUrls(rawUrl));
 	const chatGptUrl = $derived(assistantUrls.chatGptUrl);
@@ -133,11 +135,57 @@
 
 	function toggleDropdown() {
 		if (!hasMenuActions) return;
-		isDropdownOpen = !isDropdownOpen;
+		if (isDropdownOpen) {
+			closeDropdown({ restoreFocus: true });
+			return;
+		}
+		isDropdownOpen = true;
 	}
 
-	function closeDropdown() {
+	function closeDropdown(options?: { restoreFocus?: boolean }) {
 		isDropdownOpen = false;
+		if (options?.restoreFocus) {
+			triggerRef?.focus();
+		}
+	}
+
+	function getMenuItems() {
+		if (!dropdownRef) return [];
+		return Array.from(dropdownRef.querySelectorAll<HTMLElement>('[role="menuitem"]'));
+	}
+
+	function handleDropdownKeydown(event: KeyboardEvent) {
+		if (!isDropdownOpen) return;
+
+		if (event.key === 'Escape') {
+			event.preventDefault();
+			closeDropdown({ restoreFocus: true });
+			return;
+		}
+
+		const items = getMenuItems();
+		if (items.length === 0) return;
+
+		const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+		const activeIndex = activeElement ? items.indexOf(activeElement) : -1;
+
+		if (event.key === 'ArrowDown') {
+			event.preventDefault();
+			const nextIndex = activeIndex >= 0 ? (activeIndex + 1) % items.length : 0;
+			items[nextIndex]?.focus();
+			return;
+		}
+
+		if (event.key === 'ArrowUp') {
+			event.preventDefault();
+			const nextIndex = activeIndex >= 0 ? (activeIndex - 1 + items.length) % items.length : items.length - 1;
+			items[nextIndex]?.focus();
+			return;
+		}
+
+		if (event.key === 'Tab') {
+			closeDropdown();
+		}
 	}
 
 	function handleClickOutside(event: MouseEvent) {
@@ -164,16 +212,27 @@
 			window.addEventListener('click', handleClickOutside);
 			window.addEventListener('scroll', updatePosition, true);
 			window.addEventListener('resize', updatePosition);
+			window.addEventListener('keydown', handleDropdownKeydown);
 		} else {
 			window.removeEventListener('click', handleClickOutside);
 			window.removeEventListener('scroll', updatePosition, true);
 			window.removeEventListener('resize', updatePosition);
+			window.removeEventListener('keydown', handleDropdownKeydown);
 		}
 		return () => {
 			window.removeEventListener('click', handleClickOutside);
 			window.removeEventListener('scroll', updatePosition, true);
 			window.removeEventListener('resize', updatePosition);
+			window.removeEventListener('keydown', handleDropdownKeydown);
 		};
+	});
+
+	$effect(() => {
+		if (!isDropdownOpen) return;
+		tick().then(() => {
+			const [first] = getMenuItems();
+			first?.focus();
+		});
 	});
 
 	$effect(() => {
@@ -238,46 +297,52 @@
 
 		{#if hasMenuActions}
 			<div class="inset-shadow relative rounded-md bg-background-inset p-1.5">
-				<button
-					bind:this={triggerRef}
-					type="button"
-					onclick={toggleDropdown}
-					class="{buttonClass} w-auto! px-2.5!"
-					aria-label={docsUiConfig.docActions.moreActionsAriaLabel}
-					aria-haspopup="true"
-					aria-expanded={isDropdownOpen}
-				>
-					<OverflowMenuHorizontal class="size-4" />
-				</button>
-
-				{#if isDropdownOpen}
-					<div
-						use:portal
-						bind:this={dropdownRef}
-						style={dropdownStyle}
-						class="card z-50 flex w-48 origin-top-right flex-col gap-0.5 rounded-md bg-background p-1"
-						in:fly={{ y: -5, duration: 200, easing: backOut }}
-						out:fly={{ y: -5, duration: 150, easing: backOut }}
+					<button
+						bind:this={triggerRef}
+						type="button"
+						onclick={toggleDropdown}
+						class="{buttonClass} w-auto! px-2.5!"
+						aria-label={docsUiConfig.docActions.moreActionsAriaLabel}
+						aria-haspopup="menu"
+						aria-controls={dropdownId}
+						aria-expanded={isDropdownOpen}
 					>
-						{#if canShowRepository}
-							<a
-								href={githubUrl}
-								target="_blank"
-								rel="noreferrer"
-								class="group flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm font-medium tracking-normal text-foreground-muted transition-colors hover:bg-background-muted hover:text-foreground"
-							>
+						<OverflowMenuHorizontal class="size-4" />
+					</button>
+
+					{#if isDropdownOpen}
+						<div
+							use:portal={'main'}
+							bind:this={dropdownRef}
+							id={dropdownId}
+							style={dropdownStyle}
+							class="card z-50 flex w-48 origin-top-right flex-col gap-0.5 rounded-md bg-background p-1"
+							role="menu"
+							aria-label={docsUiConfig.docActions.moreActionsAriaLabel}
+							in:fly={{ y: -5, duration: 200, easing: backOut }}
+							out:fly={{ y: -5, duration: 150, easing: backOut }}
+						>
+							{#if canShowRepository}
+								<a
+									href={githubUrl}
+									target="_blank"
+									rel="noreferrer"
+									role="menuitem"
+									class="group flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm font-medium tracking-normal text-foreground-muted transition-colors hover:bg-background-muted hover:text-foreground"
+								>
 								<LogoGithub class="size-4 flex-none" />
 								{docsUiConfig.docActions.repositoryLinkLabel}
 							</a>
 						{/if}
 
 						{#if chatGptUrl}
-							<a
-								href={chatGptUrl}
-								target="_blank"
-								rel="noreferrer"
-								class="group flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm font-medium tracking-normal text-foreground-muted transition-colors hover:bg-background-muted hover:text-foreground"
-							>
+								<a
+									href={chatGptUrl}
+									target="_blank"
+									rel="noreferrer"
+									role="menuitem"
+									class="group flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm font-medium tracking-normal text-foreground-muted transition-colors hover:bg-background-muted hover:text-foreground"
+								>
 								<svg
 									role="img"
 									viewBox="0 0 24 24"
@@ -295,12 +360,13 @@
 						{/if}
 
 						{#if claudeUrl}
-							<a
-								href={claudeUrl}
-								target="_blank"
-								rel="noreferrer"
-								class="group flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm font-medium tracking-normal text-foreground-muted transition-colors hover:bg-background-muted hover:text-foreground"
-							>
+								<a
+									href={claudeUrl}
+									target="_blank"
+									rel="noreferrer"
+									role="menuitem"
+									class="group flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm font-medium tracking-normal text-foreground-muted transition-colors hover:bg-background-muted hover:text-foreground"
+								>
 								<svg
 									role="img"
 									viewBox="0 0 24 24"
