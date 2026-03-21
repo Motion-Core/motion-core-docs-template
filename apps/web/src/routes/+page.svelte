@@ -24,6 +24,7 @@
 				class="inline-flex text-accent [&_svg]:size-14 [&_svg]:fill-current md:[&_svg]:size-22"
 				aria-hidden="true"
 			>
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 				{@html brandingConfig.logoRaw}
 			</span>
 
