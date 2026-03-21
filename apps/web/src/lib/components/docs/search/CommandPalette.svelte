@@ -92,7 +92,8 @@
 
 		const first = focusable[0];
 		const last = focusable[focusable.length - 1];
-		const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+		const activeElement =
+			document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
 		if (event.shiftKey) {
 			if (!activeElement || activeElement === first || !dialogRef.contains(activeElement)) {
@@ -202,17 +203,18 @@
 				query = '';
 				contentHeight = 0;
 			}}
+		>
+			<span id="command-palette-title" class="sr-only">{docsUiConfig.search.dialogPlaceholder}</span
 			>
-				<span id="command-palette-title" class="sr-only">{docsUiConfig.search.dialogPlaceholder}</span>
-				<div class="flex items-center border-b border-border/60 px-3">
+			<div class="flex items-center border-b border-border/60 px-3">
 				<Search size={24} class="mr-2 text-foreground-muted/70" />
-					<input
-						bind:this={inputRef}
-						bind:value={query}
-						class="flex h-12 w-full bg-transparent text-base tracking-normal text-foreground placeholder:text-foreground-muted/70"
-						placeholder={docsUiConfig.search.dialogPlaceholder}
-						aria-label={docsUiConfig.search.dialogPlaceholder}
-					/>
+				<input
+					bind:this={inputRef}
+					bind:value={query}
+					class="flex h-12 w-full bg-transparent text-base tracking-normal text-foreground placeholder:text-foreground-muted/70 focus:outline-none focus-visible:border-none! focus-visible:ring-0! focus-visible:ring-offset-0! focus-visible:outline-none!"
+					placeholder={docsUiConfig.search.dialogPlaceholder}
+					aria-label={docsUiConfig.search.dialogPlaceholder}
+				/>
 				<kbd
 					class="pointer-events-none inset-shadow relative hidden h-5 items-center gap-1 rounded-[calc(var(--radius-base)*1.5)] bg-background-inset px-1.5 font-mono text-[10px] font-medium tracking-normal text-foreground-muted/70 select-none sm:flex"
 				>
@@ -232,10 +234,10 @@
 						>
 							{#each results as result, i (result.slug + (result.anchor || '') + i)}
 								{@const isChild = result.matchType === 'heading' || result.matchType === 'content'}
-									<button
-										tabindex="-1"
-										class={cn(
-											'group relative flex w-full flex-col items-start gap-1 rounded-sm px-3 py-2 text-sm font-medium tracking-normal',
+								<button
+									tabindex="-1"
+									class={cn(
+										'group relative flex w-full flex-col items-start gap-1 rounded-sm px-3 py-2 text-sm font-medium tracking-normal',
 										isChild && 'pl-8',
 										i === selectedIndex
 											? 'bg-background-muted text-foreground'
@@ -303,4 +305,4 @@
 			</div>
 		</div>
 	</div>
-	{/if}
+{/if}
