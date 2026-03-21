@@ -1,3 +1,7 @@
+<script module lang="ts">
+	let componentPreviewCounter = 0;
+</script>
+
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { cn } from '$lib/utils/cn';
@@ -33,6 +37,8 @@
 		class: className = '',
 		...restProps
 	}: ComponentProps = $props();
+	const tabsInstanceId = `component-preview-${++componentPreviewCounter}`;
+	const panelId = `${tabsInstanceId}-panel`;
 
 	let previewKey = $state(0);
 
@@ -69,6 +75,7 @@
 	});
 
 	const activeSource = $derived((tabs.at(activeTab) ?? null) as SourceTab | null);
+	const activeTabId = $derived(`${tabsInstanceId}-tab-${activeTab}`);
 
 	let highlightedSources = $state<Record<string, { light: string; dark: string }>>({});
 
@@ -90,6 +97,49 @@
 			});
 		});
 	});
+
+	function setActiveTab(index: number) {
+		activeTab = index;
+	}
+
+	function focusTabByIndex(index: number) {
+		const tabElement = document.getElementById(`${tabsInstanceId}-tab-${index}`);
+		if (tabElement instanceof HTMLButtonElement) {
+			tabElement.focus();
+		}
+	}
+
+	function handleTabKeydown(event: KeyboardEvent, index: number) {
+		if (!tabs.length) return;
+		const lastIndex = tabs.length - 1;
+		let nextIndex = index;
+
+		switch (event.key) {
+			case 'ArrowRight':
+			case 'ArrowDown':
+				event.preventDefault();
+				nextIndex = index === lastIndex ? 0 : index + 1;
+				break;
+			case 'ArrowLeft':
+			case 'ArrowUp':
+				event.preventDefault();
+				nextIndex = index === 0 ? lastIndex : index - 1;
+				break;
+			case 'Home':
+				event.preventDefault();
+				nextIndex = 0;
+				break;
+			case 'End':
+				event.preventDefault();
+				nextIndex = lastIndex;
+				break;
+			default:
+				return;
+		}
+
+		setActiveTab(nextIndex);
+		focusTabByIndex(nextIndex);
+	}
 </script>
 
 <section
@@ -119,22 +169,28 @@
 		<div
 			class="card mt-2 flex flex-1 flex-col overflow-hidden rounded-md rounded-b-md bg-background"
 		>
-			{#if tabs.length}
-				<div class="flex items-center border-b border-border bg-background text-sm">
-					<div class="flex flex-1 items-center overflow-x-auto">
-						{#each tabs as tab, index (tab.name)}
-							<button
-								type="button"
-								class={cn(
-									'border-b-2 px-4 py-2.5 text-sm font-medium tracking-normal whitespace-nowrap transition-colors duration-150 ease-out',
-									index === activeTab
-										? 'border-accent text-foreground'
-										: 'border-transparent text-foreground-muted hover:text-foreground'
-								)}
-								onclick={() => (activeTab = index)}
-							>
-								{tab.name}
-							</button>
+				{#if tabs.length}
+					<div class="flex items-center border-b border-border bg-background text-sm">
+						<div class="flex flex-1 items-center overflow-x-auto" role="tablist" aria-label="Source files">
+							{#each tabs as tab, index (tab.name)}
+								<button
+									type="button"
+									id={`${tabsInstanceId}-tab-${index}`}
+									role="tab"
+									aria-selected={index === activeTab}
+									aria-controls={panelId}
+									tabindex={index === activeTab ? 0 : -1}
+									class={cn(
+										'border-b-2 px-4 py-2.5 text-sm font-medium tracking-normal whitespace-nowrap transition-colors duration-150 ease-out',
+										index === activeTab
+											? 'border-accent text-foreground'
+											: 'border-transparent text-foreground-muted hover:text-foreground'
+									)}
+									onclick={() => setActiveTab(index)}
+									onkeydown={(event) => handleTabKeydown(event, index)}
+								>
+									{tab.name}
+								</button>
 						{/each}
 					</div>
 					<div class="mr-2 w-fit flex-none">
@@ -142,28 +198,30 @@
 							<CopyCodeButton class="size-6" code={activeSource.code} />
 						{/if}
 					</div>
+					</div>
+				{/if}
+				<div id={panelId} role="tabpanel" tabindex="0" aria-labelledby={activeTabId} class="max-h-96 flex-1">
+					<ScrollArea id="component-preview" class="relative h-full">
+						<div
+							class="p-4 text-sm *:mt-0 *:rounded-none *:border-0 *:bg-transparent *:p-0 *:inset-shadow-none"
+						>
+							{#if activeSource}
+								{#if highlightedSources[activeSource.name]}
+									<ShikiCodeBlock
+										code=""
+										htmlLight={highlightedSources[activeSource.name].light}
+										htmlDark={highlightedSources[activeSource.name].dark}
+										unstyled={true}
+									/>
+								{:else}
+									<pre class="p-4">{activeSource.code}</pre>
+								{/if}
+							{:else}
+								{@render codeSlot?.()}
+							{/if}
+						</div>
+					</ScrollArea>
 				</div>
-			{/if}
-			<ScrollArea id="component-preview" class="relative max-h-96 flex-1">
-				<div
-					class="p-4 text-sm *:mt-0 *:rounded-none *:border-0 *:bg-transparent *:p-0 *:inset-shadow-none"
-				>
-					{#if activeSource}
-						{#if highlightedSources[activeSource.name]}
-							<ShikiCodeBlock
-								code=""
-								htmlLight={highlightedSources[activeSource.name].light}
-								htmlDark={highlightedSources[activeSource.name].dark}
-								unstyled={true}
-							/>
-						{:else}
-							<pre class="p-4">{activeSource.code}</pre>
-						{/if}
-					{:else}
-						{@render codeSlot?.()}
-					{/if}
-				</div>
-			</ScrollArea>
+			</div>
 		</div>
-	</div>
-</section>
+	</section>
