@@ -15,11 +15,12 @@
 	let query = $state('');
 	let results = $derived(searchDocs(query));
 	let selectedIndex = $state(0);
+	let normalizedSelectedIndex = $derived(
+		results.length === 0 ? 0 : Math.min(selectedIndex, results.length - 1)
+	);
 	let inputRef = $state<HTMLInputElement>();
 	let dialogRef = $state<HTMLDivElement>();
 	let contentHeight = $state(0);
-	let restoreFocusEl: HTMLElement | null = null;
-	let wasOpen = false;
 
 	function handleGlobalKeydown(e: KeyboardEvent) {
 		const hotkey = docsUiConfig.search.hotkey;
@@ -42,33 +43,23 @@
 		};
 	});
 
-	$effect(() => {
-		if (!docsUiConfig.search.enabled) return;
-		const isOpen = searchState.isOpen;
-
-		if (isOpen && !wasOpen) {
-			const activeElement = document.activeElement;
-			restoreFocusEl = activeElement instanceof HTMLElement ? activeElement : null;
-			tick().then(() => {
-				inputRef?.focus();
-			});
-		}
-
-		if (!isOpen && wasOpen) {
-			restoreFocusEl?.focus();
-			restoreFocusEl = null;
-		}
-
-		wasOpen = isOpen;
-	});
-
-	$effect(() => {
-		void results;
-		selectedIndex = 0;
-	});
-
 	function close() {
 		searchState.close();
+	}
+
+	function manageDialogFocus(_node: HTMLDivElement) {
+		const activeElement = document.activeElement;
+		const restoreFocusEl = activeElement instanceof HTMLElement ? activeElement : null;
+
+		tick().then(() => {
+			inputRef?.focus();
+		});
+
+		return {
+			destroy() {
+				restoreFocusEl?.focus();
+			}
+		};
 	}
 
 	function getFocusableElements() {
@@ -135,19 +126,11 @@
 			selectedIndex = (selectedIndex - 1 + results.length) % results.length;
 		} else if (e.key === 'Enter') {
 			e.preventDefault();
-			if (results[selectedIndex]) {
-				selectResult(results[selectedIndex]);
+			if (results[normalizedSelectedIndex]) {
+				selectResult(results[normalizedSelectedIndex]);
 			}
 		}
 	}
-
-	$effect(() => {
-		if (!docsUiConfig.search.enabled) return;
-		if (searchState.isOpen) {
-			window.addEventListener('keydown', handleKeydown);
-			return () => window.removeEventListener('keydown', handleKeydown);
-		}
-	});
 
 	function selectResult(result: ReturnType<typeof searchDocs>[number]) {
 		const href = `${result.slug}${result.anchor || ''}`;
@@ -173,6 +156,8 @@
 	}
 </script>
 
+<svelte:window onkeydown={handleKeydown} />
+
 {#if docsUiConfig.search.enabled && searchState.isOpen}
 	<div
 		class="fixed inset-0 z-60 bg-background-inset/80 backdrop-blur-sm"
@@ -183,6 +168,7 @@
 
 	<div
 		bind:this={dialogRef}
+		use:manageDialogFocus
 		class="fixed inset-0 z-60 flex items-start justify-center p-4 sm:pt-[10vh]"
 		role="dialog"
 		aria-modal="true"
@@ -201,6 +187,7 @@
 			}}
 			onoutroend={() => {
 				query = '';
+				selectedIndex = 0;
 				contentHeight = 0;
 			}}
 		>
@@ -210,10 +197,14 @@
 				<Search size={24} class="mr-2 text-foreground-muted/70" />
 				<input
 					bind:this={inputRef}
-					bind:value={query}
+					value={query}
 					class="flex h-12 w-full bg-transparent text-base tracking-normal text-foreground placeholder:text-foreground-muted/70 focus:outline-none focus-visible:border-none! focus-visible:ring-0! focus-visible:ring-offset-0! focus-visible:outline-none!"
 					placeholder={docsUiConfig.search.dialogPlaceholder}
 					aria-label={docsUiConfig.search.dialogPlaceholder}
+					oninput={(event) => {
+						query = (event.currentTarget as HTMLInputElement).value;
+						selectedIndex = 0;
+					}}
 				/>
 				<kbd
 					class="pointer-events-none inset-shadow relative hidden h-5 items-center gap-1 rounded-[calc(var(--radius-base)*1.5)] bg-background-inset px-1.5 font-mono text-[10px] font-medium tracking-normal text-foreground-muted/70 select-none sm:flex"
@@ -239,7 +230,7 @@
 									class={cn(
 										'group relative flex w-full flex-col items-start gap-1 rounded-sm px-3 py-2 text-sm font-medium tracking-normal',
 										isChild && 'pl-8',
-										i === selectedIndex
+										i === normalizedSelectedIndex
 											? 'bg-background-muted text-foreground'
 											: 'text-foreground hover:bg-background-muted'
 									)}
