@@ -12,11 +12,20 @@
 	let toggleButtonRef = $state<HTMLButtonElement | null>(null);
 	let closeButtonRef = $state<HTMLButtonElement | null>(null);
 	let restoreFocusEl: HTMLElement | null = null;
+	const canUseDocument = typeof document !== 'undefined';
+
+	function setBodyOverflow(value: string) {
+		if (!canUseDocument) return;
+		document.body.style.overflow = value;
+	}
 
 	function open() {
-		const activeElement = document.activeElement;
+		const activeElement =
+			canUseDocument && document.activeElement instanceof HTMLElement
+				? document.activeElement
+				: null;
 		restoreFocusEl = activeElement instanceof HTMLElement ? activeElement : toggleButtonRef;
-		document.body.style.overflow = 'hidden';
+		setBodyOverflow('hidden');
 
 		if (isVisible) {
 			isOpen = true;
@@ -45,7 +54,7 @@
 	function close(options: { restoreFocus?: boolean } = {}) {
 		const { restoreFocus = true } = options;
 		isOpen = false;
-		document.body.style.overflow = '';
+		setBodyOverflow('');
 
 		if (restoreFocus) {
 			restoreFocusEl?.focus();
@@ -78,7 +87,10 @@
 
 		const first = focusable[0];
 		const last = focusable[focusable.length - 1];
-		const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+		const activeElement =
+			canUseDocument && document.activeElement instanceof HTMLElement
+				? document.activeElement
+				: null;
 
 		if (event.shiftKey) {
 			if (!activeElement || activeElement === first || !panelRef.contains(activeElement)) {
@@ -118,7 +130,7 @@
 	});
 
 	onDestroy(() => {
-		document.body.style.overflow = '';
+		setBodyOverflow('');
 	});
 </script>
 
