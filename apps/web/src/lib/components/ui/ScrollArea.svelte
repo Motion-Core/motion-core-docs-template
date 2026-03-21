@@ -240,7 +240,6 @@
 	}
 
 	const viewportAttachment: Attachment<HTMLDivElement> = (node) => {
-		mode;
 		viewport = node;
 		updateThumbs(node);
 

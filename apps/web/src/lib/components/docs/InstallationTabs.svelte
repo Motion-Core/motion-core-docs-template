@@ -21,7 +21,8 @@
 	};
 
 	let { pkg = siteConfig.package.name, args, isDev = false }: Props = $props();
-	const tabsInstanceId = `installation-tabs-${++installationTabsCounter}`;
+	installationTabsCounter += 1;
+	const tabsInstanceId = `installation-tabs-${installationTabsCounter}`;
 	const panelId = `${tabsInstanceId}-panel`;
 
 	const commands: Record<PackageManager, string> = $derived(
@@ -83,7 +84,7 @@
 
 	function handleTabKeydown(event: KeyboardEvent, index: number) {
 		const lastIndex = packageManagers.length - 1;
-		let nextIndex = index;
+		let nextIndex: number;
 
 		switch (event.key) {
 			case 'ArrowRight':
