@@ -127,13 +127,13 @@
 			<ThemeToggle />
 		{/if}
 		{#if docsUiConfig.sidebar.showRepositoryLink}
-			<a
-				class="group transition-scale inset-shadow relative inline-flex size-7 cursor-pointer items-center justify-center rounded-sm bg-background-inset text-foreground duration-150 ease-out active:scale-[0.95]"
-				href={githubUrl}
-				target="_blank"
-				rel="noreferrer"
-				aria-label={docsUiConfig.sidebar.repositoryAriaLabel}
-			>
+				<a
+					class="group transition-scale inset-shadow relative inline-flex size-7 cursor-pointer items-center justify-center rounded-sm bg-background-inset text-foreground duration-150 ease-out active:scale-[0.95]"
+					href={githubUrl}
+					target="_blank"
+					rel="noreferrer"
+					aria-label={`${docsUiConfig.sidebar.repositoryAriaLabel} (opens in a new tab)`}
+				>
 				<LogoGithub class="size-4 flex-none" />
 			</a>
 		{/if}
