@@ -23,23 +23,6 @@ html {
 	--accent-secondary: oklch(0.5096 0.151959 44.4414);
 	--border: oklch(0.4224 0.0013 var(--base-hue) / 0.1);
 	--highlight: oklch(0.4224 0.0013 var(--base-hue));
-
-	--shadow-xs: 0px 1px 1px -0.5px rgba(0, 0, 0, 0.06);
-	--shadow-sm: 0px 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0px 3px 3px -1.5px rgba(0, 0, 0, 0.06);
-	--shadow-md:
-		0px 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0px 3px 3px -1.5px rgba(0, 0, 0, 0.06),
-		0px 6px 6px -3px rgba(0, 0, 0, 0.06);
-	--shadow-lg:
-		0px 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0px 3px 3px -1.5px rgba(0, 0, 0, 0.06),
-		0px 6px 6px -3px rgba(0, 0, 0, 0.06), 0px 12px 12px -6px rgba(0, 0, 0, 0.06);
-	--shadow-xl:
-		0px 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0px 3px 3px -1.5px rgba(0, 0, 0, 0.06),
-		0px 6px 6px -3px rgba(0, 0, 0, 0.06), 0px 12px 12px -6px rgba(0, 0, 0, 0.06),
-		0px 24px 24px -12px rgba(0, 0, 0, 0.06);
-	--shadow-2xl:
-		0px 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0px 3px 3px -1.5px rgba(0, 0, 0, 0.06),
-		0px 6px 6px -3px rgba(0, 0, 0, 0.06), 0px 12px 12px -6px rgba(0, 0, 0, 0.06),
-		0px 24px 24px -12px rgba(0, 0, 0, 0.06), 0px 48px 48px -24px rgba(0, 0, 0, 0.06);
 }
 
 .dark {
@@ -71,13 +54,13 @@ html {
 	--color-accent-secoundary: var(--accent-secondary);
 	--color-border: var(--border);
 
-	--font-weight-light: 300;
+	--font-weight-light: 250;
 	--font-weight-normal: 350;
-	--font-weight-medium: 400;
-	--font-weight-semibold: 450;
-	--font-weight-bold: 500;
-	--font-weight-extrabold: 550;
-	--font-weight-black: 600;
+	--font-weight-medium: 450;
+	--font-weight-semibold: 550;
+	--font-weight-bold: 650;
+	--font-weight-extrabold: 750;
+	--font-weight-black: 850;
 
 	--tracking-tighter: -0.06rem;
 	--tracking-tight: -0.035rem;
@@ -96,12 +79,22 @@ html {
 	--radius-4xl: calc(var(--radius-base) * 16);
 	--radius-full: 9999px;
 
-	--shadow-xs: var(--shadow-xs);
-	--shadow-sm: var(--shadow-sm);
-	--shadow-md: var(--shadow-md);
-	--shadow-lg: var(--shadow-lg);
-	--shadow-xl: var(--shadow-xl);
-	--shadow-2xl: var(--shadow-2xl);
+	--shadow-xs: 0px 1px 1px -0.5px rgba(0, 0, 0, 0.06);
+	--shadow-sm: 0px 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0px 3px 3px -1.5px rgba(0, 0, 0, 0.06);
+	--shadow-md:
+		0px 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0px 3px 3px -1.5px rgba(0, 0, 0, 0.06),
+		0px 6px 6px -3px rgba(0, 0, 0, 0.06);
+	--shadow-lg:
+		0px 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0px 3px 3px -1.5px rgba(0, 0, 0, 0.06),
+		0px 6px 6px -3px rgba(0, 0, 0, 0.06), 0px 12px 12px -6px rgba(0, 0, 0, 0.06);
+	--shadow-xl:
+		0px 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0px 3px 3px -1.5px rgba(0, 0, 0, 0.06),
+		0px 6px 6px -3px rgba(0, 0, 0, 0.06), 0px 12px 12px -6px rgba(0, 0, 0, 0.06),
+		0px 24px 24px -12px rgba(0, 0, 0, 0.06);
+	--shadow-2xl:
+		0px 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0px 3px 3px -1.5px rgba(0, 0, 0, 0.06),
+		0px 6px 6px -3px rgba(0, 0, 0, 0.06), 0px 12px 12px -6px rgba(0, 0, 0, 0.06),
+		0px 24px 24px -12px rgba(0, 0, 0, 0.06), 0px 48px 48px -24px rgba(0, 0, 0, 0.06);
 }
 
 @layer base {
@@ -128,20 +121,6 @@ html {
 	}
 }
 
-@utility bg-dashed {
-	background-image: linear-gradient(
-		45deg,
-		var(--color-border) 12.5%,
-		transparent 12.5%,
-		transparent 50%,
-		var(--color-border) 50%,
-		var(--color-border) 62.5%,
-		transparent 62.5%,
-		transparent 100%
-	);
-	background-size: 0.25rem 0.25rem;
-}
-
 @utility inset-shadow {
 	position: relative;
 	isolation: isolate;
@@ -153,12 +132,10 @@ html {
 		inset 0 0 0 1px oklch(from var(--highlight) l c h / 10%);
 }
 
-@layer utilities {
-	.card {
-		box-shadow:
-			0 -1px rgba(255, 255, 255, 0.06),
-			0 4px 8px rgba(0, 0, 0, 0.05),
-			0 0 0 1px oklch(from var(--highlight) l c h / 10%),
-			0 1px 6px -4px #000;
-	}
+@utility card {
+	box-shadow:
+		0 -1px rgba(255, 255, 255, 0.06),
+		0 4px 8px rgba(0, 0, 0, 0.05),
+		0 0 0 1px oklch(from var(--highlight) l c h / 10%),
+		0 1px 6px -4px #000;
 }
