@@ -16,11 +16,11 @@ export const docsNavigation: DocItem[] = [
 			{
 				slug: 'structure-components',
 				name: 'Structure Components'
-			},
-			{
-				slug: 'changelog',
-				name: 'Changelog'
 			}
 		]
+	},
+	{
+		slug: 'changelog',
+		name: 'Changelog'
 	}
 ];
