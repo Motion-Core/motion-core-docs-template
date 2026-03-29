@@ -18,5 +18,9 @@ export const docsNavigation: DocItem[] = [
 				name: 'Structure Components'
 			}
 		]
+	},
+	{
+		slug: 'changelog',
+		name: 'Changelog'
 	}
 ];
