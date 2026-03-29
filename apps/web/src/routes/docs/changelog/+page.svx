@@ -1,31 +1,33 @@
 ---
 title: Changelog
-description: All notable changes to Motion Core Docs Template will be documented in this file. The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
+description: This is a mock changelog used only to preview documentation behavior in this template. Entries below are fictional examples that demonstrate changelog formatting and table-of-contents behavior.
 ---
 
 > This page is auto-generated from `CHANGELOG.md` in the repository root.
 
-## [Unreleased]
+## Unreleased
 ### Added
-- Added changelog route generation from root `CHANGELOG.md`.
+- Mock entry: demonstrates how a new section appears before release.
+- Mock entry: shows that nested headings are rendered correctly in docs.
 
 ### Changed
-- Improved docs heading link sizing for `h1` through `h4` components.
+- Mock entry: example wording for non-breaking updates.
 
 ### Fixed
-- Limited changelog table-of-contents entries to version headings only.
+- Mock entry: example bug-fix note for docs presentation.
 
-## [0.1.1] - 2026-03-26
+## 0.0.2-mock - 2026-01-15
 ### Added
-- Added docs search trigger and command palette wiring for template projects.
+- Mock entry: sample second release with two feature bullets.
+- Mock entry: another added item to make the section non-trivial.
 
 ### Changed
-- Updated docs shell spacing and table-of-contents behavior in the default layout.
+- Mock entry: adjusted wording and structure in demo docs pages.
 
-## [0.1.0] - 2026-03-15
+### Fixed
+- Mock entry: corrected placeholder links in sample content.
+
+## 0.0.1-mock - 2026-01-01
 ### Added
-- Initial public template release with SvelteKit, mdsvex docs routes, and shared docs UI components.
-
-[Unreleased]: https://github.com/Motion-Core/motion-core-docs-template/compare/v0.1.1...HEAD
-[0.1.1]: https://github.com/Motion-Core/motion-core-docs-template/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/Motion-Core/motion-core-docs-template/releases/tag/v0.1.0
+- Mock entry: initial fake release used for changelog route previews.
+- Mock entry: baseline section for testing previous/next docs navigation.
