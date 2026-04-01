@@ -34,7 +34,7 @@
 		"predev": "bun run docs:changelog",
 		"dev": "vite dev",
 		"prebuild": "bun run docs:changelog",
-		"build": "vite build && node ./scripts/patch-cloudflare-worker-wasm.mjs",
+		"build": "vite build",
 		"preview": "vite preview",
 		"preview:cf": "bun run build && wrangler dev",
 		"preview:cf:remote": "bun run build && wrangler dev --remote",
@@ -52,12 +52,10 @@
 	"type": "module",
 	"dependencies": {
 		"@fontsource/inter": "^5.2.8",
-		"@resvg/resvg-wasm": "^2.6.2",
+		"@takumi-rs/image-response": "1.0.0-rc.12",
 		"carbon-icons-svelte": "^13.9.0",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
-		"satori": "^0.25.0",
-		"satori-html": "^0.3.2",
 		"tailwind-merge": "^3.5.0"
 	}
 }
