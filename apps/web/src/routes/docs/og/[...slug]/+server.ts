@@ -2,8 +2,8 @@ import { error } from '@sveltejs/kit';
 import ImageResponse from '@takumi-rs/image-response';
 import type { RequestHandler } from './$types';
 import { brandLogoRaw, getDocBySlug, getDocMetadata, siteConfig } from '$lib';
-import interLatin400DataUri from '@fontsource/inter/files/inter-latin-400-normal.woff?inline';
-import interLatin500DataUri from '@fontsource/inter/files/inter-latin-500-normal.woff?inline';
+import interLatin400DataUri from '@fontsource/inter/files/inter-latin-400-normal.woff2?inline';
+import interLatin500DataUri from '@fontsource/inter/files/inter-latin-500-normal.woff2?inline';
 
 const OG_WIDTH = 1200;
 const OG_HEIGHT = 630;
@@ -18,7 +18,11 @@ type TakumiElement = {
 
 type TakumiChild = TakumiElement | string;
 
-const el = (type: string, props: Record<string, unknown> = {}, ...children: TakumiChild[]): TakumiElement => ({
+const el = (
+	type: string,
+	props: Record<string, unknown> = {},
+	...children: TakumiChild[]
+): TakumiElement => ({
 	type,
 	props:
 		children.length === 0
