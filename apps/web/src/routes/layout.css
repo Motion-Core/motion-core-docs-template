@@ -15,8 +15,6 @@ html {
 	--background-inset: oklch(0.9764 0.0013 var(--base-hue));
 	--background: oklch(1 0 0);
 	--background-muted: oklch(0.956 0.002 var(--base-hue));
-	--white-fixed: oklch(1 0 0);
-	--black-fixed: oklch(0.183 0.006 var(--base-hue));
 	--foreground: oklch(0.1881 0.006 var(--base-hue));
 	--foreground-muted: oklch(0.5493 0.0081 var(--base-hue));
 	--accent: oklch(0.6996 0.201959 44.4414);
@@ -28,7 +26,7 @@ html {
 .dark {
 	--background-inset: oklch(0.2099 0.0039 var(--base-hue));
 	--background: oklch(0.2574 0.0056 var(--base-hue));
-	--background-muted: oklch(0.283 0.0091 var(--base-hue));
+	--background-muted: oklch(0.3017 0.0073 var(--base-hue));
 	--foreground: oklch(0.9674 0.0013 var(--base-hue));
 	--foreground-muted: oklch(0.669 0.0107 var(--base-hue));
 	--accent: oklch(0.6996 0.181959 44.4414);
@@ -49,18 +47,9 @@ html {
 	--color-background-muted: var(--background-muted);
 	--color-foreground: var(--foreground);
 	--color-foreground-muted: var(--foreground-muted);
-	--color-white-fixed: var(--white-fixed);
 	--color-accent: var(--accent);
 	--color-accent-secoundary: var(--accent-secondary);
 	--color-border: var(--border);
-
-	--font-weight-light: 250;
-	--font-weight-normal: 350;
-	--font-weight-medium: 450;
-	--font-weight-semibold: 550;
-	--font-weight-bold: 650;
-	--font-weight-extrabold: 750;
-	--font-weight-black: 850;
 
 	--tracking-tighter: -0.06rem;
 	--tracking-tight: -0.035rem;
@@ -99,7 +88,7 @@ html {
 
 @layer base {
 	body {
-		@apply bg-background font-sans text-foreground;
+		@apply bg-background font-sans text-foreground antialiased;
 	}
 
 	* {
@@ -134,7 +123,7 @@ html {
 
 @utility card {
 	box-shadow:
-		0 -1px rgba(255, 255, 255, 0.06),
+		0 -1px rgba(255, 255, 255, 0.08),
 		0 4px 8px rgba(0, 0, 0, 0.05),
 		0 0 0 1px oklch(from var(--highlight) l c h / 10%),
 		0 1px 6px -4px #000;
