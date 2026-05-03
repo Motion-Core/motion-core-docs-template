@@ -1,7 +1,3 @@
-<script module lang="ts">
-	let installationTabsCounter = 0;
-</script>
-
 <script lang="ts">
 	import { cn } from '$lib/utils/cn';
 	import CopyCodeButton from './markdown/CopyCodeButton.svelte';
@@ -21,9 +17,6 @@
 	};
 
 	let { pkg = siteConfig.package.name, args, isDev = false }: Props = $props();
-	installationTabsCounter += 1;
-	const tabsInstanceId = `installation-tabs-${installationTabsCounter}`;
-	const panelId = `${tabsInstanceId}-panel`;
 
 	const commands: Record<PackageManager, string> = $derived(
 		isDev
@@ -42,96 +35,45 @@
 	);
 
 	const activeCommand = $derived(commands[packageManagerStore.active]);
-	const activeTabId = $derived(`${tabsInstanceId}-tab-${packageManagerStore.active}`);
 
-	async function highlightCommands(
-		value: Record<PackageManager, string>
-	): Promise<Record<PackageManager, { light: string; dark: string }>> {
-		const highlighter = await getHighlighter();
-		const highlighted = {} as Record<PackageManager, { light: string; dark: string }>;
+	let highlightedCommands = $state<Record<PackageManager, { light: string; dark: string } | null>>({
+		npm: null,
+		pnpm: null,
+		bun: null,
+		yarn: null
+	});
 
-		for (const pm of packageManagers) {
-			const cmd = value[pm];
-			highlighted[pm] = {
-				light: highlighter.codeToHtml(cmd, {
-					lang: 'bash',
-					theme: 'github-light'
-				}),
-				dark: highlighter.codeToHtml(cmd, {
-					lang: 'bash',
-					theme: 'github-dark'
-				})
-			};
-		}
-
-		return highlighted;
-	}
-
-	const highlightedCommandsPromise = $derived(highlightCommands(commands));
-
-	function setActivePackageManager(pm: PackageManager) {
-		packageManagerStore.active = pm;
-	}
-
-	function focusTabByIndex(index: number) {
-		const targetPm = packageManagers[index];
-		if (!targetPm) return;
-		const tabElement = document.getElementById(`${tabsInstanceId}-tab-${targetPm}`);
-		if (tabElement instanceof HTMLButtonElement) {
-			tabElement.focus();
-		}
-	}
-
-	function handleTabKeydown(event: KeyboardEvent, index: number) {
-		const lastIndex = packageManagers.length - 1;
-		let nextIndex: number;
-
-		switch (event.key) {
-			case 'ArrowRight':
-			case 'ArrowDown':
-				event.preventDefault();
-				nextIndex = index === lastIndex ? 0 : index + 1;
-				break;
-			case 'ArrowLeft':
-			case 'ArrowUp':
-				event.preventDefault();
-				nextIndex = index === 0 ? lastIndex : index - 1;
-				break;
-			case 'Home':
-				event.preventDefault();
-				nextIndex = 0;
-				break;
-			case 'End':
-				event.preventDefault();
-				nextIndex = lastIndex;
-				break;
-			default:
-				return;
-		}
-
-		const nextPm = packageManagers[nextIndex];
-		if (!nextPm) return;
-		setActivePackageManager(nextPm);
-		focusTabByIndex(nextIndex);
-	}
+	$effect(() => {
+		getHighlighter().then((highlighter) => {
+			for (const pm of packageManagers) {
+				const cmd = commands[pm];
+				highlightedCommands[pm] = {
+					light: highlighter.codeToHtml(cmd, {
+						lang: 'bash',
+						theme: 'github-light'
+					}),
+					dark: highlighter.codeToHtml(cmd, {
+						lang: 'bash',
+						theme: 'github-dark'
+					})
+				};
+			}
+		});
+	});
 </script>
 
 <div class="inset-shadow my-6 rounded-lg bg-background-inset p-1.5">
-		<div class="card relative w-full rounded-md bg-background">
-			<div class="flex items-center justify-between rounded-t-md border-b border-border">
-				<div class="flex items-center" role="tablist" aria-label="Package managers">
-					{#each packageManagers as pm, index (pm)}
-						<button
-							id={`${tabsInstanceId}-tab-${pm}`}
-							role="tab"
-							aria-selected={packageManagerStore.active === pm}
-							aria-controls={panelId}
-							tabindex={packageManagerStore.active === pm ? 0 : -1}
-							onclick={() => setActivePackageManager(pm)}
-							onkeydown={(event) => handleTabKeydown(event, index)}
-							class={cn(
-								'relative px-4 py-2.5 text-sm font-medium tracking-normal transition-colors duration-150 ease-out outline-none select-none',
-								packageManagerStore.active === pm
+	<div class="relative w-full rounded-md bg-background card">
+		<div
+			class="relative flex items-center justify-between rounded-t-md after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-border after:shadow-2xs after:shadow-white after:content-[''] dark:after:bg-background-inset dark:after:shadow-border"
+		>
+			<div class="flex items-center">
+				{#each packageManagers as pm (pm)}
+					<button
+						onclick={() => (packageManagerStore.active = pm)}
+						class={cn(
+							'relative px-4 py-2.5 text-sm font-medium tracking-normal transition-colors duration-150 ease-out outline-none select-none',
+							packageManagerStore.active === pm
 								? 'text-foreground'
 								: 'text-foreground-muted hover:text-foreground'
 						)}
@@ -147,28 +89,21 @@
 			<CopyCodeButton code={activeCommand} class="mr-2" />
 		</div>
 
-			<div
-				id={panelId}
-				role="tabpanel"
-				aria-labelledby={activeTabId}
-				class="min-h-12.5 p-4 [&>div]:mt-0 [&>div]:rounded-none [&>div]:border-0 [&>div]:bg-transparent [&>div]:p-0 [&>div]:shadow-none [&>div]:[box-shadow:none]!"
-			>
-				{#await highlightedCommandsPromise}
-					<code class="block font-mono text-sm leading-relaxed whitespace-pre text-foreground">
-						{activeCommand}
-					</code>
-				{:then highlightedCommands}
-					<ShikiCodeBlock
-						code=""
-						htmlLight={highlightedCommands[packageManagerStore.active].light}
-						htmlDark={highlightedCommands[packageManagerStore.active].dark}
-						unstyled={true}
-					/>
-				{:catch}
-					<code class="block font-mono text-sm leading-relaxed whitespace-pre text-foreground">
-						{activeCommand}
-					</code>
-				{/await}
+		<div
+			class="min-h-12.5 p-4 [&>div]:mt-0 [&>div]:rounded-none [&>div]:border-0 [&>div]:bg-transparent [&>div]:p-0 [&>div]:shadow-none [&>div]:[box-shadow:none]!"
+		>
+			{#if highlightedCommands[packageManagerStore.active]}
+				<ShikiCodeBlock
+					code=""
+					htmlLight={highlightedCommands[packageManagerStore.active]!.light}
+					htmlDark={highlightedCommands[packageManagerStore.active]!.dark}
+					unstyled={true}
+				/>
+			{:else}
+				<code class="block font-mono text-sm leading-relaxed whitespace-pre text-foreground">
+					{activeCommand}
+				</code>
+			{/if}
 		</div>
 	</div>
 </div>

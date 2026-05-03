@@ -230,11 +230,7 @@
 	Skip to main content
 </a>
 
-<main
-	id="docs-main-content"
-	tabindex="-1"
-	class="relative h-dvh bg-background text-foreground"
->
+<main id="docs-main-content" tabindex="-1" class="relative h-dvh bg-background text-foreground">
 	<MobileSidebar />
 
 	<div
@@ -277,7 +273,9 @@
 								<MobileDocShareActions {rawPath} {rawUrl} {githubUrl} />
 							{/if}
 						</div>
-						<hr class="text-border" />
+						<hr
+							class="h-px border-0 bg-border shadow-2xs shadow-white dark:bg-black dark:shadow-border"
+						/>
 					{/if}
 
 					<div>

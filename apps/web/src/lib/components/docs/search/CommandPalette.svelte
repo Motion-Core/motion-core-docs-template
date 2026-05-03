@@ -8,20 +8,15 @@
 	import { onNavigate } from '$app/navigation';
 	import { cn } from '$lib/utils/cn';
 	import ScrollArea from '$lib/components/ui/ScrollArea.svelte';
-	import { onMount, tick } from 'svelte';
+	import { onMount } from 'svelte';
 	import Search from 'carbon-icons-svelte/lib/Search.svelte';
 	import Return from 'carbon-icons-svelte/lib/Return.svelte';
 
 	let query = $state('');
 	let results = $derived(searchDocs(query));
 	let selectedIndex = $state(0);
-	let normalizedSelectedIndex = $derived(
-		results.length === 0 ? 0 : Math.min(selectedIndex, results.length - 1)
-	);
+	let inputRef = $state<HTMLInputElement>();
 	let contentHeight = $state(0);
-	const canUseDocument = typeof document !== 'undefined';
-	const dialogId = 'command-palette-dialog';
-	const inputId = 'command-palette-input';
 
 	function handleGlobalKeydown(e: KeyboardEvent) {
 		const hotkey = docsUiConfig.search.hotkey;
@@ -44,85 +39,24 @@
 		};
 	});
 
+	$effect(() => {
+		if (!docsUiConfig.search.enabled) return;
+		if (searchState.isOpen && inputRef) {
+			inputRef.focus();
+		}
+	});
+
+	$effect(() => {
+		void results;
+		selectedIndex = 0;
+	});
+
 	function close() {
 		searchState.close();
 	}
 
-	function getDialogElement() {
-		if (!canUseDocument) return null;
-		const node = document.getElementById(dialogId);
-		return node instanceof HTMLDivElement ? node : null;
-	}
-
-	function getInputElement() {
-		if (!canUseDocument) return null;
-		const node = document.getElementById(inputId);
-		return node instanceof HTMLInputElement ? node : null;
-	}
-
-	function manageDialogFocus(_node: HTMLDivElement) {
-		const activeElement =
-			canUseDocument && document.activeElement instanceof HTMLElement
-				? document.activeElement
-				: null;
-		const restoreFocusEl = activeElement instanceof HTMLElement ? activeElement : null;
-
-		tick().then(() => {
-			getInputElement()?.focus();
-		});
-
-		return () => {
-			restoreFocusEl?.focus();
-		};
-	}
-
-	function getFocusableElements() {
-		const dialog = getDialogElement();
-		if (!dialog) return [];
-		const selector = 'a[href], button, input, textarea, select, [tabindex]';
-		return Array.from(dialog.querySelectorAll<HTMLElement>(selector)).filter(
-			(element) =>
-				!element.hasAttribute('disabled') &&
-				element.getAttribute('aria-hidden') !== 'true' &&
-				element.tabIndex >= 0
-		);
-	}
-
-	function handleTabKey(event: KeyboardEvent) {
-		const dialog = getDialogElement();
-		if (!dialog) return;
-		const focusable = getFocusableElements();
-		if (focusable.length === 0) {
-			event.preventDefault();
-			return;
-		}
-
-		const first = focusable[0];
-		const last = focusable[focusable.length - 1];
-		const activeElement =
-			document.activeElement instanceof HTMLElement ? document.activeElement : null;
-
-		if (event.shiftKey) {
-			if (!activeElement || activeElement === first || !dialog.contains(activeElement)) {
-				event.preventDefault();
-				last.focus();
-			}
-			return;
-		}
-
-		if (!activeElement || activeElement === last || !dialog.contains(activeElement)) {
-			event.preventDefault();
-			first.focus();
-		}
-	}
-
 	function handleKeydown(e: KeyboardEvent) {
 		if (!searchState.isOpen) return;
-
-		if (e.key === 'Tab') {
-			handleTabKey(e);
-			return;
-		}
 
 		if (e.key === 'Escape') {
 			e.preventDefault();
@@ -142,11 +76,19 @@
 			selectedIndex = (selectedIndex - 1 + results.length) % results.length;
 		} else if (e.key === 'Enter') {
 			e.preventDefault();
-			if (results[normalizedSelectedIndex]) {
-				selectResult(results[normalizedSelectedIndex]);
+			if (results[selectedIndex]) {
+				selectResult(results[selectedIndex]);
 			}
 		}
 	}
+
+	$effect(() => {
+		if (!docsUiConfig.search.enabled) return;
+		if (searchState.isOpen) {
+			window.addEventListener('keydown', handleKeydown);
+			return () => window.removeEventListener('keydown', handleKeydown);
+		}
+	});
 
 	function selectResult(result: ReturnType<typeof searchDocs>[number]) {
 		const href = `${result.slug}${result.anchor || ''}`;
@@ -172,8 +114,6 @@
 	}
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
-
 {#if docsUiConfig.search.enabled && searchState.isOpen}
 	<div
 		class="fixed inset-0 z-60 bg-background-inset/80 backdrop-blur-sm"
@@ -183,18 +123,15 @@
 	></div>
 
 	<div
-		id={dialogId}
-		{@attach manageDialogFocus}
 		class="fixed inset-0 z-60 flex items-start justify-center p-4 sm:pt-[10vh]"
 		role="dialog"
 		aria-modal="true"
-		aria-labelledby="command-palette-title"
 		tabindex="-1"
 		onclick={(e) => e.target === e.currentTarget && close()}
 		onkeydown={(e) => e.key === 'Escape' && close()}
 	>
 		<div
-			class="card relative w-full max-w-164 transform-gpu rounded-lg bg-background"
+			class="relative w-full max-w-164 transform-gpu rounded-lg bg-background card"
 			role="document"
 			transition:scale={{
 				duration: 300,
@@ -203,24 +140,19 @@
 			}}
 			onoutroend={() => {
 				query = '';
-				selectedIndex = 0;
 				contentHeight = 0;
 			}}
 		>
-			<span id="command-palette-title" class="sr-only">{docsUiConfig.search.dialogPlaceholder}</span
+			<div
+				class="relative flex items-center px-3 after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-border after:shadow-2xs after:shadow-white after:content-[''] dark:after:bg-background-inset dark:after:shadow-border"
 			>
-			<div class="flex items-center border-b border-border/60 px-3">
 				<Search size={24} class="mr-2 text-foreground-muted/70" />
 				<input
-					id={inputId}
-					value={query}
-					class="flex h-12 w-full bg-transparent text-base tracking-normal text-foreground transition-none placeholder:text-foreground-muted/70 focus:outline-none focus-visible:border-none! focus-visible:ring-0! focus-visible:ring-offset-0! focus-visible:outline-none!"
+					bind:this={inputRef}
+					bind:value={query}
+					class="command-palette-input flex h-12 w-full bg-transparent text-base tracking-normal text-foreground placeholder:text-foreground-muted/70 focus:outline-none focus-visible:border-none! focus-visible:ring-0! focus-visible:ring-offset-0! focus-visible:outline-none!"
 					placeholder={docsUiConfig.search.dialogPlaceholder}
 					aria-label={docsUiConfig.search.dialogPlaceholder}
-					oninput={(event) => {
-						query = (event.currentTarget as HTMLInputElement).value;
-						selectedIndex = 0;
-					}}
 				/>
 				<kbd
 					class="pointer-events-none inset-shadow relative hidden h-5 items-center gap-1 rounded-[calc(var(--radius-base)*1.5)] bg-background-inset px-1.5 font-mono text-[10px] font-medium tracking-normal text-foreground-muted/70 select-none sm:flex"
@@ -242,11 +174,10 @@
 							{#each results as result, i (result.slug + (result.anchor || '') + i)}
 								{@const isChild = result.matchType === 'heading' || result.matchType === 'content'}
 								<button
-									tabindex="-1"
 									class={cn(
 										'group relative flex w-full flex-col items-start gap-1 rounded-sm px-3 py-2 text-sm font-medium tracking-normal',
 										isChild && 'pl-8',
-										i === normalizedSelectedIndex
+										i === selectedIndex
 											? 'bg-background-muted text-foreground'
 											: 'text-foreground hover:bg-background-muted'
 									)}
@@ -299,7 +230,7 @@
 				</div>
 			</div>
 			<div
-				class="flex w-full flex-row items-center justify-start gap-2 rounded-b-lg border-t border-border/60 bg-background p-2"
+				class="relative flex w-full flex-row items-center justify-start gap-2 rounded-b-lg bg-background p-2 after:absolute after:inset-x-0 after:top-0 after:h-px after:bg-border after:shadow-2xs after:shadow-white after:content-[''] dark:after:bg-background-inset dark:after:shadow-border"
 			>
 				<kbd
 					class="pointer-events-none inset-shadow relative hidden h-5 items-center gap-1 rounded-[calc(var(--radius-base)*1.5)] bg-background-inset px-1.5 font-mono text-[10px] font-medium text-foreground-muted/70 select-none sm:flex"
@@ -313,3 +244,13 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	.command-palette-input:focus,
+	.command-palette-input:focus-visible {
+		outline: none !important;
+		outline-color: transparent !important;
+		outline-offset: 0 !important;
+		box-shadow: none !important;
+	}
+</style>
