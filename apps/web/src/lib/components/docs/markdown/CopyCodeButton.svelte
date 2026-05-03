@@ -13,9 +13,9 @@
 	const className = $derived((props as Props).class ?? '');
 	const code = $derived((props as Props).code ?? '');
 
-	let copiedCode = $state<string | null>(null);
-	const copied = $derived(copiedCode !== null && copiedCode === code);
+	let copied = $state(false);
 	let timeoutId: number | null = null;
+	let lastCode: string | null = null;
 
 	async function handleCopy(value: string) {
 		if (!value || typeof navigator === 'undefined' || !navigator.clipboard) {
@@ -24,12 +24,12 @@
 
 		try {
 			await navigator.clipboard.writeText(value);
-			copiedCode = value;
+			copied = true;
 			if (timeoutId) {
 				window.clearTimeout(timeoutId);
 			}
 			timeoutId = window.setTimeout(() => {
-				copiedCode = null;
+				copied = false;
 				timeoutId = null;
 			}, 2000);
 		} catch (error) {
@@ -38,6 +38,19 @@
 	}
 
 	onDestroy(() => {
+		if (timeoutId) {
+			window.clearTimeout(timeoutId);
+			timeoutId = null;
+		}
+	});
+
+	$effect(() => {
+		if (lastCode === code) {
+			return;
+		}
+
+		lastCode = code;
+		copied = false;
 		if (timeoutId) {
 			window.clearTimeout(timeoutId);
 			timeoutId = null;
@@ -59,13 +72,18 @@
 	aria-label={copied ? 'Copied code' : 'Copy code'}
 >
 	<span class="sr-only">{copied ? 'Copied code' : 'Copy code'}</span>
-	<span class={cn('transition-transform duration-150 ease-out', copied && 'scale-0 blur-[2px]')}>
+	<span
+		class={cn(
+			'absolute transition-[opacity,filter,scale] duration-150 ease-out will-change-[opacity,filter,scale]',
+			copied ? 'scale-[0.25] opacity-0 blur-xs' : 'blur-0 scale-100 opacity-100'
+		)}
+	>
 		<Copy size={16} />
 	</span>
 	<span
 		class={cn(
-			'absolute transition-transform duration-150 ease-out',
-			!copied && 'scale-0 blur-[2px]'
+			'absolute transition-[opacity,filter,scale] duration-150 ease-out will-change-[opacity,filter,scale]',
+			copied ? 'blur-0 scale-100 opacity-100' : ' scale-[0.25] opacity-0 blur-xs'
 		)}
 	>
 		<Checkmark size={16} />

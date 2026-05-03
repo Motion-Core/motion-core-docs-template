@@ -149,7 +149,7 @@
 >
 	<div class="flex h-full flex-col rounded-md">
 		<div
-			class="card relative flex min-h-96 flex-1 flex-col items-center justify-center rounded-md bg-background"
+			class="relative flex min-h-96 flex-1 flex-col items-center justify-center rounded-md bg-background card"
 		>
 			<div
 				class="group/preview relative flex h-full w-full flex-1 flex-col overflow-hidden rounded-md bg-background"
@@ -169,29 +169,31 @@
 			</div>
 		</div>
 		<div
-			class="card mt-2 flex flex-1 flex-col overflow-hidden rounded-md rounded-b-md bg-background"
+			class="mt-2 flex flex-1 flex-col overflow-hidden rounded-md rounded-b-md bg-background card"
 		>
 			{#if tabs.length}
-				<div class="flex items-center border-b border-border bg-background text-sm">
+				<div
+					class="relative flex items-center bg-background text-sm after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-border after:shadow-2xs after:shadow-white after:content-[''] dark:after:bg-background-inset dark:after:shadow-border"
+				>
 					<div
 						class="flex flex-1 items-center overflow-x-auto"
 						role="tablist"
 						aria-label="Source files"
 					>
 						{#each tabs as tab, index (tab.name)}
-								<button
-									type="button"
-									id={`${tabsInstanceId}-tab-${index}`}
-									role="tab"
-									aria-selected={index === selectedTab}
-									aria-controls={panelId}
-									tabindex={index === selectedTab ? 0 : -1}
-									class={cn(
-										'border-b-2 px-4 py-2.5 text-sm font-medium tracking-normal whitespace-nowrap transition-colors duration-150 ease-out outline-none select-none',
-										index === selectedTab
-											? 'border-accent text-foreground'
-											: 'border-transparent text-foreground-muted hover:text-foreground'
-									)}
+							<button
+								type="button"
+								id={`${tabsInstanceId}-tab-${index}`}
+								role="tab"
+								aria-selected={index === selectedTab}
+								aria-controls={panelId}
+								tabindex={index === selectedTab ? 0 : -1}
+								class={cn(
+									'border-b-2 px-4 py-2.5 text-sm font-medium tracking-normal whitespace-nowrap transition-colors duration-150 ease-out outline-none select-none',
+									index === selectedTab
+										? 'border-accent text-foreground'
+										: 'border-transparent text-foreground-muted hover:text-foreground'
+								)}
 								onclick={() => setActiveTab(index)}
 								onkeydown={(event) => handleTabKeydown(event, index)}
 							>
@@ -206,18 +208,13 @@
 					</div>
 				</div>
 			{/if}
-				<div
-					id={panelId}
-					role="tabpanel"
-					aria-labelledby={activeTabId}
-					class="flex-1"
+			<div id={panelId} role="tabpanel" aria-labelledby={activeTabId} class="flex-1">
+				<ScrollArea
+					id="component-preview"
+					class="relative max-h-96"
+					thumbTabbable={false}
+					viewportTabbable={false}
 				>
-					<ScrollArea
-						id="component-preview"
-						class="relative max-h-96"
-						thumbTabbable={false}
-						viewportTabbable={false}
-					>
 					<div
 						class="p-4 text-sm *:mt-0 *:rounded-none *:border-0 *:bg-transparent *:p-0 *:inset-shadow-none"
 					>
