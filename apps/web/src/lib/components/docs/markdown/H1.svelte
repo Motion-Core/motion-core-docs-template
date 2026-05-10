@@ -64,12 +64,9 @@
 	)}
 >
 	<span class="inline-flex items-center gap-2 align-baseline leading-none">
-		<a
-			href={id ? `#${encodeURIComponent(id)}` : undefined}
-			class="min-w-0 no-underline hover:no-underline"
-		>
+		<span class="min-w-0 [&_a]:text-3xl">
 			{@render children?.()}
-		</a>
+		</span>
 
 		{#if id}
 			<div
@@ -83,10 +80,6 @@
 					onclick={copyHeadingUrl}
 					aria-label={copied ? 'Copied heading link' : 'Copy heading link'}
 				>
-					<span class="sr-only">
-						{copied ? 'Copied heading link' : 'Copy heading link'}
-					</span>
-
 					<span
 						class={cn(
 							'absolute inline-flex items-center justify-center transition-[opacity,filter,scale] duration-150 ease-out will-change-[opacity,filter,scale]',
