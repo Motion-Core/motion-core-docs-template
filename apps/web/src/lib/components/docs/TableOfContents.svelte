@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { fromAction } from 'svelte/attachments';
-	import { SvelteMap } from 'svelte/reactivity';
+	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import { cn } from '$lib/utils/cn';
 	import { page } from '$app/state';
 	import TableOfContents from 'carbon-icons-svelte/lib/TableOfContents.svelte';
@@ -298,6 +298,7 @@
 		}
 
 		const slugCounts = new SvelteMap<string, number>();
+		const usedIds = new SvelteSet<string>();
 		const nodeList = Array.from(document.querySelectorAll(selector)).filter(
 			(node): node is HTMLElement => node instanceof HTMLElement
 		);
@@ -323,8 +324,24 @@
 					slugCounts.set(baseSlug, 0);
 				}
 				id = baseSlug;
+			}
+
+			if (usedIds.has(id)) {
+				const baseId = id;
+				let nextCount = slugCounts.get(baseId) ?? 0;
+
+				do {
+					nextCount += 1;
+					id = `${baseId}-${nextCount}`;
+				} while (usedIds.has(id));
+
+				slugCounts.set(baseId, nextCount);
+			}
+
+			if (node.id !== id) {
 				node.id = id;
 			}
+			usedIds.add(id);
 
 			const level = Number(node.tagName.replace('H', '')) || 2;
 			parsed.push({
@@ -460,7 +477,10 @@
 		return currentIndex >= min && currentIndex <= max;
 	}
 
-	function manageToc(_node: HTMLElement, deps: { path: string; active: boolean; selector: string }) {
+	function manageToc(
+		_node: HTMLElement,
+		deps: { path: string; active: boolean; selector: string }
+	) {
 		let currentDeps = deps;
 
 		const run = () => {
@@ -525,20 +545,24 @@
 
 <div
 	class="contents"
-	{@attach fromAction(manageToc, () => ({ path: currentPath, active: tocViewportActive, selector }))}
+	{@attach fromAction(manageToc, () => ({
+		path: currentPath,
+		active: tocViewportActive,
+		selector
+	}))}
 >
 	{#if headings.length > 0}
 		<nav class="hidden lg:block" aria-label={title}>
-		<div
-			class="mb-2 flex items-center gap-2 text-xs font-medium tracking-wide text-foreground-muted/70 uppercase"
-		>
-			<TableOfContents size={16} />
-			{title}
-		</div>
-		<div class="relative flex px-2">
 			<div
-				class="pointer-events-none absolute top-0 left-1 h-full w-10"
-				style={`
+				class="mb-2 flex items-center gap-2 text-xs font-medium tracking-wide text-foreground-muted/70 uppercase"
+			>
+				<TableOfContents size={16} />
+				{title}
+			</div>
+			<div class="relative flex px-2">
+				<div
+					class="pointer-events-none absolute top-0 left-1 h-full w-10"
+					style={`
                     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${svgWidth} ${lineHeight}' width='${svgWidth}' height='${lineHeight}' preserveAspectRatio='none'%3E%3Cpath d='${svgPath}' stroke='black' stroke-width='1' fill='none'/%3E%3C/svg%3E");
                     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${svgWidth} ${lineHeight}' width='${svgWidth}' height='${lineHeight}' preserveAspectRatio='none'%3E%3Cpath d='${svgPath}' stroke='black' stroke-width='1' fill='none'/%3E%3C/svg%3E");
                     mask-repeat: no-repeat;
@@ -548,32 +572,32 @@
                     mask-size: 100% 100%;
                     -webkit-mask-size: 100% 100%;
                 `}
-			>
-				<div class="absolute inset-0 h-full w-full bg-border"></div>
+				>
+					<div class="absolute inset-0 h-full w-full bg-border"></div>
 
-				{#if indicatorHeight > 0}
-					<div
-						class="absolute left-0 w-full bg-accent transition-all duration-450 ease-out"
-						style={`
+					{#if indicatorHeight > 0}
+						<div
+							class="absolute left-0 w-full bg-accent transition-all duration-450 ease-out"
+							style={`
                             top: ${indicatorTop}px;
                             bottom: ${Math.max(0, lineHeight - indicatorBottom)}px;
                         `}
-					></div>
-				{/if}
-			</div>
+						></div>
+					{/if}
+				</div>
 
 				<ol
 					id={linksWrapperId}
 					class="relative flex flex-col pl-3 text-sm"
 					{@attach fromAction(observeLinksWrapper, () => tocViewportActive)}
 				>
-				{#each headings as heading (heading.id)}
-					<li
-						class="transition-colors duration-150 ease-out"
-						style={`padding-left: ${(heading.level - 2) * 12}px`}
-					>
-						<a
-							href={`#${heading.id}`}
+					{#each headings as heading (heading.id)}
+						<li
+							class="transition-colors duration-150 ease-out"
+							style={`padding-left: ${(heading.level - 2) * 12}px`}
+						>
+							<a
+								href={`#${heading.id}`}
 								class={cn(
 									'block max-w-48 truncate py-1 font-medium tracking-normal transition-[color] duration-150 ease-out',
 									isLinkHighlighted(heading.id)
@@ -582,12 +606,12 @@
 								)}
 								{@attach fromAction(registerLink, () => heading.id)}
 							>
-							{heading.text}
-						</a>
-					</li>
-				{/each}
-			</ol>
-		</div>
+								{heading.text}
+							</a>
+						</li>
+					{/each}
+				</ol>
+			</div>
 		</nav>
 	{:else}
 		<div class="hidden text-sm tracking-normal text-foreground-muted/70 lg:block">{emptyLabel}</div>
