@@ -16,8 +16,8 @@ This repository provides a ready-to-use docs app with configurable SEO, navigati
 ## Quick Start
 
 ```bash
-bun install
-bun run dev
+pnpm install
+pnpm dev
 ```
 
 App runs in `apps/web`.
@@ -38,11 +38,11 @@ Then adjust docs content:
 ## Common Commands
 
 ```bash
-bun run dev
-bun run check
-bun run lint
-bun run build
-bun run deploy:web
+pnpm dev
+pnpm check
+pnpm lint
+pnpm build
+pnpm deploy:web
 ```
 
 ## License
