@@ -2,10 +2,13 @@
 	import { cn } from '$lib/utils/cn';
 	import type { Snippet } from 'svelte';
 
-	let { class: className, children } = $props<{
+	let {
+		class: className,
+		children
+	}: {
 		class?: string;
 		children?: Snippet;
-	}>();
+	} = $props();
 </script>
 
 <div

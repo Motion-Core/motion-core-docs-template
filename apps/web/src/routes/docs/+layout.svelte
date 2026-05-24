@@ -21,25 +21,24 @@
 	import { beforeNavigate, afterNavigate } from '$app/navigation';
 	import { SvelteMap } from 'svelte/reactivity';
 
-	const props = $props<{ data: LayoutData; children?: Snippet }>();
+	const { data, children }: { data: LayoutData; children?: Snippet } = $props();
 	const previousLink = $derived(
-		props.data.previousDoc
+		data.previousDoc
 			? {
-					title: props.data.previousDoc.name,
-					href: getDocHref(props.data.previousDoc.slug)
+					title: data.previousDoc.name,
+					href: getDocHref(data.previousDoc.slug)
 				}
 			: null
 	);
 	const nextLink = $derived(
-		props.data.nextDoc
+		data.nextDoc
 			? {
-					title: props.data.nextDoc.name,
-					href: getDocHref(props.data.nextDoc.slug)
+					title: data.nextDoc.name,
+					href: getDocHref(data.nextDoc.slug)
 				}
 			: null
 	);
-	const metadata = $derived(props.data.metadata);
-	const renderChildren = $derived(props.children);
+	const metadata = $derived(data.metadata);
 	const docSlug = $derived(metadata?.slug);
 	const currentDoc = $derived(docsManifest.find((d) => d.slug === docSlug));
 	const siteOrigin = new URL(siteConfig.url).origin;
@@ -49,10 +48,8 @@
 			? new URL(`/docs/og/${metadata.slug}`, siteOrigin).href
 			: new URL(siteConfig.ogImage, siteOrigin).href
 	);
-	const docTitle = $derived(
-		metadata?.name || metadata?.title || currentDoc?.name || siteConfig.name
-	);
-	const docDescription = $derived(metadata?.description || siteConfig.description);
+	const docTitle = $derived(metadata?.title ?? currentDoc?.name ?? siteConfig.name);
+	const docDescription = $derived(metadata?.description ?? siteConfig.description);
 	const docStructuredData = $derived.by(() => {
 		if (!canonicalUrl) return null;
 		return JSON.stringify({
@@ -103,7 +100,7 @@
 		metadata ? metadata.href.replace(/^\/docs(?:\/|$)/, '').replace(/\/+$/, '') || 'index' : null
 	);
 	const rawPath = $derived(rawDocSlug ? `/docs/raw/${rawDocSlug}` : null);
-	const docOrigin = $derived(props.data.docOrigin);
+	const docOrigin = $derived(data.docOrigin);
 	const rawUrl = $derived(rawPath && docOrigin ? new URL(rawPath, docOrigin).href : null);
 	const repoRelativePath = $derived(
 		metadata ? `/apps/web/src/routes${metadata.href}/+page.svx` : null
@@ -127,7 +124,7 @@
 		}
 	}
 
-	function scrollToHash(hash: string) {
+	async function scrollToHash(hash: string) {
 		if (!hash) return;
 		const id = hash.substring(1);
 
@@ -144,7 +141,7 @@
 		};
 
 		clearHashFallbackTimer();
-		tick().then(() => {
+		await tick().then(() => {
 			if (!scrollToElement()) {
 				hashFallbackTimer = setTimeout(scrollToElement, 100);
 			}
@@ -172,13 +169,13 @@
 		}
 
 		if (page.url.hash) {
-			scrollToHash(page.url.hash);
+			void scrollToHash(page.url.hash);
 		}
 	});
 
 	onMount(() => {
 		const handleHashChange = () => {
-			scrollToHash(window.location.hash);
+			void scrollToHash(window.location.hash);
 		};
 
 		window.addEventListener('hashchange', handleHashChange);
@@ -261,7 +258,7 @@
 								</p>
 							{/if}
 							<h1 class="scroll-m-20 text-3xl font-medium tracking-tight text-foreground">
-								{metadata.name || metadata.title}
+								{metadata.title}
 							</h1>
 							{#if metadata.description}
 								<p class="max-w-4xl text-base font-normal tracking-normal text-foreground-muted">
@@ -279,7 +276,7 @@
 					{/if}
 
 					<div>
-						{@render renderChildren?.()}
+						{@render children?.()}
 
 						<DocNavigation previous={previousLink} next={nextLink} />
 					</div>

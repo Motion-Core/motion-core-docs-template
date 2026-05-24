@@ -4,21 +4,14 @@
 	import Copy from 'carbon-icons-svelte/lib/Copy.svelte';
 	import Checkmark from 'carbon-icons-svelte/lib/Checkmark.svelte';
 
-	type Props = {
-		code: string;
-		class?: string;
-	};
-
-	const props = $props();
-	const className = $derived((props as Props).class ?? '');
-	const code = $derived((props as Props).code ?? '');
+	let { code, class: className }: { code: string; class: string } = $props();
 
 	let copied = $state(false);
 	let timeoutId: number | null = null;
 	let lastCode: string | null = null;
 
 	async function handleCopy(value: string) {
-		if (!value || typeof navigator === 'undefined' || !navigator.clipboard) {
+		if (!value || typeof navigator === 'undefined') {
 			return;
 		}
 
@@ -67,7 +60,7 @@
 	onclick={(event) => {
 		event.stopPropagation();
 		event.preventDefault();
-		handleCopy(code);
+		void handleCopy(code);
 	}}
 	aria-label={copied ? 'Copied code' : 'Copy code'}
 >

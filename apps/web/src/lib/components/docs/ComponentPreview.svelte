@@ -38,7 +38,7 @@
 		...restProps
 	}: ComponentProps = $props();
 	componentPreviewCounter += 1;
-	const tabsInstanceId = `component-preview-${componentPreviewCounter}`;
+	const tabsInstanceId = `component-preview-${componentPreviewCounter.toString()}`;
 	const panelId = `${tabsInstanceId}-panel`;
 
 	let previewKey = $state(0);
@@ -46,7 +46,7 @@
 	const tabs = $derived(
 		(() => {
 			const normalized =
-				providedSources?.filter((tab): tab is SourceTab => Boolean(tab?.code)) ?? [];
+				providedSources?.filter((tab): tab is SourceTab => Boolean(tab.code)) ?? [];
 
 			if (normalized.length > 0) {
 				return normalized;
@@ -63,7 +63,7 @@
 			}
 
 			return [];
-		})() as SourceTab[]
+		})()
 	);
 
 	let activeTab = $state(0);
@@ -71,8 +71,8 @@
 	const selectedTab = $derived(
 		tabs.length === 0 ? 0 : Math.min(activeTab, Math.max(0, tabs.length - 1))
 	);
-	const activeSource = $derived((tabs.at(selectedTab) ?? null) as SourceTab | null);
-	const activeTabId = $derived(`${tabsInstanceId}-tab-${selectedTab}`);
+	const activeSource = $derived(tabs.at(selectedTab) ?? null);
+	const activeTabId = $derived(`${tabsInstanceId}-tab-${selectedTab.toString()}`);
 
 	const highlightedSources = $derived.by(() => {
 		const highlighter = getHighlighter();
@@ -100,7 +100,7 @@
 	}
 
 	function focusTabByIndex(index: number) {
-		const tabElement = document.getElementById(`${tabsInstanceId}-tab-${index}`);
+		const tabElement = document.getElementById(`${tabsInstanceId}-tab-${index.toString()}`);
 		if (tabElement instanceof HTMLButtonElement) {
 			tabElement.focus();
 		}
@@ -158,7 +158,9 @@
 				>
 					<div class="flex w-full flex-1 flex-col items-center justify-center">
 						{#key previewKey}
-							{@render children?.()}
+							{#if children}
+								{@render children()}
+							{/if}
 						{/key}
 					</div>
 				</ScrollArea>
@@ -179,7 +181,7 @@
 						{#each tabs as tab, index (tab.name)}
 							<button
 								type="button"
-								id={`${tabsInstanceId}-tab-${index}`}
+								id={`${tabsInstanceId}-tab-${index.toString()}`}
 								role="tab"
 								aria-selected={index === selectedTab}
 								aria-controls={panelId}
@@ -190,8 +192,12 @@
 										? 'border-accent text-foreground'
 										: 'border-transparent text-foreground-muted hover:text-foreground'
 								)}
-								onclick={() => setActiveTab(index)}
-								onkeydown={(event) => handleTabKeydown(event, index)}
+								onclick={() => {
+									setActiveTab(index);
+								}}
+								onkeydown={(event) => {
+									handleTabKeydown(event, index);
+								}}
 							>
 								{tab.name}
 							</button>
@@ -221,8 +227,8 @@
 								htmlDark={highlightedSources[activeSource.name].dark}
 								unstyled={true}
 							/>
-						{:else}
-							{@render codeSlot?.()}
+						{:else if codeSlot}
+							{@render codeSlot()}
 						{/if}
 					</div>
 				</ScrollArea>

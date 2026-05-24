@@ -7,15 +7,16 @@
 		href: string;
 	};
 
-	const props = $props<{
+	const {
+		previous,
+		next
+	}: {
 		previous?: DocNavLink | null;
 		next?: DocNavLink | null;
-	}>();
-	const previous = $derived(props.previous ?? null);
-	const next = $derived(props.next ?? null);
+	} = $props();
 </script>
 
-{#if docsUiConfig.pagination.enabled && (previous || next)}
+{#if docsUiConfig.pagination.enabled && (previous ?? next)}
 	<nav
 		class="relative mt-16 pt-9 after:pointer-events-none after:absolute after:inset-x-0 after:top-0 after:h-px after:bg-border after:shadow-2xs after:shadow-white after:content-[''] dark:after:bg-black dark:after:shadow-border"
 	>

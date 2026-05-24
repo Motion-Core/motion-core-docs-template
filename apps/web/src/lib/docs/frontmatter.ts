@@ -10,7 +10,7 @@ const FRONTMATTER_LINE_RE = /^([a-zA-Z0-9_-]+)\s*:\s*(.*)$/;
 function stripMatchingQuotes(value: string): string {
 	if (value.length < 2) return value;
 	const quote = value[0];
-	if ((quote === '"' || quote === "'") && value[value.length - 1] === quote) {
+	if ((quote === '"' || quote === "'") && value.endsWith(quote)) {
 		return value.slice(1, -1);
 	}
 	return value;
@@ -23,7 +23,7 @@ function parseFrontmatterBlock(block: string): Record<string, string> {
 		const trimmed = line.trim();
 		if (!trimmed || trimmed.startsWith('#')) continue;
 
-		const match = trimmed.match(FRONTMATTER_LINE_RE);
+		const match = FRONTMATTER_LINE_RE.exec(trimmed);
 		if (!match) continue;
 
 		const [, key, rawValue] = match;
@@ -34,7 +34,7 @@ function parseFrontmatterBlock(block: string): Record<string, string> {
 }
 
 export function parseDocSource(rawSource: string): { metadata: DocFrontmatter; body: string } {
-	const match = rawSource.match(FRONTMATTER_BLOCK_RE);
+	const match = FRONTMATTER_BLOCK_RE.exec(rawSource);
 	if (!match) {
 		return { metadata: {}, body: rawSource };
 	}

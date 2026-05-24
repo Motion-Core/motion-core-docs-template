@@ -75,8 +75,8 @@ function parseDocs() {
 		const cleanPath = relativePath.replace(/^\/+/, '');
 		const slug = cleanPath ? `/docs/${cleanPath}` : '/docs';
 
-		const title = meta.name || meta.title || cleanPath;
-		const description = meta.description || '';
+		const title = meta.name ?? meta.title ?? cleanPath;
+		const description = meta.description ?? '';
 
 		index.push({
 			title: title,
@@ -122,7 +122,7 @@ function parseDocs() {
 		};
 
 		for (const line of lines) {
-			const headingMatch = line.match(/^(#{2,4})\s+(.+)$/);
+			const headingMatch = /^(#{2,4})\s+(.+)$/.exec(line);
 
 			if (headingMatch) {
 				flushBuffer();
@@ -132,7 +132,7 @@ function parseDocs() {
 				let baseSlug = slugify(text);
 				if (!baseSlug) {
 					untitledSectionCount += 1;
-					baseSlug = `section-${untitledSectionCount}`;
+					baseSlug = `section-${untitledSectionCount.toString()}`;
 				}
 				const count = slugCounts.get(baseSlug);
 				let uniqueSlug = baseSlug;
@@ -140,7 +140,7 @@ function parseDocs() {
 				if (typeof count === 'number') {
 					const nextCount = count + 1;
 					slugCounts.set(baseSlug, nextCount);
-					uniqueSlug = `${baseSlug}-${nextCount}`;
+					uniqueSlug = `${baseSlug}-${nextCount.toString()}`;
 				} else {
 					slugCounts.set(baseSlug, 0);
 				}
@@ -214,7 +214,7 @@ export function searchDocs(query: string): DocSection[] {
 			if (!groups.has(item.slug)) {
 				groups.set(item.slug, {
 					parent: {
-						title: pageLookup.get(item.slug) || item.title,
+						title: pageLookup.get(item.slug) ?? item.title,
 						slug: item.slug,
 						matchType: 'title',
 						score: 0
@@ -224,7 +224,8 @@ export function searchDocs(query: string): DocSection[] {
 				});
 			}
 
-			const group = groups.get(item.slug)!;
+			const group = groups.get(item.slug);
+			if (!group) continue;
 
 			if (item.matchType === 'title') {
 				group.parent = { ...item, score };

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { cn } from '$lib/utils/cn';
 
 	type ComponentProps = {
@@ -26,9 +27,10 @@
 	)}
 >
 	<a
-		{href}
+		// @ts-expect-error arg cannot be cast as `resolve`s expected type
+		href={resolve(href)}
 		class={cn(
-			'group card relative flex flex-col rounded-md bg-background px-4 py-3 transition-[background-color] duration-150 ease-out hover:bg-background-muted'
+			'group relative flex flex-col rounded-md bg-background px-4 py-3 card transition-[background-color] duration-150 ease-out hover:bg-background-muted'
 		)}
 	>
 		<span class="text-xs font-normal tracking-wide text-foreground-muted/70 uppercase">

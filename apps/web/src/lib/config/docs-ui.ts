@@ -40,10 +40,10 @@ export type DocsUiConfig = {
 		emptyLabel: string;
 		minViewportWidth: number;
 		defaultSelector: string;
-		selectorOverrides: Array<{
+		selectorOverrides: {
 			slugPrefix: string;
 			selector: string;
-		}>;
+		}[];
 	};
 	docActions: {
 		enabled: boolean;

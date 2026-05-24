@@ -25,9 +25,9 @@ function createPackageManagerStore() {
 	);
 
 	if (browser) {
-		const stored = localStorage.getItem(docsUiConfig.packageManager.storageKey) as PackageManager;
-		if (stored && packageManagers.includes(stored)) {
-			active = stored;
+		const stored = localStorage.getItem(docsUiConfig.packageManager.storageKey);
+		if (stored && packageManagers.includes(stored as PackageManager)) {
+			active = stored as PackageManager;
 		}
 	}
 

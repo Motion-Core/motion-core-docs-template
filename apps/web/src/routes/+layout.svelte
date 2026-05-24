@@ -2,8 +2,9 @@
 	import './layout.css';
 	import { page } from '$app/state';
 	import { CommandPalette, docsUiConfig, siteConfig } from '$lib';
+	import { type Snippet } from 'svelte';
 
-	const { children } = $props();
+	const { children }: { children: Snippet } = $props();
 
 	const currentPage = page;
 
@@ -15,7 +16,7 @@
 	const isHomeRoute = $derived(isHomePath(currentPath));
 	const isDocsRoute = $derived(isDocsPath(currentPath));
 	const siteOrigin = new URL(siteConfig.url).origin;
-	const canonicalUrl = $derived(new URL(currentPath || '/', siteOrigin).href);
+	const canonicalUrl = $derived(new URL(currentPath, siteOrigin).href);
 
 	const siteName = siteConfig.name;
 	const authorName = siteConfig.author;
