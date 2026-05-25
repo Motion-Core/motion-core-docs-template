@@ -234,7 +234,7 @@
 	<MobileSidebar />
 
 	<div
-		class="flex h-full w-full min-w-0 lg:grid lg:grid-cols-[22rem_minmax(0,1fr)] lg:pr-4 xl:grid-cols-[22rem_minmax(0,56rem)_18rem] xl:justify-center"
+		class="flex h-full w-full min-w-0 lg:grid lg:grid-cols-[22rem_minmax(0,1fr)] lg:pr-4 xl:grid-cols-[22rem_minmax(0,56rem)_18rem] xl:justify-center xl:pr-0"
 	>
 		<div class="hidden lg:block">
 			<DocsSidebar />
