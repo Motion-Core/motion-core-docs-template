@@ -74,13 +74,11 @@
 	const activeSource = $derived((tabs.at(selectedTab) ?? null) as SourceTab | null);
 	const activeTabId = $derived(`${tabsInstanceId}-tab-${selectedTab}`);
 
-	async function highlightTabs(
-		sources: SourceTab[]
-	): Promise<Record<string, { light: string; dark: string }>> {
-		const highlighter = await getHighlighter();
+	const highlightedSources = $derived.by(() => {
+		const highlighter = getHighlighter();
 		const highlightedSources: Record<string, { light: string; dark: string }> = {};
 
-		for (const tab of sources) {
+		for (const tab of tabs) {
 			const lang = tab.language ?? 'typescript';
 			highlightedSources[tab.name] = {
 				light: highlighter.codeToHtml(tab.code, {
@@ -95,9 +93,7 @@
 		}
 
 		return highlightedSources;
-	}
-
-	const highlightedSourcesPromise = $derived(highlightTabs(tabs));
+	});
 
 	function setActiveTab(index: number) {
 		activeTab = index;
@@ -219,18 +215,12 @@
 						class="p-4 text-sm *:mt-0 *:rounded-none *:border-0 *:bg-transparent *:p-0 *:inset-shadow-none"
 					>
 						{#if activeSource}
-							{#await highlightedSourcesPromise}
-								<pre class="p-4">{activeSource.code}</pre>
-							{:then highlightedSources}
-								<ShikiCodeBlock
-									code=""
-									htmlLight={highlightedSources[activeSource.name].light}
-									htmlDark={highlightedSources[activeSource.name].dark}
-									unstyled={true}
-								/>
-							{:catch}
-								<pre class="p-4">{activeSource.code}</pre>
-							{/await}
+							<ShikiCodeBlock
+								code=""
+								htmlLight={highlightedSources[activeSource.name].light}
+								htmlDark={highlightedSources[activeSource.name].dark}
+								unstyled={true}
+							/>
 						{:else}
 							{@render codeSlot?.()}
 						{/if}
