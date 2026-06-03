@@ -1,7 +1,9 @@
 <script lang="ts">
 	import './layout.css';
 	import { page } from '$app/state';
-	import { CommandPalette, docsUiConfig, siteConfig } from '$lib';
+	import { CommandPalette, contentUiDefaults, siteConfig } from '$lib';
+	import { getContentSectionByPathname, getContentSectionUiConfig } from '$lib/content/sections';
+	import type { SectionUiConfig } from '$lib/config/content-ui';
 	import { type Snippet } from 'svelte';
 
 	const { children }: { children: Snippet } = $props();
@@ -9,12 +11,18 @@
 	const currentPage = page;
 
 	const isHomePath = (path?: string) => path === '/';
-	const isDocsPath = (path?: string) => path?.startsWith('/docs');
 
 	const currentUrl = $derived(currentPage.url);
 	const currentPath = $derived(currentUrl.pathname);
 	const isHomeRoute = $derived(isHomePath(currentPath));
-	const isDocsRoute = $derived(isDocsPath(currentPath));
+	const currentSection = $derived(getContentSectionByPathname(currentPath));
+	const currentSectionUi = $derived(
+		currentSection ? getContentSectionUiConfig(currentSection.id) : null
+	);
+	const searchConfig = $derived<SectionUiConfig['search']>(
+		currentSectionUi?.search ?? contentUiDefaults.search
+	);
+	const showCommandPalette = $derived(Boolean(currentSection) && searchConfig.enabled);
 	const siteOrigin = new URL(siteConfig.url).origin;
 	const canonicalUrl = $derived(new URL(currentPath, siteOrigin).href);
 
@@ -81,14 +89,14 @@
 		<svelte:element this={'script'} type="application/ld+json">
 			{homeStructuredData}
 		</svelte:element>
-	{:else if !isDocsRoute}
+	{:else if !currentSection}
 		<title>{siteName}</title>
 		<meta name="description" content={homeDescription} />
 		<link rel="canonical" href={canonicalUrl} />
 	{/if}
 </svelte:head>
 
-{#if docsUiConfig.search.enabled}
-	<CommandPalette />
+{#if showCommandPalette}
+	<CommandPalette {searchConfig} />
 {/if}
 {@render children()}

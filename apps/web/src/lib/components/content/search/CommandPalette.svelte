@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { searchState } from '$lib/stores/search.svelte';
-	import { docsUiConfig } from '$lib/config/docs-ui';
-	import { searchDocs } from '$lib/utils/search';
+	import { contentUiDefaults, type SectionUiConfig } from '$lib/config/content-ui';
+	import { searchContent } from '$lib/utils/search';
 	import { fade, scale } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import { goto, onNavigate } from '$app/navigation';
@@ -12,15 +12,18 @@
 	import Search from 'carbon-icons-svelte/lib/Search.svelte';
 	import Return from 'carbon-icons-svelte/lib/Return.svelte';
 
+	const { searchConfig = contentUiDefaults.search }: { searchConfig?: SectionUiConfig['search'] } =
+		$props();
+
 	let query = $state('');
-	let results = $derived(searchDocs(query));
+	let results = $derived(searchContent(query, searchConfig));
 	let selectedIndex = $state(0);
 	let inputRef = $state<HTMLInputElement>();
 	let contentHeight = $state(0);
 
 	function handleGlobalKeydown(e: KeyboardEvent) {
-		const hotkey = docsUiConfig.search.hotkey;
-		if (!hotkey.enabled || !docsUiConfig.search.enabled) {
+		const hotkey = searchConfig.hotkey;
+		if (!hotkey.enabled || !searchConfig.enabled) {
 			return;
 		}
 
@@ -40,7 +43,7 @@
 	});
 
 	$effect(() => {
-		if (!docsUiConfig.search.enabled) return;
+		if (!searchConfig.enabled) return;
 		if (searchState.isOpen && inputRef) {
 			inputRef.focus();
 		}
@@ -83,7 +86,7 @@
 	}
 
 	$effect(() => {
-		if (!docsUiConfig.search.enabled) return;
+		if (!searchConfig.enabled) return;
 		if (searchState.isOpen) {
 			window.addEventListener('keydown', handleKeydown);
 			return () => {
@@ -92,7 +95,7 @@
 		}
 	});
 
-	function selectResult(result: ReturnType<typeof searchDocs>[number]) {
+	function selectResult(result: ReturnType<typeof searchContent>[number]) {
 		const href = `${result.slug}${result.anchor ?? ''}`;
 		// @ts-expect-error arg cannot be cast as `resolve`'s expected type
 		void goto(resolve(href));
@@ -117,7 +120,7 @@
 	}
 </script>
 
-{#if docsUiConfig.search.enabled && searchState.isOpen}
+{#if searchConfig.enabled && searchState.isOpen}
 	<div
 		class="fixed inset-0 z-60 bg-background-inset/80 backdrop-blur-sm"
 		transition:fade={{ duration: 150 }}
@@ -158,8 +161,8 @@
 					bind:this={inputRef}
 					bind:value={query}
 					class="command-palette-input flex h-12 w-full bg-transparent text-base tracking-normal text-foreground placeholder:text-foreground-muted/70 focus:outline-none focus-visible:border-none! focus-visible:ring-0! focus-visible:ring-offset-0! focus-visible:outline-none!"
-					placeholder={docsUiConfig.search.dialogPlaceholder}
-					aria-label={docsUiConfig.search.dialogPlaceholder}
+					placeholder={searchConfig.dialogPlaceholder}
+					aria-label={searchConfig.dialogPlaceholder}
 				/>
 				<kbd
 					class="pointer-events-none inset-shadow relative hidden h-5 items-center gap-1 rounded-[calc(var(--radius-base)*1.5)] bg-background-inset px-1.5 font-mono text-[10px] font-medium tracking-normal text-foreground-muted/70 select-none sm:flex"
@@ -233,33 +236,16 @@
 						</ScrollArea>
 					{:else if query}
 						<div class="py-6 text-center text-sm tracking-normal text-foreground-muted/70">
-							{docsUiConfig.search.noResultsLabel}
+							{searchConfig.noResultsLabel}
+						</div>
+					{:else}
+						<div class="flex items-center gap-2 px-4 py-6 text-sm text-foreground-muted/70">
+							<Return size={16} class="rotate-90" />
+							<span>{searchConfig.submitHintLabel}</span>
 						</div>
 					{/if}
 				</div>
 			</div>
-			<div
-				class="relative flex w-full flex-row items-center justify-start gap-2 rounded-b-lg bg-background p-2 after:absolute after:inset-x-0 after:top-0 after:h-px after:bg-border after:shadow-2xs after:shadow-white after:content-[''] dark:after:bg-background-inset dark:after:shadow-border"
-			>
-				<kbd
-					class="pointer-events-none inset-shadow relative hidden h-5 items-center gap-1 rounded-[calc(var(--radius-base)*1.5)] bg-background-inset px-1.5 font-mono text-[10px] font-medium text-foreground-muted/70 select-none sm:flex"
-				>
-					<Return class="size-3" />
-				</kbd>
-				<span class="text-xs font-medium tracking-normal text-foreground-muted/70">
-					{docsUiConfig.search.submitHintLabel}
-				</span>
-			</div>
 		</div>
 	</div>
 {/if}
-
-<style>
-	.command-palette-input:focus,
-	.command-palette-input:focus-visible {
-		outline: none !important;
-		outline-color: transparent !important;
-		outline-offset: 0 !important;
-		box-shadow: none !important;
-	}
-</style>

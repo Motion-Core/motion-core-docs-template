@@ -36,6 +36,7 @@
 
 			<div class="inset-shadow rounded-md bg-background-inset p-1.5">
 				<a
+					// @ts-expect-error arg cannot be cast as `resolve`s expected type
 					href={resolve('/docs')}
 					class="inline-flex items-center justify-center rounded-sm bg-background px-4 py-2.5 text-sm font-medium text-foreground no-underline card transition-[background-color] duration-150 ease-out hover:bg-background-muted"
 				>

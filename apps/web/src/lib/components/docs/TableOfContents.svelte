@@ -27,6 +27,7 @@
 		title?: string;
 		emptyLabel?: string;
 		minViewportWidth?: number;
+		scrollContainerId?: string;
 	};
 
 	const props = $props();
@@ -36,6 +37,7 @@
 	const title = $derived((props as Props).title ?? 'On this page');
 	const emptyLabel = $derived((props as Props).emptyLabel ?? 'No headings');
 	const minViewportWidth = $derived((props as Props).minViewportWidth ?? 1280);
+	const scrollContainerId = $derived((props as Props).scrollContainerId ?? null);
 
 	let headings = $state<Omit<TocItem, 'element'>[]>([]);
 	let activeId = $state('');
@@ -61,6 +63,13 @@
 	const linksWrapperId = 'toc-links-wrapper';
 
 	const currentPath = $derived(page.url.pathname);
+
+	function getScrollContainer() {
+		if (typeof document === 'undefined') return window;
+		if (!scrollContainerId) return window;
+		const element = document.getElementById(scrollContainerId);
+		return element ?? window;
+	}
 
 	const slugify = (value: string) =>
 		value
@@ -379,18 +388,16 @@
 
 		const updateActive = () => {
 			let current = parsed[0]?.id ?? '';
-			const container = document.getElementById('docs-content-container') ?? window;
-			const isWindow = container === window;
-			const scrollY = isWindow ? window.scrollY : (container as HTMLElement).scrollTop;
-			const viewportHeight = isWindow
-				? window.innerHeight
-				: (container as HTMLElement).clientHeight;
+			const scrollEl = getScrollContainer();
+			const isWindow = scrollEl === window;
+			const scrollY = isWindow ? window.scrollY : (scrollEl as HTMLElement).scrollTop;
+			const viewportHeight = isWindow ? window.innerHeight : (scrollEl as HTMLElement).clientHeight;
 			const scrollHeight = isWindow
 				? document.documentElement.scrollHeight
-				: (container as HTMLElement).scrollHeight;
+				: (scrollEl as HTMLElement).scrollHeight;
 			const containerBounds = isWindow
 				? { top: 0, bottom: viewportHeight }
-				: (container as HTMLElement).getBoundingClientRect();
+				: (scrollEl as HTMLElement).getBoundingClientRect();
 			const viewportTop = containerBounds.top - VISIBLE_BUFFER;
 			const viewportBottom = containerBounds.bottom + VISIBLE_BUFFER;
 			const visibleIds: string[] = [];
@@ -425,7 +432,7 @@
 			scheduleIndicatorUpdate(range);
 		};
 
-		const container = document.getElementById('docs-content-container') ?? window;
+		const container = getScrollContainer();
 
 		if (parsed.length > 0) {
 			const isWindow = container === window;

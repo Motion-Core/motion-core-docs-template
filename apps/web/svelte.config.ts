@@ -130,7 +130,7 @@ const config: Config = {
 		mdsvex({
 			extensions: ['.svx'],
 			layout: {
-				docs: markdownLayout
+				_: markdownLayout
 			},
 			// @ts-expect-error - plugin type is structurally compatible at runtime;
 			// typing it precisely would require changing unified/mdsvex generics.

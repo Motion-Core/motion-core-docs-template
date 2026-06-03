@@ -28,12 +28,12 @@ Update these files first:
 
 - `apps/web/src/lib/config/site.ts` - site name, description, keywords, links, package metadata, canonical URL.
 - `apps/web/src/lib/config/branding.ts` - logo source and brand label used in shared UI.
-- `apps/web/src/lib/config/navigation.ts` - manual sidebar structure and docs order.
-- `apps/web/src/lib/config/docs-ui.ts` - search, TOC, doc actions, pagination, package manager tabs, theme defaults.
+- `apps/web/src/lib/config/navigation.ts` - manual sidebar structure and pages order.
+- `apps/web/src/lib/config/content-ui.ts` - search, TOC, actions, pagination, package manager tabs, theme defaults.
 
 Then adjust docs content:
 
-- `apps/web/src/routes/docs/**/*` - page content (`.svx`) and docs routes.
+- `apps/web/src/lib/content/**/*` - page content (`.svx` or `.svelte`) and routes.
 
 ## Common Commands
 

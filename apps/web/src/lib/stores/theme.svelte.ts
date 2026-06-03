@@ -1,10 +1,10 @@
 import { browser } from '$app/environment';
-import { docsUiConfig } from '$lib/config/docs-ui';
+import { contentUiDefaults } from '$lib/config/content-ui';
 
 export const themes = ['light', 'dark'] as const;
 export type Theme = (typeof themes)[number];
 
-const storageKey = docsUiConfig.theme.storageKey;
+const storageKey = contentUiDefaults.theme.storageKey;
 
 function isTheme(value: string | null): value is Theme {
 	return value === 'light' || value === 'dark';
@@ -12,11 +12,14 @@ function isTheme(value: string | null): value is Theme {
 
 function getPreferredTheme(): Theme {
 	if (!browser) {
-		return docsUiConfig.theme.defaultMode === 'dark' ? 'dark' : 'light';
+		return contentUiDefaults.theme.defaultMode === 'dark' ? 'dark' : 'light';
 	}
 
-	if (docsUiConfig.theme.defaultMode === 'light' || docsUiConfig.theme.defaultMode === 'dark') {
-		return docsUiConfig.theme.defaultMode;
+	if (
+		contentUiDefaults.theme.defaultMode === 'light' ||
+		contentUiDefaults.theme.defaultMode === 'dark'
+	) {
+		return contentUiDefaults.theme.defaultMode;
 	}
 
 	return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';

@@ -8,11 +8,7 @@ export const availablePackageManagers = ['npm', 'pnpm', 'bun', 'yarn'] as const;
  */
 export type PackageManagerOption = (typeof availablePackageManagers)[number];
 
-/**
- * Global, strongly-typed settings for interactive documentation UI elements.
- * Adjust defaults here to tune behavior across the entire docs experience.
- */
-export type DocsUiConfig = {
+export type SectionUiConfig = {
 	search: {
 		enabled: boolean;
 		triggerPlaceholder: string;
@@ -45,7 +41,7 @@ export type DocsUiConfig = {
 			selector: string;
 		}[];
 	};
-	docActions: {
+	pageActions: {
 		enabled: boolean;
 		showCopyMarkdown: boolean;
 		showRepositoryLink: boolean;
@@ -78,6 +74,21 @@ export type DocsUiConfig = {
 		previousLabel: string;
 		nextLabel: string;
 	};
+};
+
+export type DeepPartial<T> = {
+	[K in keyof T]?: T[K] extends (infer U)[]
+		? DeepPartial<U>[]
+		: T[K] extends object
+			? DeepPartial<T[K]>
+			: T[K];
+};
+
+/**
+ * Global, strongly-typed settings for interactive content UI elements.
+ * Adjust defaults here to tune behavior across the entire site experience.
+ */
+export type ContentUiConfig = SectionUiConfig & {
 	packageManager: {
 		enabled: PackageManagerOption[];
 		default: PackageManagerOption;
@@ -90,13 +101,13 @@ export type DocsUiConfig = {
 };
 
 /**
- * Centralized interactive docs configuration used by route components and helpers.
+ * Default section-level UI configuration shared across content sections.
  */
-export const docsUiConfig: DocsUiConfig = {
+export const sectionUiDefaults: SectionUiConfig = {
 	search: {
 		enabled: true,
 		triggerPlaceholder: 'Search...',
-		dialogPlaceholder: 'Search documentation...',
+		dialogPlaceholder: 'Search...',
 		noResultsLabel: 'No results found.',
 		submitHintLabel: 'Go to page',
 		hotkey: {
@@ -122,7 +133,7 @@ export const docsUiConfig: DocsUiConfig = {
 		defaultSelector: '[data-doc-content] > h2, [data-doc-content] > h3',
 		selectorOverrides: [{ slugPrefix: 'changelog', selector: '[data-doc-content] > h2' }]
 	},
-	docActions: {
+	pageActions: {
 		enabled: true,
 		showCopyMarkdown: true,
 		showRepositoryLink: true,
@@ -155,7 +166,14 @@ export const docsUiConfig: DocsUiConfig = {
 		enabled: true,
 		previousLabel: 'Previous',
 		nextLabel: 'Next'
-	},
+	}
+};
+
+/**
+ * Centralized UI defaults used across content sections and shared layout helpers.
+ */
+export const contentUiDefaults: ContentUiConfig = {
+	...sectionUiDefaults,
 	packageManager: {
 		enabled: ['npm', 'pnpm', 'bun', 'yarn'],
 		default: 'npm',
@@ -166,6 +184,38 @@ export const docsUiConfig: DocsUiConfig = {
 		defaultMode: 'system'
 	}
 };
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+	typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const mergeDeep = <T>(base: T, overrides: DeepPartial<T>): T => {
+	if (!isPlainObject(base) || !isPlainObject(overrides)) {
+		return overrides as T;
+	}
+
+	const result: Record<string, unknown> = { ...base };
+	for (const [key, value] of Object.entries(overrides)) {
+		if (value === undefined) continue;
+		const baseValue = (base as Record<string, unknown>)[key];
+		if (Array.isArray(baseValue) && Array.isArray(value)) {
+			result[key] = value;
+			continue;
+		}
+		if (isPlainObject(baseValue) && isPlainObject(value)) {
+			result[key] = mergeDeep(baseValue, value as DeepPartial<typeof baseValue>);
+			continue;
+		}
+		result[key] = value;
+	}
+
+	return result as T;
+};
+
+export function mergeSectionUiConfig(
+	overrides: DeepPartial<SectionUiConfig> = {}
+): SectionUiConfig {
+	return mergeDeep(sectionUiDefaults, overrides);
+}
 
 /**
  * Replaces `{token}` placeholders in a template string with provided values.
@@ -179,34 +229,39 @@ function interpolateTemplate(template: string, variables: Record<string, string>
 }
 
 /**
- * Resolves the heading selector for table-of-contents generation based on a doc slug.
+ * Resolves the heading selector for table-of-contents generation based on a slug.
  *
- * @param slug Relative documentation slug (for example `changelog/1.0.0`).
+ * @param tocConfig Section toc configuration.
+ * @param slug Relative content slug (for example `changelog/1.0.0`).
  * @returns CSS selector used to extract headings from page content.
  */
-export function resolveTocSelector(slug?: string | null) {
+export function resolveTocSelector(tocConfig: SectionUiConfig['toc'], slug?: string | null) {
 	const normalizedSlug = slug ?? '';
-	const override = docsUiConfig.toc.selectorOverrides.find((item) =>
+	const override = tocConfig.selectorOverrides.find((item) =>
 		normalizedSlug.startsWith(item.slugPrefix)
 	);
-	return override?.selector ?? docsUiConfig.toc.defaultSelector;
+	return override?.selector ?? tocConfig.defaultSelector;
 }
 
 /**
- * Builds AI assistant links (ChatGPT/Claude) for the current documentation URL.
+ * Builds AI assistant links (ChatGPT/Claude) for the current page URL.
  *
- * @param rawUrl Absolute URL of the current docs page.
+ * @param pageActionsConfig Section page actions configuration.
+ * @param rawUrl Absolute URL of the current page.
  * @returns Encoded assistant URLs when enabled; otherwise `null` values.
  */
-export function resolveDocAssistantUrls(rawUrl?: string | null) {
-	if (!rawUrl) {
+export function resolveAssistantUrls(
+	pageActionsConfig: SectionUiConfig['pageActions'],
+	rawUrl?: string | null
+) {
+	if (!rawUrl || !pageActionsConfig.enabled) {
 		return {
 			chatGptUrl: null,
 			claudeUrl: null
 		};
 	}
 
-	const prompt = interpolateTemplate(docsUiConfig.docActions.assistantPromptTemplate, {
+	const prompt = interpolateTemplate(pageActionsConfig.assistantPromptTemplate, {
 		url: rawUrl
 	});
 	const encodedPrompt = encodeURIComponent(prompt);
@@ -218,24 +273,29 @@ export function resolveDocAssistantUrls(rawUrl?: string | null) {
 	};
 
 	return {
-		chatGptUrl: docsUiConfig.docActions.assistants.chatgpt.enabled
-			? interpolateTemplate(docsUiConfig.docActions.assistants.chatgpt.hrefTemplate, templateVars)
+		chatGptUrl: pageActionsConfig.assistants.chatgpt.enabled
+			? interpolateTemplate(pageActionsConfig.assistants.chatgpt.hrefTemplate, templateVars)
 			: null,
-		claudeUrl: docsUiConfig.docActions.assistants.claude.enabled
-			? interpolateTemplate(docsUiConfig.docActions.assistants.claude.hrefTemplate, templateVars)
+		claudeUrl: pageActionsConfig.assistants.claude.enabled
+			? interpolateTemplate(pageActionsConfig.assistants.claude.hrefTemplate, templateVars)
 			: null
 	};
 }
 
 /**
- * Creates a deep link to a documentation file in the source repository.
+ * Creates a deep link to a repository file.
  *
+ * @param pageActionsConfig Section page actions configuration.
  * @param repositoryBaseUrl Repository root URL (for example `https://github.com/org/repo`).
  * @param repositoryRelativePath File path prefixed with `/` from repository root.
  * @returns URL pointing to the configured branch and target file.
  */
-export function resolveRepositoryDocUrl(repositoryBaseUrl: string, repositoryRelativePath: string) {
-	const branch = docsUiConfig.docActions.repositoryBranch.trim();
+export function resolveRepositoryFileUrl(
+	pageActionsConfig: SectionUiConfig['pageActions'],
+	repositoryBaseUrl: string,
+	repositoryRelativePath: string
+) {
+	const branch = pageActionsConfig.repositoryBranch.trim();
 	const safeBranch = branch.length > 0 ? branch : 'main';
 	return `${repositoryBaseUrl}/blob/${safeBranch}${repositoryRelativePath}`;
 }

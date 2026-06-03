@@ -1,15 +1,15 @@
 import { browser } from '$app/environment';
 import {
-	docsUiConfig,
+	contentUiDefaults,
 	availablePackageManagers,
 	type PackageManagerOption
-} from '$lib/config/docs-ui';
+} from '$lib/config/content-ui';
 
 export type PackageManager = PackageManagerOption;
 
 const enabledManagers = Array.from(
 	new Set(
-		docsUiConfig.packageManager.enabled.filter((pm): pm is PackageManager =>
+		contentUiDefaults.packageManager.enabled.filter((pm): pm is PackageManager =>
 			availablePackageManagers.includes(pm)
 		)
 	)
@@ -19,13 +19,13 @@ export const packageManagers: PackageManager[] =
 	enabledManagers.length > 0 ? enabledManagers : ['npm'];
 
 function createPackageManagerStore() {
-	const configuredDefault = docsUiConfig.packageManager.default;
+	const configuredDefault = contentUiDefaults.packageManager.default;
 	let active = $state<PackageManager>(
 		packageManagers.includes(configuredDefault) ? configuredDefault : packageManagers[0]
 	);
 
 	if (browser) {
-		const stored = localStorage.getItem(docsUiConfig.packageManager.storageKey);
+		const stored = localStorage.getItem(contentUiDefaults.packageManager.storageKey);
 		if (stored && packageManagers.includes(stored as PackageManager)) {
 			active = stored as PackageManager;
 		}
@@ -38,7 +38,7 @@ function createPackageManagerStore() {
 		set active(v: PackageManager) {
 			active = v;
 			if (browser) {
-				localStorage.setItem(docsUiConfig.packageManager.storageKey, v);
+				localStorage.setItem(contentUiDefaults.packageManager.storageKey, v);
 			}
 		}
 	};

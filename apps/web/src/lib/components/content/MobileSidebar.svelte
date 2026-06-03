@@ -2,10 +2,45 @@
 	import { afterNavigate } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onDestroy } from 'svelte';
-	import DocsSidebar from './DocsSidebar.svelte';
+	import ContentSidebar from '$lib/components/content/ContentSidebar.svelte';
 	import { brandingConfig } from '$lib/config/branding';
+	import { contentUiDefaults, type SectionUiConfig } from '$lib/config/content-ui';
+	import { getContentSectionLinks } from '$lib/content/sections';
+	import { siteConfig } from '$lib/config/site';
 	import Menu from 'carbon-icons-svelte/lib/Menu.svelte';
 	import Close from 'carbon-icons-svelte/lib/Close.svelte';
+	import type { ContentItem } from '$lib/config/navigation';
+
+	type SectionLink = {
+		label: string;
+		href: string;
+	};
+
+	const defaultSectionLinks = getContentSectionLinks();
+
+	const {
+		navigation = [],
+		navigationLabel = contentUiDefaults.sidebar.navigationLabel,
+		basePath = '/',
+		showSearch = contentUiDefaults.search.enabled,
+		showThemeToggle = contentUiDefaults.sidebar.showThemeToggle,
+		showRepositoryLink = contentUiDefaults.sidebar.showRepositoryLink,
+		repositoryUrl = siteConfig.links.github,
+		repositoryAriaLabel = contentUiDefaults.sidebar.repositoryAriaLabel,
+		searchConfig = contentUiDefaults.search,
+		sectionLinks = defaultSectionLinks
+	}: {
+		navigation?: ContentItem[];
+		navigationLabel?: string;
+		basePath?: string;
+		showSearch?: boolean;
+		showThemeToggle?: boolean;
+		showRepositoryLink?: boolean;
+		repositoryUrl?: string;
+		repositoryAriaLabel?: string;
+		searchConfig?: SectionUiConfig['search'];
+		sectionLinks?: SectionLink[];
+	} = $props();
 
 	let isOpen = $state(false);
 	let isVisible = $state(false);
@@ -186,52 +221,51 @@
 
 {#if isVisible}
 	<div
-		class="overlay fixed inset-0 z-50 bg-background-inset/80 backdrop-blur-sm lg:hidden"
-		class:active={isOpen}
-		onclick={closePanel}
-		role="presentation"
-		aria-hidden="true"
-	></div>
-
-	<div
-		id={panelId}
-		class="sidebar fixed inset-y-0 right-0 z-50 w-3/4 max-w-sm overflow-hidden border-l border-border bg-background-inset text-foreground-muted lg:hidden"
-		class:active={isOpen}
-		ontransitionend={handleSidebarTransitionEnd}
+		class="fixed inset-0 z-50 flex lg:hidden"
+		class:pointer-events-none={!isOpen}
 		role="dialog"
 		aria-modal="true"
-		aria-label="Navigation menu"
-		tabindex="-1"
+		aria-label={navigationLabel}
 	>
-		<div class="absolute top-0 right-0 flex justify-end p-4">
-			<button id={closeButtonId} onclick={closePanel} aria-label="Close menu">
-				<Close size={32} class="size-6" />
-			</button>
-		</div>
-		<DocsSidebar />
+		<div
+			class="absolute inset-0 bg-black/30 transition-opacity duration-200 ease-out"
+			class:opacity-0={!isOpen}
+			class:pointer-events-none={!isOpen}
+			onclick={closePanel}
+		></div>
+		<aside
+			id={panelId}
+			class="relative flex h-full w-70 max-w-[85vw] transform flex-col border-r border-border bg-background transition-transform duration-200 ease-out"
+			class:translate-x-0={isOpen}
+			class:-translate-x-full={!isOpen}
+			ontransitionend={handleSidebarTransitionEnd}
+		>
+			<div class="flex items-center justify-between border-b border-border px-4 py-3">
+				<span class="text-sm font-medium tracking-tight text-foreground">{navigationLabel}</span>
+				<button
+					id={closeButtonId}
+					onclick={closePanel}
+					class="inline-flex size-8 items-center justify-center rounded-sm text-foreground transition-colors duration-150 ease-out hover:bg-background-muted"
+					aria-label="Close menu"
+				>
+					<Close size={20} />
+				</button>
+			</div>
+
+			<div class="flex min-h-0 flex-1 flex-col">
+				<ContentSidebar
+					{navigation}
+					{navigationLabel}
+					{basePath}
+					{showSearch}
+					{showThemeToggle}
+					{showRepositoryLink}
+					{repositoryUrl}
+					{repositoryAriaLabel}
+					{searchConfig}
+					{sectionLinks}
+				/>
+			</div>
+		</aside>
 	</div>
 {/if}
-
-<style>
-	.overlay {
-		opacity: 0;
-		pointer-events: none;
-		transition: opacity 200ms ease-out;
-		will-change: opacity;
-	}
-
-	.overlay.active {
-		opacity: 1;
-		pointer-events: auto;
-	}
-
-	.sidebar {
-		transform: translateX(100%);
-		transition: transform 200ms ease-out;
-		will-change: transform;
-	}
-
-	.sidebar.active {
-		transform: translateX(0);
-	}
-</style>
