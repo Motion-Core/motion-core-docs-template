@@ -1,53 +1,39 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
 	import { cn } from '$lib/utils/cn';
+	import { copyToClipboard } from '$lib/utils/copy';
 	import Copy from 'carbon-icons-svelte/lib/Copy.svelte';
 	import Checkmark from 'carbon-icons-svelte/lib/Checkmark.svelte';
 
 	let { code, class: className }: { code: string; class: string } = $props();
 
 	let copied = $state(false);
-	let timeoutId: number | null = null;
-	let lastCode: string | null = null;
 
 	async function handleCopy(value: string) {
-		if (!value || typeof navigator === 'undefined') {
-			return;
-		}
-
+		if (!value) return;
 		try {
-			await navigator.clipboard.writeText(value);
+			await copyToClipboard(value);
 			copied = true;
-			if (timeoutId) {
-				window.clearTimeout(timeoutId);
-			}
-			timeoutId = window.setTimeout(() => {
-				copied = false;
-				timeoutId = null;
-			}, 2000);
-		} catch (error) {
-			console.error('Failed to copy code snippet', error);
+		} catch {
+			console.error('Failed to copy code snippet');
 		}
 	}
 
-	onDestroy(() => {
-		if (timeoutId) {
-			window.clearTimeout(timeoutId);
-			timeoutId = null;
-		}
+	// Reset the copied state after 2 seconds
+	$effect(() => {
+		if (!copied) return;
+		const t = setTimeout(() => {
+			copied = false;
+		}, 2000);
+		return () => {
+			clearTimeout(t);
+		};
 	});
 
+	// Reset when code changes
 	$effect(() => {
-		if (lastCode === code) {
-			return;
-		}
-
-		lastCode = code;
+		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+		code;
 		copied = false;
-		if (timeoutId) {
-			window.clearTimeout(timeoutId);
-			timeoutId = null;
-		}
 	});
 </script>
 
