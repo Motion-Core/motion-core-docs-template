@@ -29,7 +29,8 @@
 		repositoryUrl = siteConfig.links.github,
 		repositoryAriaLabel = contentUiDefaults.sidebar.repositoryAriaLabel,
 		searchConfig = contentUiDefaults.search,
-		sectionLinks = []
+		sectionLinks = [],
+		showBranding = true
 	}: {
 		navigation: ContentItem[];
 		navigationLabel?: string;
@@ -41,6 +42,7 @@
 		repositoryAriaLabel?: string;
 		searchConfig?: SectionUiConfig['search'];
 		sectionLinks?: SectionLink[];
+		showBranding?: boolean;
 	} = $props();
 
 	const currentPath = $derived(
@@ -100,16 +102,19 @@
 
 <aside class="flex h-full min-h-0 flex-col bg-background" aria-label={navigationLabel + ' sidebar'}>
 	<div class="flex flex-col gap-2 p-4 pb-0 lg:p-0">
-		<a href={resolve('/')} class="flex items-center gap-2">
-			<span
-				class="inline-flex shrink-0 items-center text-accent [&>svg]:size-6 [&>svg]:fill-current"
-				aria-hidden="true"
-			>
-				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-				{@html brandingConfig.logoRaw}
-			</span>
-			<span class="text-xl font-medium tracking-tight text-foreground">{brandingConfig.name}</span>
-		</a>
+		{#if showBranding}
+			<a href={resolve('/')} class="flex items-center gap-2">
+				<span
+					class="inline-flex shrink-0 items-center text-accent [&>svg]:size-6 [&>svg]:fill-current"
+					aria-hidden="true"
+				>
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+					{@html brandingConfig.logoRaw}
+				</span>
+				<span class="text-xl font-medium tracking-tight text-foreground">{brandingConfig.name}</span
+				>
+			</a>
+		{/if}
 
 		{#if sectionLinks.length > 1}
 			<nav

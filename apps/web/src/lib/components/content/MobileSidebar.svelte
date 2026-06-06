@@ -235,20 +235,19 @@
 		></div>
 		<aside
 			id={panelId}
-			class="relative flex h-full w-70 max-w-[85vw] transform flex-col border-r border-border bg-background transition-transform duration-200 ease-out"
+			class="relative ml-auto flex h-full w-70 max-w-[85vw] transform flex-col border-l border-border bg-background transition-transform duration-200 ease-out"
 			class:translate-x-0={isOpen}
-			class:-translate-x-full={!isOpen}
+			class:translate-x-full={!isOpen}
 			ontransitionend={handleSidebarTransitionEnd}
 		>
-			<div class="flex items-center justify-between border-b border-border px-4 py-3">
-				<span class="text-sm font-medium tracking-tight text-foreground">{navigationLabel}</span>
+			<div class="flex items-center justify-end border-b border-border px-4 py-1.5">
 				<button
 					id={closeButtonId}
 					onclick={closePanel}
-					class="inline-flex size-8 items-center justify-center rounded-sm text-foreground transition-colors duration-150 ease-out hover:bg-background-muted"
+					class="inline-flex size-10 items-center justify-center rounded-sm text-foreground transition-colors duration-150 ease-out hover:bg-background-muted"
 					aria-label="Close menu"
 				>
-					<Close size={20} />
+					<Close size={22} />
 				</button>
 			</div>
 
@@ -264,6 +263,7 @@
 					{repositoryAriaLabel}
 					{searchConfig}
 					{sectionLinks}
+					showBranding={false}
 				/>
 			</div>
 		</aside>
