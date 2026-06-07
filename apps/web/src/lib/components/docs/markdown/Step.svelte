@@ -6,11 +6,11 @@
 		class: className,
 		children,
 		title
-	} = $props<{
+	}: {
 		class?: string;
 		children?: Snippet;
 		title?: string;
-	}>();
+	} = $props();
 </script>
 
 <div class={cn('relative pl-8', className)}>
@@ -20,7 +20,7 @@
 				class="inset-shadow absolute -left-5 flex size-10 rounded-full bg-background-inset p-1.5"
 			>
 				<span
-					class="card flex h-full w-full items-center justify-center rounded-full bg-background text-xs font-medium text-foreground [counter-increment:step] before:content-[counter(step)]"
+					class="flex h-full w-full items-center justify-center rounded-full bg-background text-xs font-medium text-foreground card [counter-increment:step] before:content-[counter(step)]"
 				>
 				</span>
 			</div>
@@ -31,7 +31,7 @@
 	{:else}
 		<div class="inset-shadow absolute -left-5 flex size-10 rounded-full bg-background-inset p-1.5">
 			<span
-				class="card flex h-full w-full items-center justify-center rounded-full bg-background text-xs font-medium text-foreground [counter-increment:step] before:content-[counter(step)]"
+				class="flex h-full w-full items-center justify-center rounded-full bg-background text-xs font-medium text-foreground card [counter-increment:step] before:content-[counter(step)]"
 			>
 			</span>
 		</div>

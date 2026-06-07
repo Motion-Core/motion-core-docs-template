@@ -1,8 +1,8 @@
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-export const GET: RequestHandler = async ({ params }) => {
-	const slug = (params.slug ?? '').replace(/^\/+|\/+$/g, '');
+export const GET: RequestHandler = ({ params }) => {
+	const slug = params.slug.replace(/^\/+|\/+$/g, '');
 	const targetSlug = slug === 'index' || slug === 'docs' ? '' : slug;
 
 	const modules = import.meta.glob('/src/routes/docs/**/*.svx', {
@@ -28,7 +28,7 @@ export const GET: RequestHandler = async ({ params }) => {
 	}
 
 	if (!found) {
-		throw error(404, 'Document not found');
+		error(404, 'Document not found');
 	}
 
 	return new Response(content, {

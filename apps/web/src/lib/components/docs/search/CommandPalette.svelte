@@ -4,8 +4,8 @@
 	import { searchDocs } from '$lib/utils/search';
 	import { fade, scale } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
-	import { goto } from '$app/navigation';
-	import { onNavigate } from '$app/navigation';
+	import { goto, onNavigate } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { cn } from '$lib/utils/cn';
 	import ScrollArea from '$lib/components/ui/ScrollArea.svelte';
 	import { onMount } from 'svelte';
@@ -86,13 +86,16 @@
 		if (!docsUiConfig.search.enabled) return;
 		if (searchState.isOpen) {
 			window.addEventListener('keydown', handleKeydown);
-			return () => window.removeEventListener('keydown', handleKeydown);
+			return () => {
+				window.removeEventListener('keydown', handleKeydown);
+			};
 		}
 	});
 
 	function selectResult(result: ReturnType<typeof searchDocs>[number]) {
-		const href = `${result.slug}${result.anchor || ''}`;
-		goto(href);
+		const href = `${result.slug}${result.anchor ?? ''}`;
+		// @ts-expect-error arg cannot be cast as `resolve`'s expected type
+		void goto(resolve(href));
 		close();
 	}
 
@@ -127,8 +130,12 @@
 		role="dialog"
 		aria-modal="true"
 		tabindex="-1"
-		onclick={(e) => e.target === e.currentTarget && close()}
-		onkeydown={(e) => e.key === 'Escape' && close()}
+		onclick={(e) => {
+			if (e.target === e.currentTarget) close();
+		}}
+		onkeydown={(e) => {
+			if (e.key === 'Escape') close();
+		}}
 	>
 		<div
 			class="relative w-full max-w-164 transform-gpu rounded-lg bg-background card"
@@ -171,7 +178,7 @@
 							viewportStyle="mask-image: linear-gradient(to bottom, transparent, black 8px, black calc(100% - 8px), transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 8px, black calc(100% - 8px), transparent);"
 							viewportClass="max-h-96 p-2"
 						>
-							{#each results as result, i (result.slug + (result.anchor || '') + i)}
+							{#each results as result, i (`${result.slug}${result.anchor ?? ''}${i.toString()}`)}
 								{@const isChild = result.matchType === 'heading' || result.matchType === 'content'}
 								<button
 									class={cn(
@@ -181,7 +188,9 @@
 											? 'bg-background-muted text-foreground'
 											: 'text-foreground hover:bg-background-muted'
 									)}
-									onclick={() => selectResult(result)}
+									onclick={() => {
+										selectResult(result);
+									}}
 									onmouseenter={() => (selectedIndex = i)}
 								>
 									{#if isChild}
@@ -195,7 +204,7 @@
 													<span class="opacity-70">#</span>
 												{/if}
 												<span>
-													{#each highlight(result.heading || result.title, query) as part, index (index)}
+													{#each highlight(result.heading ?? result.title, query) as part, index (index)}
 														{#if part.highlight}
 															<span class="text-accent">{part.text}</span>
 														{:else}

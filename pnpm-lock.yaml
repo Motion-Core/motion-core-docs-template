@@ -51,9 +51,15 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.17
         version: 4.3.0(vite@7.3.3(@types/node@25.8.0)(jiti@2.7.0)(lightningcss@1.32.0))
+      '@types/hast':
+        specifier: ^3.0.4
+        version: 3.0.4
       '@types/node':
         specifier: ^25.5.0
         version: 25.8.0
+      '@types/unist':
+        specifier: ^3.0.3
+        version: 3.0.3
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.56.1
         version: 8.59.3(@typescript-eslint/parser@8.59.3(eslint@10.4.0(jiti@2.7.0))(typescript@5.9.3))(eslint@10.4.0(jiti@2.7.0))(typescript@5.9.3)
@@ -2969,7 +2975,7 @@ snapshots:
 
   '@types/mdast@4.0.4':
     dependencies:
-      '@types/unist': 2.0.11
+      '@types/unist': 3.0.3
 
   '@types/node@25.8.0':
     dependencies:

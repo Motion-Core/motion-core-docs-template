@@ -32,7 +32,7 @@ export function getDocMetadata(path: string): DocMetadata | null {
 	return {
 		href: normalizedPath as `/docs/${string}`,
 		slug,
-		title: name || title || slugToTitle(slug),
+		title: name ?? title ?? slugToTitle(slug),
 		description
 	};
 }

@@ -129,17 +129,17 @@
 		if (points.length === 0) return '';
 		if (points.length === 1) {
 			const [point] = points;
-			return `M ${point.x} ${point.y}`;
+			return `M ${point.x.toString()} ${point.y.toString()}`;
 		}
 
-		const commands: string[] = [`M ${points[0].x} ${points[0].y}`];
+		const commands: string[] = [`M ${points[0].x.toString()} ${points[0].y.toString()}`];
 
 		for (let i = 1; i < points.length; i++) {
 			const point = points[i];
 			const prev = points[i - 1];
 
 			if (i === points.length - 1) {
-				commands.push(` L ${point.x} ${point.y}`);
+				commands.push(` L ${point.x.toString()} ${point.y.toString()}`);
 				continue;
 			}
 
@@ -152,7 +152,7 @@
 			const nextLen = Math.hypot(nextVecX, nextVecY);
 
 			if (prevLen === 0 || nextLen === 0) {
-				commands.push(` L ${point.x} ${point.y}`);
+				commands.push(` L ${point.x.toString()} ${point.y.toString()}`);
 				continue;
 			}
 
@@ -163,7 +163,7 @@
 			const dot = prevDirX * nextDirX + prevDirY * nextDirY;
 
 			if (Math.abs(dot) > 0.999) {
-				commands.push(` L ${point.x} ${point.y}`);
+				commands.push(` L ${point.x.toString()} ${point.y.toString()}`);
 				continue;
 			}
 
@@ -173,8 +173,10 @@
 			const exitX = point.x + nextDirX * cornerRadius;
 			const exitY = point.y + nextDirY * cornerRadius;
 
-			commands.push(` L ${entryX} ${entryY}`);
-			commands.push(` Q ${point.x} ${point.y} ${exitX} ${exitY}`);
+			commands.push(` L ${entryX.toString()} ${entryY.toString()}`);
+			commands.push(
+				` Q ${point.x.toString()} ${point.y.toString()} ${exitX.toString()} ${exitY.toString()}`
+			);
 		}
 
 		return commands.join('');
@@ -245,8 +247,8 @@
 
 		if (range) {
 			indicatorRange = range;
-		} else if (!indicatorRange) {
-			indicatorRange = appliedRange;
+		} else {
+			indicatorRange ??= appliedRange;
 		}
 
 		const startPos = linkPositions.get(appliedRange.startId);
@@ -306,20 +308,21 @@
 		const parsed: TocItem[] = [];
 
 		for (const node of nodeList) {
-			const text = node.textContent?.trim() ?? '';
+			const rawText = node.textContent;
+			const text = rawText ? rawText.trim() : '';
 			if (!text) continue;
 
 			let id = node.id;
 			if (!id) {
 				let baseSlug = slugify(text);
 				if (!baseSlug) {
-					baseSlug = `section-${parsed.length + 1}`;
+					baseSlug = `section-${(parsed.length + 1).toString()}`;
 				}
 				const count = slugCounts.get(baseSlug);
 				if (typeof count === 'number') {
 					const nextCount = count + 1;
 					slugCounts.set(baseSlug, nextCount);
-					baseSlug = `${baseSlug}-${nextCount}`;
+					baseSlug = `${baseSlug}-${nextCount.toString()}`;
 				} else {
 					slugCounts.set(baseSlug, 0);
 				}
@@ -332,7 +335,7 @@
 
 				do {
 					nextCount += 1;
-					id = `${baseId}-${nextCount}`;
+					id = `${baseId}-${nextCount.toString()}`;
 				} while (usedIds.has(id));
 
 				slugCounts.set(baseId, nextCount);
@@ -366,7 +369,9 @@
 		indicatorBottom = 0;
 		indicatorRange = null;
 
-		requestAnimationFrame(() => updateLayout());
+		requestAnimationFrame(() => {
+			updateLayout();
+		});
 
 		if (!parsed.length) {
 			return undefined;
@@ -401,11 +406,9 @@
 			}
 
 			const last = parsed[parsed.length - 1];
-			if (last) {
-				const scrolledBottom = scrollY + viewportHeight;
-				if (scrolledBottom >= scrollHeight - 20) {
-					current = last.id;
-				}
+			const scrolledBottom = scrollY + viewportHeight;
+			if (scrolledBottom >= scrollHeight - 20) {
+				current = last.id;
 			}
 
 			activeId = current;
@@ -563,8 +566,8 @@
 				<div
 					class="pointer-events-none absolute top-0 left-1 h-full w-10"
 					style={`
-                    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${svgWidth} ${lineHeight}' width='${svgWidth}' height='${lineHeight}' preserveAspectRatio='none'%3E%3Cpath d='${svgPath}' stroke='black' stroke-width='1' fill='none'/%3E%3C/svg%3E");
-                    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${svgWidth} ${lineHeight}' width='${svgWidth}' height='${lineHeight}' preserveAspectRatio='none'%3E%3Cpath d='${svgPath}' stroke='black' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+                    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${svgWidth.toString()} ${lineHeight.toString()}' width='${svgWidth.toString()}' height='${lineHeight.toString()}' preserveAspectRatio='none'%3E%3Cpath d='${svgPath}' stroke='black' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+                    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${svgWidth.toString()} ${lineHeight.toString()}' width='${svgWidth.toString()}' height='${lineHeight.toString()}' preserveAspectRatio='none'%3E%3Cpath d='${svgPath}' stroke='black' stroke-width='1' fill='none'/%3E%3C/svg%3E");
                     mask-repeat: no-repeat;
                     -webkit-mask-repeat: no-repeat;
                     mask-position: left top;
@@ -579,8 +582,8 @@
 						<div
 							class="absolute left-0 w-full bg-accent transition-all duration-450 ease-out"
 							style={`
-                            top: ${indicatorTop}px;
-                            bottom: ${Math.max(0, lineHeight - indicatorBottom)}px;
+                            top: ${indicatorTop.toString()}px;
+                            bottom: ${Math.max(0, lineHeight - indicatorBottom).toString()}px;
                         `}
 						></div>
 					{/if}
@@ -594,7 +597,7 @@
 					{#each headings as heading (heading.id)}
 						<li
 							class="transition-colors duration-150 ease-out"
-							style={`padding-left: ${(heading.level - 2) * 12}px`}
+							style={`padding-left: ${((heading.level - 2) * 12).toString()}px`}
 						>
 							<a
 								href={`#${heading.id}`}

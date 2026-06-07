@@ -30,7 +30,10 @@
 </script>
 
 <Pre {code} class={className} data-language={lang} {unstyled}>
-	<div class="shiki-theme-light" {@attach fromAction(setInnerHtml, () => normalizedHtmlLight)}></div>
+	<div
+		class="shiki-theme-light"
+		{@attach fromAction(setInnerHtml, () => normalizedHtmlLight)}
+	></div>
 	<div class="shiki-theme-dark" {@attach fromAction(setInnerHtml, () => normalizedHtmlDark)}></div>
 </Pre>
 

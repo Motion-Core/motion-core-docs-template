@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { afterNavigate } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { onDestroy } from 'svelte';
 	import DocsSidebar from './DocsSidebar.svelte';
 	import { brandingConfig } from '$lib/config/branding';
@@ -91,7 +92,8 @@
 		const selector =
 			'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 		return Array.from(panel.querySelectorAll<HTMLElement>(selector)).filter(
-			(element) => !element.hasAttribute('disabled') && element.getAttribute('aria-hidden') !== 'true'
+			(element) =>
+				!element.hasAttribute('disabled') && element.getAttribute('aria-hidden') !== 'true'
 		);
 	}
 
@@ -160,7 +162,7 @@
 	class="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-border bg-background px-4 py-1.5 lg:hidden"
 >
 	<a
-		href="/"
+		href={resolve('/')}
 		class="inline-flex items-center gap-1 px-2 py-2 text-sm tracking-tight text-foreground transition-colors duration-150 ease-out hover:text-foreground"
 	>
 		<span
@@ -172,11 +174,11 @@
 		</span>
 		<span class="font-medium tracking-tight text-foreground">{brandingConfig.name}</span>
 	</a>
-		<button
-			id={toggleButtonId}
-			onclick={toggle}
-			class="-mr-2 inline-flex size-10 items-center justify-center gap-2 rounded-sm text-sm whitespace-nowrap text-foreground transition-colors duration-150 ease-out hover:bg-background-muted lg:hidden"
-			aria-label="Toggle menu"
+	<button
+		id={toggleButtonId}
+		onclick={toggle}
+		class="-mr-2 inline-flex size-10 items-center justify-center gap-2 rounded-sm text-sm whitespace-nowrap text-foreground transition-colors duration-150 ease-out hover:bg-background-muted lg:hidden"
+		aria-label="Toggle menu"
 	>
 		<Menu size={20} />
 	</button>
@@ -191,21 +193,21 @@
 		aria-hidden="true"
 	></div>
 
-		<div
-			id={panelId}
-			class="sidebar fixed inset-y-0 right-0 z-50 w-3/4 max-w-sm overflow-hidden border-l border-border bg-background-inset text-foreground-muted lg:hidden"
-			class:active={isOpen}
-			ontransitionend={handleSidebarTransitionEnd}
+	<div
+		id={panelId}
+		class="sidebar fixed inset-y-0 right-0 z-50 w-3/4 max-w-sm overflow-hidden border-l border-border bg-background-inset text-foreground-muted lg:hidden"
+		class:active={isOpen}
+		ontransitionend={handleSidebarTransitionEnd}
 		role="dialog"
 		aria-modal="true"
 		aria-label="Navigation menu"
 		tabindex="-1"
-		>
-			<div class="absolute top-0 right-0 flex justify-end p-4">
-				<button id={closeButtonId} onclick={closePanel} aria-label="Close menu">
-					<Close size={32} class="size-6" />
-				</button>
-			</div>
+	>
+		<div class="absolute top-0 right-0 flex justify-end p-4">
+			<button id={closeButtonId} onclick={closePanel} aria-label="Close menu">
+				<Close size={32} class="size-6" />
+			</button>
+		</div>
 		<DocsSidebar />
 	</div>
 {/if}

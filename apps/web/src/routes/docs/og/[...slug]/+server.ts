@@ -83,7 +83,7 @@ const logoDataUri = `data:image/svg+xml,${encodeURIComponent(
 const LOGO_DISPLAY_HEIGHT = 78;
 
 const extractLogoAspectRatio = (svgMarkup: string) => {
-	const viewBoxMatch = svgMarkup.match(/viewBox="([^"]+)"/i);
+	const viewBoxMatch = /viewBox="([^"]+)"/i.exec(svgMarkup);
 	if (viewBoxMatch) {
 		const [, rawViewBox] = viewBoxMatch;
 		const values = rawViewBox
@@ -101,8 +101,8 @@ const extractLogoAspectRatio = (svgMarkup: string) => {
 		}
 	}
 
-	const widthMatch = svgMarkup.match(/width="([^"]+)"/i);
-	const heightMatch = svgMarkup.match(/height="([^"]+)"/i);
+	const widthMatch = /width="([^"]+)"/i.exec(svgMarkup);
+	const heightMatch = /height="([^"]+)"/i.exec(svgMarkup);
 	if (widthMatch && heightMatch) {
 		const width = Number(widthMatch[1]);
 		const height = Number(heightMatch[1]);
@@ -117,12 +117,12 @@ const extractLogoAspectRatio = (svgMarkup: string) => {
 const logoDisplayWidth = Math.round(LOGO_DISPLAY_HEIGHT * extractLogoAspectRatio(brandLogoRaw));
 
 export const GET: RequestHandler = async ({ params }) => {
-	const rawSlug = (params.slug ?? '').replace(/^\/+|\/+$/g, '');
+	const rawSlug = params.slug.replace(/^\/+|\/+$/g, '');
 	const slug = rawSlug === '' || rawSlug === 'index' || rawSlug === 'docs' ? '' : rawSlug;
 
 	const metadata = getDocMetadata(`/docs/${slug}`);
 	if (!metadata) {
-		throw error(404, 'Document not found');
+		error(404, 'Document not found');
 	}
 
 	const category = getDocBySlug(metadata.slug)?.category ?? 'Documentation';

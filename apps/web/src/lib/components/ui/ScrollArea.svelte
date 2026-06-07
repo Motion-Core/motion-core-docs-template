@@ -116,7 +116,9 @@
 	}
 
 	function handleScroll() {
-		requestAnimationFrame(() => updateThumbs());
+		requestAnimationFrame(() => {
+			updateThumbs();
+		});
 		isScrolling = true;
 		clearTimeout(scrollTimeout);
 		scrollTimeout = setTimeout(() => {
@@ -308,7 +310,7 @@
 					? 'opacity-100'
 					: 'opacity-0'
 			)}
-			style:bottom={showHorizontalTrack ? `${SCROLLBAR_THICKNESS}px` : '0px'}
+			style:bottom={showHorizontalTrack ? `${SCROLLBAR_THICKNESS.toString()}px` : '0px'}
 			onmouseenter={() => (isHoveringVerticalTrack = true)}
 			onmouseleave={() => (isHoveringVerticalTrack = false)}
 			role="presentation"
@@ -325,10 +327,14 @@
 					'relative rounded-full bg-foreground/10 transition-colors duration-150 hover:bg-foreground/30 active:bg-foreground/50',
 					isDragging && dragAxis === 'vertical' && 'bg-foreground/50'
 				)}
-				style:height={`${verticalThumbSize}px`}
-				style:transform={`translate3d(0, ${verticalThumbOffset}px, 0)`}
-				onmousedown={(event) => onDragStart(event, 'vertical')}
-				onkeydown={(event) => onThumbKeyDown(event, 'vertical')}
+				style:height={`${verticalThumbSize.toString()}px`}
+				style:transform={`translate3d(0, ${verticalThumbOffset.toString()}px, 0)`}
+				onmousedown={(event) => {
+					onDragStart(event, 'vertical');
+				}}
+				onkeydown={(event) => {
+					onThumbKeyDown(event, 'vertical');
+				}}
 			></div>
 		</div>
 	{/if}
@@ -341,7 +347,7 @@
 					? 'opacity-100'
 					: 'opacity-0'
 			)}
-			style:right={showVerticalTrack ? `${SCROLLBAR_THICKNESS}px` : '0px'}
+			style:right={showVerticalTrack ? `${SCROLLBAR_THICKNESS.toString()}px` : '0px'}
 			onmouseenter={() => (isHoveringHorizontalTrack = true)}
 			onmouseleave={() => (isHoveringHorizontalTrack = false)}
 			role="presentation"
@@ -358,10 +364,14 @@
 					'relative h-full rounded-full bg-foreground/10 transition-colors duration-150 hover:bg-foreground/30 active:bg-foreground/50',
 					isDragging && dragAxis === 'horizontal' && 'bg-foreground/50'
 				)}
-				style:width={`${horizontalThumbSize}px`}
-				style:transform={`translate3d(${horizontalThumbOffset}px, 0, 0)`}
-				onmousedown={(event) => onDragStart(event, 'horizontal')}
-				onkeydown={(event) => onThumbKeyDown(event, 'horizontal')}
+				style:width={`${horizontalThumbSize.toString()}px`}
+				style:transform={`translate3d(${horizontalThumbOffset.toString()}px, 0, 0)`}
+				onmousedown={(event) => {
+					onDragStart(event, 'horizontal');
+				}}
+				onkeydown={(event) => {
+					onThumbKeyDown(event, 'horizontal');
+				}}
 			></div>
 		</div>
 	{/if}

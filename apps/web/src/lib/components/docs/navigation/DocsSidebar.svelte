@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { resolve } from '$app/paths';
 	import { slide } from 'svelte/transition';
 	import { docsNavigation } from '$lib/config/navigation';
 	import { brandingConfig } from '$lib/config/branding';
@@ -17,11 +18,11 @@
 	);
 	const githubUrl = siteConfig.links.github;
 
-	let expandedGroupOverrides = $state<Record<string, boolean>>({});
+	let expandedGroupOverrides = $state<Record<string, boolean | undefined>>({});
 
 	const docHref = (slug: string) => (slug ? `/docs/${slug}` : '/docs');
 
-	const autoExpandedGroups = $derived.by<Record<string, boolean>>(() => {
+	const autoExpandedGroups = $derived.by<Record<string, boolean | undefined>>(() => {
 		const expanded: Record<string, boolean> = {};
 		for (const doc of docsNavigation) {
 			if (doc.items?.length) {
@@ -32,7 +33,13 @@
 	});
 
 	function isGroupActive(slug: string) {
-		return expandedGroupOverrides[slug] ?? autoExpandedGroups[slug] ?? false;
+		const override = expandedGroupOverrides[slug];
+		if (override !== undefined) return override;
+
+		const auto = autoExpandedGroups[slug];
+		if (auto !== undefined) return auto;
+
+		return false;
 	}
 
 	const getGroupSlideDuration = (node: Element) => {
@@ -48,7 +55,7 @@
 
 <aside class="flex h-dvh flex-col bg-background" aria-label="Documentation sidebar">
 	<div class="flex flex-col gap-8 p-4">
-		<a href="/" class="flex items-center gap-2">
+		<a href={resolve('/')} class="flex items-center gap-2">
 			<span
 				class="inline-flex shrink-0 items-center text-accent [&>svg]:size-6 [&>svg]:fill-current"
 				aria-hidden="true"
@@ -78,7 +85,9 @@
 					{@const groupIsActive = isGroupActive(doc.slug)}
 					<div class="flex flex-col">
 						<button
-							onclick={() => toggleGroup(doc.slug)}
+							onclick={() => {
+								toggleGroup(doc.slug);
+							}}
 							class={cn(
 								'flex w-full items-center justify-between rounded-sm px-3 py-1.5 text-sm font-medium tracking-normal transition-all duration-150 ease-out hover:bg-background-muted hover:text-foreground',
 								groupIsActive ? 'text-foreground' : 'text-foreground-muted'
@@ -98,7 +107,8 @@
 										{@const href = docHref(item.slug)}
 										{@const isActive = currentPath === href}
 										<a
-											{href}
+											// @ts-expect-error arg cannot be cast as `resolve`s expected type
+											href={resolve(href)}
 											class={cn(
 												'block rounded-sm px-3 py-1.5 text-sm font-medium tracking-normal transition-all duration-150 ease-out',
 												isActive
@@ -117,7 +127,8 @@
 					{@const href = docHref(doc.slug)}
 					{@const isActive = currentPath === href}
 					<a
-						{href}
+						// @ts-expect-error arg cannot be cast as `resolve`s expected type
+						href={resolve(href)}
 						class={cn(
 							'block rounded-sm px-3 py-1.5 text-sm tracking-normal transition-all duration-150 ease-out',
 							isActive
@@ -141,7 +152,7 @@
 				class="group transition-scale inset-shadow relative inline-flex size-7 cursor-pointer items-center justify-center rounded-sm bg-background-inset text-foreground duration-150 ease-out active:scale-[0.95]"
 				href={githubUrl}
 				target="_blank"
-				rel="noreferrer"
+				rel="noreferrer external"
 				aria-label={`${docsUiConfig.sidebar.repositoryAriaLabel} (opens in a new tab)`}
 			>
 				<LogoGithub class="size-4 flex-none" />
