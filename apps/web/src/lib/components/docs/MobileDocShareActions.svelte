@@ -7,10 +7,11 @@
 		type SectionUiConfig
 	} from '$lib/config/content-ui';
 	import { portal } from '$lib/utils/use-portal';
+	import { copyToClipboard } from '$lib/utils/copy';
 	import Checkmark from 'carbon-icons-svelte/lib/Checkmark.svelte';
 	import LogoGithub from 'carbon-icons-svelte/lib/LogoGithub.svelte';
 	import OverflowMenuHorizontal from 'carbon-icons-svelte/lib/OverflowMenuHorizontal.svelte';
-	import { onDestroy, onMount, tick } from 'svelte';
+	import { onMount, tick } from 'svelte';
 
 	type Props = {
 		rawPath?: string | null;
@@ -27,7 +28,6 @@
 	}: Props = $props();
 
 	let copyState = $state<'idle' | 'copying' | 'success' | 'error'>('idle');
-	let resetTimer = $state<ReturnType<typeof setTimeout> | null>(null);
 	let isDropdownOpen = $state(false);
 	let dropdownStyle = $state('');
 	const dropdownId = 'mobile-doc-actions-menu';
@@ -86,66 +86,24 @@
 				content = await response.text();
 			}
 
-			let success = false;
-
-			// 1. Try modern Clipboard API
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-			if (canUseWindow && navigator?.clipboard?.writeText) {
-				try {
-					await navigator.clipboard.writeText(content);
-					success = true;
-				} catch (err) {
-					console.warn('Clipboard API failed, trying fallback...', err);
-				}
-			}
-
-			// 2. Fallback for Mobile Safari
-			if (!success && canUseDocument) {
-				try {
-					const textArea = document.createElement('textarea');
-					textArea.value = content;
-
-					// Ensure it's not visible but part of the DOM
-					textArea.style.position = 'fixed';
-					textArea.style.left = '-9999px';
-					textArea.style.top = '0';
-					textArea.setAttribute('readonly', '');
-					document.body.appendChild(textArea);
-
-					textArea.focus();
-					textArea.select();
-
-					// Using deprecated APIs as a last-resort fallback for older browsers.
-					// eslint-disable-next-line @typescript-eslint/no-deprecated
-					const supported = document.queryCommandSupported('copy');
-					if (supported) {
-						// eslint-disable-next-line @typescript-eslint/no-deprecated
-						success = document.execCommand('copy');
-					}
-					document.body.removeChild(textArea);
-				} catch (err) {
-					console.warn('Fallback copy mechanism failed:', err);
-				}
-			}
-
-			if (!success) {
-				throw new Error('All copy methods failed');
-			}
-
+			await copyToClipboard(content);
 			copyState = 'success';
 		} catch (e) {
 			console.error('Copy failed:', e);
 			copyState = 'error';
-		} finally {
-			if (resetTimer) {
-				clearTimeout(resetTimer);
-			}
-
-			resetTimer = setTimeout(() => {
-				copyState = 'idle';
-			}, 2000);
 		}
 	}
+
+	// Reset copy state back to idle after 2 seconds
+	$effect(() => {
+		if (copyState !== 'success' && copyState !== 'error') return;
+		const t = setTimeout(() => {
+			copyState = 'idle';
+		}, 2000);
+		return () => {
+			clearTimeout(t);
+		};
+	});
 
 	function toggleDropdown() {
 		if (!hasMenuActions) return;
@@ -275,12 +233,6 @@
 			window.removeEventListener('resize', handleScrollOrResize);
 			window.removeEventListener('keydown', handleWindowKeydown);
 		};
-	});
-
-	onDestroy(() => {
-		if (resetTimer) {
-			clearTimeout(resetTimer);
-		}
 	});
 
 	const buttonClass =

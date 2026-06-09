@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import { backOut } from 'svelte/easing';
-	import { onDestroy } from 'svelte';
 	import {
 		contentUiDefaults,
 		resolveAssistantUrls,
 		type SectionUiConfig
 	} from '$lib/config/content-ui';
+	import { copyToClipboard } from '$lib/utils/copy';
 	import Checkmark from 'carbon-icons-svelte/lib/Checkmark.svelte';
 	import LogoGithub from 'carbon-icons-svelte/lib/LogoGithub.svelte';
 	import Launch from 'carbon-icons-svelte/lib/Launch.svelte';
@@ -29,7 +29,6 @@
 
 	type CopyState = 'idle' | 'copying' | 'success' | 'error';
 	let copyState = $state<CopyState>('idle');
-	let resetTimer = $state<ReturnType<typeof setTimeout> | null>(null);
 
 	const assistantUrls = $derived(resolveAssistantUrls(pageActionsConfig, rawUrl));
 	const chatGptUrl = $derived(assistantUrls.chatGptUrl);
@@ -57,38 +56,24 @@
 
 		try {
 			const response = await fetch(rawPath);
-			if (!response.ok) {
-				throw new Error('Failed to load document');
-			}
-
+			if (!response.ok) throw new Error('Failed to load document');
 			const content = await response.text();
-			if (typeof navigator === 'undefined') {
-				throw new Error('Clipboard unavailable');
-			}
-
-			try {
-				await navigator.clipboard.writeText(content);
-			} catch (_err: unknown) {
-				throw new Error('Clipboard unavailable', { cause: _err });
-			}
+			await copyToClipboard(content);
 			copyState = 'success';
 		} catch {
 			copyState = 'error';
-		} finally {
-			if (resetTimer) {
-				clearTimeout(resetTimer);
-			}
-
-			resetTimer = setTimeout(() => {
-				copyState = 'idle';
-			}, 2000);
 		}
 	}
 
-	onDestroy(() => {
-		if (resetTimer) {
-			clearTimeout(resetTimer);
-		}
+	// Reset copy state back to idle after 2 seconds
+	$effect(() => {
+		if (copyState !== 'success' && copyState !== 'error') return;
+		const t = setTimeout(() => {
+			copyState = 'idle';
+		}, 2000);
+		return () => {
+			clearTimeout(t);
+		};
 	});
 </script>
 

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
 	import type { Snippet } from 'svelte';
 	import { cn } from '$lib/utils/cn';
+	import { copyToClipboard } from '$lib/utils/copy';
 
 	import Copy from 'carbon-icons-svelte/lib/Copy.svelte';
 	import Checkmark from 'carbon-icons-svelte/lib/Checkmark.svelte';
@@ -16,7 +16,6 @@
 	const { children, id, class: className = '', ...restProps }: ComponentProps = $props();
 
 	let copied = $state(false);
-	let timeoutId: number | null = null;
 
 	async function copyHeadingUrl(event: MouseEvent) {
 		event.preventDefault();
@@ -30,28 +29,22 @@
 		window.history.pushState(null, '', hash);
 
 		try {
-			await navigator.clipboard.writeText(url);
-
+			await copyToClipboard(url);
 			copied = true;
-
-			if (timeoutId) {
-				window.clearTimeout(timeoutId);
-			}
-
-			timeoutId = window.setTimeout(() => {
-				copied = false;
-				timeoutId = null;
-			}, 2000);
 		} catch (error) {
 			console.error('Failed to copy heading link', error);
 		}
 	}
 
-	onDestroy(() => {
-		if (timeoutId) {
-			window.clearTimeout(timeoutId);
-			timeoutId = null;
-		}
+	// Reset the copied state after 2 seconds
+	$effect(() => {
+		if (!copied) return;
+		const t = setTimeout(() => {
+			copied = false;
+		}, 2000);
+		return () => {
+			clearTimeout(t);
+		};
 	});
 </script>
 
