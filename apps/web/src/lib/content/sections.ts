@@ -1,4 +1,4 @@
-import type { ContentItem } from '$lib/config/navigation';
+import type { ContentItem, ContentSectionLink } from '$lib/config/navigation';
 import { contentSections, type ContentSectionConfig } from '$lib/config/navigation';
 import { mergeSectionUiConfig, type SectionUiConfig } from '$lib/config/content-ui';
 import { parseContentSource } from '$lib/content/frontmatter';
@@ -11,11 +11,6 @@ import {
 import type { Component } from 'svelte';
 
 export type ContentSectionId = string;
-
-export type ContentSectionLink = {
-	label: string;
-	href: string;
-};
 
 export type ContentMetadata = {
 	href: string;
@@ -94,7 +89,9 @@ export function getContentSectionLinks(order: ContentSectionId[] = contentSectio
 		const section = contentSectionsById[sectionId];
 		return {
 			label: section.label,
-			href: basePathFor(section.id)
+			href: basePathFor(section.id),
+			icon: section.icon,
+			description: section.description
 		};
 	});
 }

@@ -6,18 +6,14 @@
 	import { siteConfig } from '$lib/config/site';
 	import { cn } from '$lib/utils/cn';
 	import ScrollArea from '$lib/components/ui/ScrollArea.svelte';
+	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 	import ThemeToggle from '$lib/components/ui/ThemeToggle.svelte';
 	import SearchTrigger from '$lib/components/content/search/SearchTrigger.svelte';
 	import ChevronRight from 'carbon-icons-svelte/lib/ChevronRight.svelte';
 	import LogoGithub from 'carbon-icons-svelte/lib/LogoGithub.svelte';
 	import { getHref } from '$lib/content/manifest';
-	import type { ContentItem } from '$lib/config/navigation';
+	import type { ContentItem, ContentSectionLink } from '$lib/config/navigation';
 	import { resolve } from '$app/paths';
-
-	type SectionLink = {
-		label: string;
-		href: string;
-	};
 
 	const {
 		navigation,
@@ -41,7 +37,7 @@
 		repositoryUrl?: string;
 		repositoryAriaLabel?: string;
 		searchConfig?: SectionUiConfig['search'];
-		sectionLinks?: SectionLink[];
+		sectionLinks?: ContentSectionLink[];
 		showBranding?: boolean;
 	} = $props();
 
@@ -55,12 +51,26 @@
 		return pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
 	}
 
-	function isSectionLinkActive(href: string) {
-		const normalizedHref = normalizePath(href);
-		return (
-			currentPath === normalizedHref ||
-			(normalizedHref !== '/' && currentPath.startsWith(`${normalizedHref}/`))
-		);
+	const dropdownItems = $derived(
+		sectionLinks.map((link) => {
+			const normalizedHref = normalizePath(link.href);
+			const isActive =
+				currentPath === normalizedHref ||
+				(normalizedHref !== '/' && currentPath.startsWith(`${normalizedHref}/`));
+			return {
+				label: link.label,
+				value: link.href,
+				href: isActive ? undefined : link.href,
+				icon: link.icon,
+				description: link.description,
+				active: isActive
+			};
+		})
+	);
+
+	function handleSectionClick() {
+		// Navigation is handled natively by the <a> element's resolve()'d href.
+		// This callback exists so Dropdown can close the menu after click.
 	}
 
 	function contentHref(slug: string) {
@@ -117,26 +127,7 @@
 		{/if}
 
 		{#if sectionLinks.length > 1}
-			<nav
-				class="inset-shadow inline-flex flex-wrap gap-1 rounded-sm bg-background-inset p-1 text-xs font-medium"
-				aria-label="Content sections"
-			>
-				{#each sectionLinks as link (link.href)}
-					{@const isActive = isSectionLinkActive(link.href)}
-					<a
-						// @ts-expect-error arg cannot be cast as `resolve`s expected type
-						href={resolve(link.href)}
-						class={cn(
-							'rounded-xs px-3 py-1.5 transition-colors duration-150 ease-out',
-							isActive
-								? 'bg-accent/10 text-accent'
-								: 'text-foreground-muted hover:bg-background-muted hover:text-foreground'
-						)}
-					>
-						{link.label}
-					</a>
-				{/each}
-			</nav>
+			<Dropdown items={dropdownItems} onItemClick={handleSectionClick} class="w-full"></Dropdown>
 		{/if}
 
 		{#if showSearch}

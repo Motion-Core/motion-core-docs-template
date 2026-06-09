@@ -1,4 +1,13 @@
 import type { DeepPartial, SectionUiConfig } from '$lib/config/content-ui';
+import { Devices, Scan } from 'carbon-icons-svelte';
+import type { Component } from 'svelte';
+
+export type ContentSectionLink = {
+	label: string;
+	href: string;
+	icon?: Component<{ size?: number; class?: string }>;
+	description?: string;
+};
 
 export type ContentSectionConfig = {
 	/**
@@ -9,6 +18,8 @@ export type ContentSectionConfig = {
 	label: string;
 	navigation: ContentItem[];
 	ui?: DeepPartial<SectionUiConfig>;
+	icon?: Component;
+	description?: string;
 };
 
 export type ContentItem = {
@@ -23,6 +34,8 @@ export const contentSections: ContentSectionConfig[] = [
 	{
 		id: 'docs',
 		label: 'Docs',
+		icon: Scan,
+		description: 'An introction on how to use this template',
 		navigation: [
 			{
 				slug: 'reference',
@@ -47,6 +60,8 @@ export const contentSections: ContentSectionConfig[] = [
 	{
 		id: 'examples',
 		label: 'Examples',
+		icon: Devices,
+		description: 'Dummy examples to showcase the template’s sections',
 		navigation: [
 			{
 				name: 'Dummy category',

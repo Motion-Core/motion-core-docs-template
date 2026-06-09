@@ -9,12 +9,7 @@
 	import { siteConfig } from '$lib/config/site';
 	import Menu from 'carbon-icons-svelte/lib/Menu.svelte';
 	import Close from 'carbon-icons-svelte/lib/Close.svelte';
-	import type { ContentItem } from '$lib/config/navigation';
-
-	type SectionLink = {
-		label: string;
-		href: string;
-	};
+	import type { ContentItem, ContentSectionLink } from '$lib/config/navigation';
 
 	const defaultSectionLinks = getContentSectionLinks();
 
@@ -39,7 +34,7 @@
 		repositoryUrl?: string;
 		repositoryAriaLabel?: string;
 		searchConfig?: SectionUiConfig['search'];
-		sectionLinks?: SectionLink[];
+		sectionLinks?: ContentSectionLink[];
 	} = $props();
 
 	let isOpen = $state(false);

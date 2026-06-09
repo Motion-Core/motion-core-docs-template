@@ -1,19 +1,13 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { beforeNavigate, afterNavigate } from '$app/navigation';
-	import { onMount, tick } from 'svelte';
+	import { onMount, tick, type Snippet } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import ContentSidebar from '$lib/components/content/ContentSidebar.svelte';
 	import MobileSidebar from '$lib/components/content/MobileSidebar.svelte';
 	import ScrollArea from '$lib/components/ui/ScrollArea.svelte';
 	import { type SectionUiConfig } from '$lib/config/content-ui';
-	import type { ContentItem } from '$lib/config/navigation';
-	import type { Snippet } from 'svelte';
-
-	type SectionLink = {
-		label: string;
-		href: string;
-	};
+	import type { ContentItem, ContentSectionLink } from '$lib/config/navigation';
 
 	type SidebarConfig = {
 		navigation: ContentItem[];
@@ -25,7 +19,7 @@
 		repositoryUrl?: string;
 		repositoryAriaLabel?: string;
 		searchConfig?: SectionUiConfig['search'];
-		sectionLinks?: SectionLink[];
+		sectionLinks?: ContentSectionLink[];
 	};
 
 	const DEFAULT_GRID_CLASS_BASE =
