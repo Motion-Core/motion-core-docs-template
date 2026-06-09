@@ -238,14 +238,31 @@
 						<div class="py-6 text-center text-sm tracking-normal text-foreground-muted/70">
 							{searchConfig.noResultsLabel}
 						</div>
-					{:else}
-						<div class="flex items-center gap-2 px-4 py-6 text-sm text-foreground-muted/70">
-							<Return size={16} class="rotate-90" />
-							<span>{searchConfig.submitHintLabel}</span>
-						</div>
 					{/if}
 				</div>
+			</div>
+			<div
+				class="relative flex w-full flex-row items-center justify-start gap-2 rounded-b-lg bg-background p-2 after:absolute after:inset-x-0 after:top-0 after:h-px after:bg-border after:shadow-2xs after:shadow-white after:content-[''] dark:after:bg-background-inset dark:after:shadow-border"
+			>
+				<kbd
+					class="pointer-events-none inset-shadow relative hidden h-5 items-center gap-1 rounded-[calc(var(--radius-base)*1.5)] bg-background-inset px-1.5 font-mono text-[10px] font-medium text-foreground-muted/70 select-none sm:flex"
+				>
+					<Return class="size-3" />
+				</kbd>
+				<span class="text-xs font-medium tracking-normal text-foreground-muted/70">
+					{searchConfig.submitHintLabel}
+				</span>
 			</div>
 		</div>
 	</div>
 {/if}
+
+<style>
+	.command-palette-input:focus,
+	.command-palette-input:focus-visible {
+		outline: none !important;
+		outline-color: transparent !important;
+		outline-offset: 0 !important;
+		box-shadow: none !important;
+	}
+</style>
