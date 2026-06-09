@@ -111,21 +111,20 @@
 </script>
 
 <aside class="flex h-full min-h-0 flex-col bg-background" aria-label={navigationLabel + ' sidebar'}>
-	<div class="flex flex-col gap-2 p-4 pb-0 lg:p-0">
-		{#if showBranding}
-			<a href={resolve('/')} class="flex items-center gap-2">
-				<span
-					class="inline-flex shrink-0 items-center text-accent [&>svg]:size-6 [&>svg]:fill-current"
-					aria-hidden="true"
-				>
-					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-					{@html brandingConfig.logoRaw}
-				</span>
-				<span class="text-xl font-medium tracking-tight text-foreground">{brandingConfig.name}</span
-				>
-			</a>
-		{/if}
+	{#if showBranding}
+		<a href={resolve('/')} class="mb-4 flex items-center gap-2">
+			<span
+				class="inline-flex shrink-0 items-center text-accent [&>svg]:size-6 [&>svg]:fill-current"
+				aria-hidden="true"
+			>
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html brandingConfig.logoRaw}
+			</span>
+			<span class="text-xl font-medium tracking-tight text-foreground">{brandingConfig.name}</span>
+		</a>
+	{/if}
 
+	<div class="grid gap-2 p-4 lg:px-0">
 		{#if sectionLinks.length > 1}
 			<Dropdown items={dropdownItems} onItemClick={handleSectionClick} class="w-full"></Dropdown>
 		{/if}
