@@ -1,9 +1,32 @@
 import { error } from '@sveltejs/kit';
 import ImageResponse from '@takumi-rs/image-response';
 import type { RequestHandler } from './$types';
-import { brandLogoRaw, getDocBySlug, getDocMetadata, siteConfig } from '$lib';
+import { brandLogoRaw, siteConfig } from '$lib';
+import {
+	getContentSectionItemBySlug,
+	getContentSectionMetadata,
+	getContentSectionByPathname,
+	getContentSectionManifest
+} from '$lib/content/sections';
+import { contentSections } from '$lib/config/navigation';
 import interLatin400DataUri from '@fontsource/inter/files/inter-latin-400-normal.woff2?inline';
 import interLatin500DataUri from '@fontsource/inter/files/inter-latin-500-normal.woff2?inline';
+
+export const prerender = true;
+
+export const entries = () => {
+	const result: { section: string; slug: string }[] = [];
+	for (const section of contentSections) {
+		const manifest = getContentSectionManifest(section.id);
+		for (const item of manifest) {
+			result.push({
+				section: section.id,
+				slug: item.slug || 'index'
+			});
+		}
+	}
+	return result;
+};
 
 const OG_WIDTH = 1200;
 const OG_HEIGHT = 630;
@@ -117,21 +140,28 @@ const extractLogoAspectRatio = (svgMarkup: string) => {
 const logoDisplayWidth = Math.round(LOGO_DISPLAY_HEIGHT * extractLogoAspectRatio(brandLogoRaw));
 
 export const GET: RequestHandler = async ({ params }) => {
+	const sectionParam = params.section;
+	const sectionPath = `/${sectionParam}`;
+	const section = getContentSectionByPathname(sectionPath);
+	if (!section) {
+		error(404, 'Section not found');
+	}
 	const rawSlug = params.slug.replace(/^\/+|\/+$/g, '');
-	const slug = rawSlug === '' || rawSlug === 'index' || rawSlug === 'docs' ? '' : rawSlug;
+	const slug = rawSlug === '' || rawSlug === 'index' || rawSlug === sectionParam ? '' : rawSlug;
 
-	const metadata = getDocMetadata(`/docs/${slug}`);
+	const metadata = getContentSectionMetadata(section.id, `/${section.id}/${slug}`);
 	if (!metadata) {
 		error(404, 'Document not found');
 	}
 
-	const category = getDocBySlug(metadata.slug)?.category ?? 'Documentation';
+	const category =
+		getContentSectionItemBySlug(section.id, metadata.slug)?.category ?? section.label;
 	const title = clampText(metadata.title, MAX_TITLE_LENGTH);
 	const description = clampText(
-		metadata.description ?? 'Documentation for Motion GPU.',
+		metadata.description ?? `${section.label} documentation.`,
 		MAX_DESCRIPTION_LENGTH
 	);
-	const pageUrl = new URL(`/docs/${metadata.slug}`, canonicalOrigin).href;
+	const pageUrl = new URL(`/${section.id}/${metadata.slug}`, canonicalOrigin).href;
 
 	const component = el(
 		'div',

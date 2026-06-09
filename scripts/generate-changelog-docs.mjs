@@ -7,7 +7,7 @@ const currentFile = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(currentFile), '..');
 
 const sourcePath = path.join(repoRoot, 'CHANGELOG.md');
-const targetPath = path.join(repoRoot, 'apps', 'web', 'src', 'routes', 'docs', 'changelog', '+page.svx');
+const targetPath = path.join(repoRoot, 'apps', 'web', 'src', 'lib', 'content', 'docs', 'changelog.svx');
 
 function normalizeMarkdown(input) {
 	return input.replace(/\r\n?/g, '\n').trim();

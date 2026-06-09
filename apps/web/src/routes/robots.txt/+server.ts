@@ -1,7 +1,9 @@
 import type { RequestHandler } from './$types';
 import { siteConfig } from '$lib';
+import { contentSections } from '$lib/config/navigation';
 
-const directives = ['User-agent: *', 'Allow: /', 'Disallow: /docs/raw/'];
+const rawDisallow = contentSections.map((section) => `Disallow: /${section.id}/raw/`);
+const directives = ['User-agent: *', 'Allow: /', ...rawDisallow];
 
 const toSitemapUrl = (origin: string) => new URL('/sitemap.xml', origin).href;
 

@@ -1,7 +1,8 @@
-import { docsUiConfig } from '$lib/config/docs-ui';
-import { parseDocSource } from '$lib/docs/frontmatter';
+import { contentUiDefaults, type SectionUiConfig } from '$lib/config/content-ui';
+import { contentSections } from '$lib/config/navigation';
+import { parseContentSource } from '$lib/content/frontmatter';
 
-type DocSection = {
+type ContentSearchEntry = {
 	title: string;
 	slug: string;
 	heading?: string;
@@ -12,12 +13,6 @@ type DocSection = {
 	content?: string;
 	snippet?: string;
 };
-
-const docModules = import.meta.glob<string>('/src/routes/docs/**/*.svx', {
-	query: '?raw',
-	eager: true,
-	import: 'default'
-});
 
 const slugify = (value: string) =>
 	value
@@ -61,25 +56,41 @@ function getSnippet(content: string, query: string, maxLength = 100): string {
 	return snippet;
 }
 
-function parseDocs() {
-	const index: DocSection[] = [];
+function parseContentIndex() {
+	const index: ContentSearchEntry[] = [];
 
-	for (const path in docModules) {
-		const rawContent = docModules[path];
-		const { metadata: meta, body: contentBody } = parseDocSource(rawContent);
+	// Glob from lib/content which mirrors the route structure.
+	const modules = import.meta.glob<string>('/src/lib/content/**/*.svx', {
+		query: '?raw',
+		eager: true,
+		import: 'default'
+	});
 
-		const relativePath = path
-			.replace(/^\/src\/routes\/docs/, '')
-			.replace(/\/\+page\.svx$/, '')
-			.replace(/^\+page\.svx$/, '');
+	for (const path in modules) {
+		const rawContent = modules[path];
+		const { metadata: meta, body: contentBody } = parseContentSource(rawContent);
+
+		// Path example: /src/lib/content/docs/changelog.svx → route: /docs/changelog
+		//              /src/lib/content/examples/index.svx → route: /examples
+		const contentPath = path
+			.replace(/^\/src\/lib\/content\//, '/')
+			.replace(/\.svx$/, '')
+			.replace(/\/index$/, '');
+
+		const section = contentSections.find(
+			(s) => contentPath === `/${s.id}` || contentPath.startsWith(`/${s.id}/`)
+		);
+		if (!section) continue;
+
+		const relativePath = contentPath.replace(new RegExp(`^/${section.id}`), '');
 		const cleanPath = relativePath.replace(/^\/+/, '');
-		const slug = cleanPath ? `/docs/${cleanPath}` : '/docs';
+		const slug = cleanPath ? `/${section.id}/${cleanPath}` : `/${section.id}`;
 
-		const title = meta.name ?? meta.title ?? cleanPath;
+		const title = meta.name ?? meta.title ?? (cleanPath || section.label);
 		const description = meta.description ?? '';
 
 		index.push({
-			title: title,
+			title,
 			slug,
 			matchType: 'title',
 			score: 0
@@ -87,7 +98,7 @@ function parseDocs() {
 
 		if (description) {
 			index.push({
-				title: title,
+				title,
 				slug,
 				anchor: '',
 				matchType: 'content',
@@ -108,7 +119,7 @@ function parseDocs() {
 				const text = stripMdx(currentContentBuffer.join(' '));
 				if (text.length > 10) {
 					index.push({
-						title: title,
+						title,
 						slug,
 						heading: currentHeading ?? title,
 						anchor: currentAnchor,
@@ -151,7 +162,7 @@ function parseDocs() {
 				currentAnchor = anchor;
 
 				index.push({
-					title: title,
+					title,
 					slug,
 					heading: text,
 					anchor,
@@ -171,7 +182,7 @@ function parseDocs() {
 	return index;
 }
 
-const searchIndex = parseDocs();
+const searchIndex = parseContentIndex();
 
 const pageLookup = new Map<string, string>();
 searchIndex.forEach((item) => {
@@ -180,14 +191,17 @@ searchIndex.forEach((item) => {
 	}
 });
 
-export function searchDocs(query: string): DocSection[] {
+export function searchContent(
+	query: string,
+	searchConfig: SectionUiConfig['search'] = contentUiDefaults.search
+): ContentSearchEntry[] {
 	if (!query) return [];
 
 	const normalizedQuery = query.toLowerCase();
 
 	const groups = new Map<
 		string,
-		{ parent: DocSection; children: DocSection[]; maxScore: number }
+		{ parent: ContentSearchEntry; children: ContentSearchEntry[]; maxScore: number }
 	>();
 
 	for (const item of searchIndex) {
@@ -245,16 +259,16 @@ export function searchDocs(query: string): DocSection[] {
 			if (scoreDiff !== 0) return scoreDiff;
 			return a.parent.title.localeCompare(b.parent.title);
 		})
-		.slice(0, docsUiConfig.search.maxGroups);
+		.slice(0, searchConfig.maxGroups);
 
-	const flatResults: DocSection[] = [];
+	const flatResults: ContentSearchEntry[] = [];
 
 	for (const group of sortedGroups) {
 		flatResults.push(group.parent);
 
 		group.children.sort((a, b) => b.score - a.score);
 
-		const topChildren = group.children.slice(0, docsUiConfig.search.maxChildrenPerGroup);
+		const topChildren = group.children.slice(0, searchConfig.maxChildrenPerGroup);
 
 		flatResults.push(...topChildren);
 	}

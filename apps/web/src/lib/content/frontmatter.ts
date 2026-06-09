@@ -1,4 +1,4 @@
-export type DocFrontmatter = {
+export type ContentFrontmatter = {
 	title?: string;
 	name?: string;
 	description?: string;
@@ -33,7 +33,10 @@ function parseFrontmatterBlock(block: string): Record<string, string> {
 	return parsed;
 }
 
-export function parseDocSource(rawSource: string): { metadata: DocFrontmatter; body: string } {
+export function parseContentSource(rawSource: string): {
+	metadata: ContentFrontmatter;
+	body: string;
+} {
 	const match = FRONTMATTER_BLOCK_RE.exec(rawSource);
 	if (!match) {
 		return { metadata: {}, body: rawSource };
